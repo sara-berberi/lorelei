@@ -1,0 +1,47 @@
+{
+  "common": {
+    "home": "Kryefaqja",
+    "products": "Produktet",
+    "orderNow": "Porosit Tani",
+    "soldOut": "Shitur",
+    "sale": "Ulje"
+  },
+  "checkout": {
+    "title": "Porosia",
+    "name": "Emri",
+    "surname": "Mbiemri",
+    "instagramUsername": "Emri në Instagram",
+    "address": "Adresa",
+    "city": "Qyteti",
+    "phoneNumber": "Numri i Telefonit",
+    "notes": "Shënime (Opsionale)",
+    "confirmOrder": "Konfirmo Porosinë",
+    "totalPrice": "Çmimi Total",
+    "postalFee": "Tarifa Postare",
+    "totalWithFee": "Total me Tarifë Postare",
+    "orderSummary": "Përmbledhje e Porosisë"
+  },
+  "order": {
+    "success": "Faleminderit për porosinë tuaj, @lorelei_boutique do t'ju kontaktojë për ta konfirmuar."
+  },
+  "hero": {
+    "title": "Mirë se vini në Lorelei Boutique",
+    "subtitle": "Zbuloni koleksionin tonë premium"
+  },
+  "product": {
+    "soldOut": "Shitur",
+    "sale": "Ulje",
+    "selectSize": "Zgjidhni Madhësinë"
+  },
+  "cart": {
+    "cart": "Shporta",
+    "addToCart": "Shto në Shportë",
+    "emptyCart": "Shporta juaj është e zbrazët",
+    "size": "Madhësia",
+    "remove": "Hiq",
+    "total": "Totali",
+    "checkout": "Porosit",
+    "checkoutComingSoon": "Funksioni i porosisë vjen së shpejti"
+  }
+}
+

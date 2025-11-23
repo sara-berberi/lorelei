@@ -1,0 +1,47 @@
+{
+  "common": {
+    "home": "Home",
+    "products": "Products",
+    "orderNow": "Order Now",
+    "soldOut": "Sold Out",
+    "sale": "Sale"
+  },
+  "checkout": {
+    "title": "Checkout",
+    "name": "Name",
+    "surname": "Surname",
+    "instagramUsername": "Instagram Username",
+    "address": "Address",
+    "city": "City",
+    "phoneNumber": "Phone Number",
+    "notes": "Notes (Optional)",
+    "confirmOrder": "Confirm Order",
+    "totalPrice": "Total Price",
+    "postalFee": "Postal Fee",
+    "totalWithFee": "Total with Postal Fee",
+    "orderSummary": "Order Summary"
+  },
+  "order": {
+    "success": "Thank you for your order, @lorelei_boutique will contact you to confirm your order."
+  },
+  "hero": {
+    "title": "Welcome to Lorelei Boutique",
+    "subtitle": "Discover our premium collection"
+  },
+  "product": {
+    "soldOut": "Sold Out",
+    "sale": "Sale",
+    "selectSize": "Select Size"
+  },
+  "cart": {
+    "cart": "Cart",
+    "addToCart": "Add to Cart",
+    "emptyCart": "Your cart is empty",
+    "size": "Size",
+    "remove": "Remove",
+    "total": "Total",
+    "checkout": "Checkout",
+    "checkoutComingSoon": "Checkout feature coming soon"
+  }
+}
+

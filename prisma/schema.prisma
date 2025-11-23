@@ -1,0 +1,46 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Product {
+  id          Int       @id @default(autoincrement())
+  name        String    @db.VarChar(255)
+  description String?   @db.Text
+  price       Float
+  salePrice   Float?
+  imageUrl    String
+  sizes       String?   @db.Text // JSON array of available sizes, e.g. ["S", "M", "L", "XL"]
+  isSoldOut   Boolean   @default(false)
+  isOnSale    Boolean   @default(false)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  deletedAt   DateTime?
+
+  @@map("products")
+}
+
+model Order {
+  id              Int       @id @default(autoincrement())
+  fullName        String
+  instagramUsername String
+  address         String
+  city            String
+  phoneNumber     String
+  productId       Int
+  createdAt       DateTime  @default(now())
+  totalPrice      Float
+  postalFee       Float
+  totalPriceWithPostalFee Float
+  notes           String?
+
+  @@map("orders")
+}
+
