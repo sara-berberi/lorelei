@@ -1,7 +1,7 @@
-'use client';
+"use client";
 
-import { useEffect, useState } from 'react';
-import ProductCard from './ProductCard';
+import { useEffect, useState } from "react";
+import ProductCard from "./ProductCard";
 
 interface Product {
   id: number;
@@ -25,40 +25,40 @@ export default function ProductGrid() {
         // Add timeout to prevent hanging
         const controller = new AbortController();
         const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
-        
-        const res = await fetch('/api/products', {
+
+        const res = await fetch("/api/products", {
           signal: controller.signal,
           headers: {
-            'Content-Type': 'application/json',
+            "Content-Type": "application/json",
           },
         });
-        
+
         clearTimeout(timeoutId);
-        
+
         if (!res.ok) {
           throw new Error(`Failed to fetch products: ${res.status}`);
         }
-        
+
         const data = await res.json();
-        
+
         // Handle both array and error response
         if (Array.isArray(data)) {
           setProducts(data);
         } else {
-          console.error('Unexpected response format:', data);
+          console.error("Unexpected response format:", data);
           setProducts([]);
         }
       } catch (err: any) {
-        console.error('Error fetching products:', err);
-        if (err.name === 'AbortError') {
-          console.error('Request timed out. Check your database connection.');
+        console.error("Error fetching products:", err);
+        if (err.name === "AbortError") {
+          console.error("Request timed out. Check your database connection.");
         }
         setProducts([]); // Set empty array so page still renders
       } finally {
         setLoading(false);
       }
     };
-    
+
     fetchProducts();
   }, []);
 
@@ -79,11 +79,10 @@ export default function ProductGrid() {
   }
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6 lg:gap-8">
+    <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6 lg:gap-8">
       {products.map((product) => (
         <ProductCard key={product.id} product={product} />
       ))}
     </div>
   );
 }
-
