@@ -1,8 +1,8 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import { useTranslations } from 'next-intl';
-import { useCart } from '@/contexts/CartContext';
+import { useState, useEffect } from "react";
+import { useTranslations } from "next-intl";
+import { useCart } from "@/contexts/CartContext";
 
 interface Product {
   id: number;
@@ -21,24 +21,29 @@ interface ProductDetailsModalProps {
   onClose: () => void;
 }
 
-export default function ProductDetailsModal({ product, onClose }: ProductDetailsModalProps) {
-  const t = useTranslations('product');
-  const tCart = useTranslations('cart');
+export default function ProductDetailsModal({
+  product,
+  onClose,
+}: ProductDetailsModalProps) {
+  const t = useTranslations("product");
+  const tCart = useTranslations("cart");
   const { addToCart } = useCart();
-  
-  const [selectedSize, setSelectedSize] = useState<string>('');
+
+  const [selectedSize, setSelectedSize] = useState<string>("");
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [touchStart, setTouchStart] = useState(0);
   const [touchEnd, setTouchEnd] = useState(0);
 
   // Parse sizes from JSON string or use default
   const availableSizes = (() => {
-    if (!product.sizes) return ['S', 'M', 'L', 'XL'];
+    if (!product.sizes) return ["S", "M", "L", "XL"];
     try {
       const parsed = JSON.parse(product.sizes);
-      return Array.isArray(parsed) && parsed.length > 0 ? parsed : ['S', 'M', 'L', 'XL'];
+      return Array.isArray(parsed) && parsed.length > 0
+        ? parsed
+        : ["S", "M", "L", "XL"];
     } catch {
-      return ['S', 'M', 'L', 'XL'];
+      return ["S", "M", "L", "XL"];
     }
   })();
 
@@ -57,12 +62,14 @@ export default function ProductDetailsModal({ product, onClose }: ProductDetails
     return [product.imageUrl];
   })();
 
-  const displayPrice = product.isOnSale && product.salePrice ? product.salePrice : product.price;
-  const originalPrice = product.isOnSale && product.salePrice ? product.price : null;
+  const displayPrice =
+    product.isOnSale && product.salePrice ? product.salePrice : product.price;
+  const originalPrice =
+    product.isOnSale && product.salePrice ? product.price : null;
 
   const handleAddToCart = () => {
     if (!selectedSize) {
-      alert(t('selectSize'));
+      alert(t("selectSize"));
       return;
     }
     addToCart(product, selectedSize);
@@ -80,7 +87,7 @@ export default function ProductDetailsModal({ product, onClose }: ProductDetails
 
   const handleTouchEnd = () => {
     if (!touchStart || !touchEnd) return;
-    
+
     const distance = touchStart - touchEnd;
     const isLeftSwipe = distance > 50;
     const isRightSwipe = distance < -50;
@@ -96,14 +103,14 @@ export default function ProductDetailsModal({ product, onClose }: ProductDetails
   // Close on Escape key
   useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose();
+      if (e.key === "Escape") onClose();
     };
-    window.addEventListener('keydown', handleEscape);
-    return () => window.removeEventListener('keydown', handleEscape);
+    window.addEventListener("keydown", handleEscape);
+    return () => window.removeEventListener("keydown", handleEscape);
   }, [onClose]);
 
   return (
-    <div 
+    <div
       className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-3 sm:p-4 overflow-y-auto"
       onClick={(e) => e.target === e.currentTarget && onClose()}
     >
@@ -115,8 +122,18 @@ export default function ProductDetailsModal({ product, onClose }: ProductDetails
             className="absolute top-4 right-4 z-10 bg-white rounded-full p-2 hover:bg-gray-100 transition-colors"
             aria-label="Close"
           >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            <svg
+              className="w-5 h-5"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M6 18L18 6M6 6l12 12"
+              />
             </svg>
           </button>
 
@@ -133,7 +150,7 @@ export default function ProductDetailsModal({ product, onClose }: ProductDetails
                     onTouchMove={handleTouchMove}
                     onTouchEnd={handleTouchEnd}
                   />
-                  
+
                   {/* Carousel indicators */}
                   {images.length > 1 && (
                     <>
@@ -143,34 +160,60 @@ export default function ProductDetailsModal({ product, onClose }: ProductDetails
                             key={index}
                             onClick={() => setCurrentImageIndex(index)}
                             className={`w-2 h-2 rounded-full transition-all ${
-                              index === currentImageIndex ? 'bg-white' : 'bg-white/50'
+                              index === currentImageIndex
+                                ? "bg-white"
+                                : "bg-white/50"
                             }`}
                             aria-label={`Go to image ${index + 1}`}
                           />
                         ))}
                       </div>
-                      
+
                       {/* Navigation arrows */}
                       {currentImageIndex > 0 && (
                         <button
-                          onClick={() => setCurrentImageIndex(currentImageIndex - 1)}
+                          onClick={() =>
+                            setCurrentImageIndex(currentImageIndex - 1)
+                          }
                           className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-white/80 hover:bg-white rounded-full p-2 transition-colors"
                           aria-label="Previous image"
                         >
-                          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                          <svg
+                            className="w-5 h-5"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M15 19l-7-7 7-7"
+                            />
                           </svg>
                         </button>
                       )}
-                      
+
                       {currentImageIndex < images.length - 1 && (
                         <button
-                          onClick={() => setCurrentImageIndex(currentImageIndex + 1)}
+                          onClick={() =>
+                            setCurrentImageIndex(currentImageIndex + 1)
+                          }
                           className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-white/80 hover:bg-white rounded-full p-2 transition-colors"
                           aria-label="Next image"
                         >
-                          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                          <svg
+                            className="w-5 h-5"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M9 5l7 7-7 7"
+                            />
                           </svg>
                         </button>
                       )}
@@ -191,28 +234,34 @@ export default function ProductDetailsModal({ product, onClose }: ProductDetails
                 <div className="flex gap-2 mb-4">
                   {product.isSoldOut && (
                     <span className="bg-black text-white px-3 py-1 text-xs font-medium">
-                      {t('soldOut')}
+                      {t("soldOut")}
                     </span>
                   )}
                   {product.isOnSale && !product.isSoldOut && (
                     <span className="bg-red-500 text-white px-3 py-1 text-xs font-medium">
-                      {t('sale')}
+                      {t("sale")}
                     </span>
                   )}
                 </div>
 
                 {/* Title */}
-                <h1 className="text-2xl sm:text-3xl font-light mb-4">{product.name}</h1>
+                <h1 className="text-2xl sm:text-3xl font-light mb-4">
+                  {product.name}
+                </h1>
 
                 {/* Price */}
                 <div className="flex items-center gap-3 mb-6">
                   {originalPrice && (
                     <span className="text-gray-400 line-through text-lg">
-                      €{originalPrice.toFixed(2)}
+                      ALL {originalPrice.toFixed(2)}
                     </span>
                   )}
-                  <span className={`text-2xl font-medium ${product.isOnSale ? 'text-red-600' : 'text-black'}`}>
-                    €{displayPrice.toFixed(2)}
+                  <span
+                    className={`text-2xl font-medium ${
+                      product.isOnSale ? "text-red-600" : "text-black"
+                    }`}
+                  >
+                    ALL {displayPrice.toFixed(2)}
                   </span>
                 </div>
 
@@ -226,7 +275,7 @@ export default function ProductDetailsModal({ product, onClose }: ProductDetails
                 {/* Size Selection */}
                 <div className="mb-6">
                   <label className="block text-sm font-medium mb-3">
-                    {t('selectSize')}
+                    {t("selectSize")}
                   </label>
                   <div className="flex flex-wrap gap-2">
                     {availableSizes.map((size) => (
@@ -236,10 +285,10 @@ export default function ProductDetailsModal({ product, onClose }: ProductDetails
                         disabled={product.isSoldOut}
                         className={`px-4 py-2 border-2 transition-all text-sm font-medium ${
                           selectedSize === size
-                            ? 'border-black bg-black text-white'
+                            ? "border-black bg-black text-white"
                             : product.isSoldOut
-                            ? 'border-gray-200 text-gray-400 cursor-not-allowed'
-                            : 'border-gray-300 hover:border-black'
+                            ? "border-gray-200 text-gray-400 cursor-not-allowed"
+                            : "border-gray-300 hover:border-black"
                         }`}
                       >
                         {size}
@@ -255,11 +304,11 @@ export default function ProductDetailsModal({ product, onClose }: ProductDetails
                 disabled={product.isSoldOut || !selectedSize}
                 className={`w-full py-3 px-4 font-medium transition-colors ${
                   product.isSoldOut || !selectedSize
-                    ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
-                    : 'bg-black text-white hover:bg-gray-800'
+                    ? "bg-gray-200 text-gray-400 cursor-not-allowed"
+                    : "bg-black text-white hover:bg-gray-800"
                 }`}
               >
-                {product.isSoldOut ? t('soldOut') : tCart('addToCart')}
+                {product.isSoldOut ? t("soldOut") : tCart("addToCart")}
               </button>
             </div>
           </div>
@@ -268,4 +317,3 @@ export default function ProductDetailsModal({ product, onClose }: ProductDetails
     </div>
   );
 }
-

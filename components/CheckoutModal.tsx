@@ -1,10 +1,10 @@
-'use client';
+"use client";
 
-import { useState, FormEvent } from 'react';
-import { useTranslations } from 'next-intl';
-import { useRouter } from 'next/navigation';
-import { albanianCities } from '@/lib/albanian-cities';
-import { CartItem } from '@/contexts/CartContext';
+import { useState, FormEvent } from "react";
+import { useTranslations } from "next-intl";
+import { useRouter } from "next/navigation";
+import { albanianCities } from "@/lib/albanian-cities";
+import { CartItem } from "@/contexts/CartContext";
 
 interface Product {
   id: number;
@@ -21,26 +21,34 @@ interface CheckoutModalProps {
   onOrderSuccess?: () => void;
 }
 
-const POSTAL_FEE = 5.00; // Fixed postal fee in euros
+const POSTAL_FEE = 200; // Fixed postal fee in euros
 
-export default function CheckoutModal({ product, cartItems, onClose, onOrderSuccess }: CheckoutModalProps) {
-  const t = useTranslations('checkout');
-  const tOrder = useTranslations('order');
+export default function CheckoutModal({
+  product,
+  cartItems,
+  onClose,
+  onOrderSuccess,
+}: CheckoutModalProps) {
+  const t = useTranslations("checkout");
+  const tOrder = useTranslations("order");
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
 
   // Determine if this is a cart checkout or single product checkout
   const isCartCheckout = !!cartItems && cartItems.length > 0;
-  
+
   // Calculate totals
   const totalPrice = isCartCheckout
     ? cartItems.reduce((sum, item) => {
-        const price = item.isOnSale && item.salePrice ? item.salePrice : item.price;
+        const price =
+          item.isOnSale && item.salePrice ? item.salePrice : item.price;
         return sum + price * item.quantity;
       }, 0)
-    : (product?.isOnSale && product?.salePrice ? product.salePrice : product?.price || 0);
-  
+    : product?.isOnSale && product?.salePrice
+    ? product.salePrice
+    : product?.price || 0;
+
   const totalWithFee = totalPrice + POSTAL_FEE;
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
@@ -48,21 +56,22 @@ export default function CheckoutModal({ product, cartItems, onClose, onOrderSucc
     setIsSubmitting(true);
 
     const formData = new FormData(e.currentTarget);
-    const fullName = `${formData.get('name')} ${formData.get('surname')}`;
-    const instagramUsername = formData.get('instagramUsername');
-    const address = formData.get('address');
-    const city = formData.get('city');
-    const phoneNumber = formData.get('phoneNumber');
-    const notes = formData.get('notes') || null;
+    const fullName = `${formData.get("name")} ${formData.get("surname")}`;
+    const instagramUsername = formData.get("instagramUsername");
+    const address = formData.get("address");
+    const city = formData.get("city");
+    const phoneNumber = formData.get("phoneNumber");
+    const notes = formData.get("notes") || null;
 
     try {
       if (isCartCheckout && cartItems) {
         // Create one order per cart item
         const orderPromises = cartItems.map(async (item) => {
-          const itemPrice = item.isOnSale && item.salePrice ? item.salePrice : item.price;
+          const itemPrice =
+            item.isOnSale && item.salePrice ? item.salePrice : item.price;
           const itemTotal = itemPrice * item.quantity;
           const itemTotalWithFee = itemTotal + POSTAL_FEE;
-          
+
           const orderData = {
             fullName,
             instagramUsername,
@@ -73,13 +82,15 @@ export default function CheckoutModal({ product, cartItems, onClose, onOrderSucc
             totalPrice: itemTotal,
             postalFee: POSTAL_FEE,
             totalPriceWithPostalFee: itemTotalWithFee,
-            notes: notes ? `${notes} | Size: ${item.size}, Qty: ${item.quantity}` : `Size: ${item.size}, Qty: ${item.quantity}`,
+            notes: notes
+              ? `${notes} | Size: ${item.size}, Qty: ${item.quantity}`
+              : `Size: ${item.size}, Qty: ${item.quantity}`,
           };
 
-          return fetch('/api/orders', {
-            method: 'POST',
+          return fetch("/api/orders", {
+            method: "POST",
             headers: {
-              'Content-Type': 'application/json',
+              "Content-Type": "application/json",
             },
             body: JSON.stringify(orderData),
           });
@@ -98,7 +109,7 @@ export default function CheckoutModal({ product, cartItems, onClose, onOrderSucc
             router.refresh();
           }, 3000);
         } else {
-          alert('Error submitting some orders. Please try again.');
+          alert("Error submitting some orders. Please try again.");
         }
       } else if (product) {
         // Single product checkout
@@ -115,10 +126,10 @@ export default function CheckoutModal({ product, cartItems, onClose, onOrderSucc
           notes: notes || null,
         };
 
-        const response = await fetch('/api/orders', {
-          method: 'POST',
+        const response = await fetch("/api/orders", {
+          method: "POST",
           headers: {
-            'Content-Type': 'application/json',
+            "Content-Type": "application/json",
           },
           body: JSON.stringify(orderData),
         });
@@ -130,12 +141,12 @@ export default function CheckoutModal({ product, cartItems, onClose, onOrderSucc
             router.refresh();
           }, 3000);
         } else {
-          alert('Error submitting order. Please try again.');
+          alert("Error submitting order. Please try again.");
         }
       }
     } catch (error) {
-      console.error('Error:', error);
-      alert('Error submitting order. Please try again.');
+      console.error("Error:", error);
+      alert("Error submitting order. Please try again.");
     } finally {
       setIsSubmitting(false);
     }
@@ -146,7 +157,7 @@ export default function CheckoutModal({ product, cartItems, onClose, onOrderSucc
       <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[60] p-4">
         <div className="bg-white rounded-lg p-6 max-w-sm w-full text-center">
           <div className="text-3xl mb-3">✓</div>
-          <p className="text-base mb-4">{tOrder('success')}</p>
+          <p className="text-base mb-4">{tOrder("success")}</p>
           <button
             onClick={onClose}
             className="bg-black text-white px-5 py-2 text-sm hover:bg-gray-800"
@@ -159,13 +170,13 @@ export default function CheckoutModal({ product, cartItems, onClose, onOrderSucc
   }
 
   return (
-    <div 
+    <div
       className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[60] p-3 sm:p-4 overflow-y-auto"
       onClick={(e) => e.target === e.currentTarget && onClose()}
     >
       <div className="bg-white rounded-lg p-4 sm:p-6 max-w-lg w-full my-4 sm:my-8 max-h-[90vh] overflow-y-auto">
         <div className="flex justify-between items-center mb-4 sm:mb-5">
-          <h2 className="text-xl sm:text-2xl font-light">{t('title')}</h2>
+          <h2 className="text-xl sm:text-2xl font-light">{t("title")}</h2>
           <button
             onClick={onClose}
             className="text-gray-400 hover:text-gray-600 text-2xl sm:text-3xl leading-none"
@@ -178,14 +189,22 @@ export default function CheckoutModal({ product, cartItems, onClose, onOrderSucc
         {/* Product/Cart Summary */}
         {isCartCheckout && cartItems ? (
           <div className="mb-4 sm:mb-5 p-3 bg-gray-50 rounded max-h-40 overflow-y-auto">
-            <p className="font-medium text-sm sm:text-base mb-2">{t('orderSummary')}</p>
+            <p className="font-medium text-sm sm:text-base mb-2">
+              {t("orderSummary")}
+            </p>
             <div className="space-y-2">
               {cartItems.map((item) => {
-                const itemPrice = item.isOnSale && item.salePrice ? item.salePrice : item.price;
+                const itemPrice =
+                  item.isOnSale && item.salePrice ? item.salePrice : item.price;
                 return (
-                  <div key={item.id} className="flex justify-between text-xs sm:text-sm">
-                    <span>{item.name} ({item.size}) × {item.quantity}</span>
-                    <span>€{(itemPrice * item.quantity).toFixed(2)}</span>
+                  <div
+                    key={item.id}
+                    className="flex justify-between text-xs sm:text-sm"
+                  >
+                    <span>
+                      {item.name} ({item.size}) × {item.quantity}
+                    </span>
+                    <span>ALL {(itemPrice * item.quantity).toFixed(2)}</span>
                   </div>
                 );
               })}
@@ -193,18 +212,21 @@ export default function CheckoutModal({ product, cartItems, onClose, onOrderSucc
           </div>
         ) : product ? (
           <div className="mb-4 sm:mb-5 p-3 bg-gray-50 rounded">
-            <p className="font-medium text-sm sm:text-base mb-1">{product.name}</p>
-            <p className="text-base sm:text-lg">
-              €{totalPrice.toFixed(2)}
+            <p className="font-medium text-sm sm:text-base mb-1">
+              {product.name}
             </p>
+            <p className="text-base sm:text-lg">ALL {totalPrice.toFixed(2)}</p>
           </div>
         ) : null}
 
         <form onSubmit={handleSubmit} className="space-y-3 sm:space-y-4">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
             <div>
-              <label htmlFor="name" className="block text-xs sm:text-sm font-medium mb-1">
-                {t('name')}
+              <label
+                htmlFor="name"
+                className="block text-xs sm:text-sm font-medium mb-1"
+              >
+                {t("name")}
               </label>
               <input
                 type="text"
@@ -215,8 +237,11 @@ export default function CheckoutModal({ product, cartItems, onClose, onOrderSucc
               />
             </div>
             <div>
-              <label htmlFor="surname" className="block text-xs sm:text-sm font-medium mb-1">
-                {t('surname')}
+              <label
+                htmlFor="surname"
+                className="block text-xs sm:text-sm font-medium mb-1"
+              >
+                {t("surname")}
               </label>
               <input
                 type="text"
@@ -229,8 +254,11 @@ export default function CheckoutModal({ product, cartItems, onClose, onOrderSucc
           </div>
 
           <div>
-            <label htmlFor="instagramUsername" className="block text-xs sm:text-sm font-medium mb-1">
-              {t('instagramUsername')}
+            <label
+              htmlFor="instagramUsername"
+              className="block text-xs sm:text-sm font-medium mb-1"
+            >
+              {t("instagramUsername")}
             </label>
             <input
               type="text"
@@ -242,8 +270,11 @@ export default function CheckoutModal({ product, cartItems, onClose, onOrderSucc
           </div>
 
           <div>
-            <label htmlFor="address" className="block text-xs sm:text-sm font-medium mb-1">
-              {t('address')}
+            <label
+              htmlFor="address"
+              className="block text-xs sm:text-sm font-medium mb-1"
+            >
+              {t("address")}
             </label>
             <input
               type="text"
@@ -255,8 +286,11 @@ export default function CheckoutModal({ product, cartItems, onClose, onOrderSucc
           </div>
 
           <div>
-            <label htmlFor="city" className="block text-xs sm:text-sm font-medium mb-1">
-              {t('city')}
+            <label
+              htmlFor="city"
+              className="block text-xs sm:text-sm font-medium mb-1"
+            >
+              {t("city")}
             </label>
             <select
               id="city"
@@ -274,8 +308,11 @@ export default function CheckoutModal({ product, cartItems, onClose, onOrderSucc
           </div>
 
           <div>
-            <label htmlFor="phoneNumber" className="block text-xs sm:text-sm font-medium mb-1">
-              {t('phoneNumber')}
+            <label
+              htmlFor="phoneNumber"
+              className="block text-xs sm:text-sm font-medium mb-1"
+            >
+              {t("phoneNumber")}
             </label>
             <input
               type="tel"
@@ -287,8 +324,11 @@ export default function CheckoutModal({ product, cartItems, onClose, onOrderSucc
           </div>
 
           <div>
-            <label htmlFor="notes" className="block text-xs sm:text-sm font-medium mb-1">
-              {t('notes')}
+            <label
+              htmlFor="notes"
+              className="block text-xs sm:text-sm font-medium mb-1"
+            >
+              {t("notes")}
             </label>
             <textarea
               id="notes"
@@ -300,16 +340,16 @@ export default function CheckoutModal({ product, cartItems, onClose, onOrderSucc
 
           <div className="border-t pt-3 sm:pt-4 space-y-1.5 sm:space-y-2">
             <div className="flex justify-between text-xs sm:text-sm">
-              <span>{t('totalPrice')}:</span>
-              <span>€{totalPrice.toFixed(2)}</span>
+              <span>{t("totalPrice")}:</span>
+              <span>ALL {totalPrice.toFixed(2)}</span>
             </div>
             <div className="flex justify-between text-xs sm:text-sm">
-              <span>{t('postalFee')}:</span>
-              <span>€{POSTAL_FEE.toFixed(2)}</span>
+              <span>{t("postalFee")}:</span>
+              <span>ALL {POSTAL_FEE.toFixed(2)}</span>
             </div>
             <div className="flex justify-between font-medium text-sm sm:text-base pt-2 border-t">
-              <span>{t('totalWithFee')}:</span>
-              <span>€{totalWithFee.toFixed(2)}</span>
+              <span>{t("totalWithFee")}:</span>
+              <span>ALL {totalWithFee.toFixed(2)}</span>
             </div>
           </div>
 
@@ -318,11 +358,10 @@ export default function CheckoutModal({ product, cartItems, onClose, onOrderSucc
             disabled={isSubmitting}
             className="w-full bg-black text-white py-2.5 sm:py-3 px-4 text-sm sm:text-base font-medium hover:bg-gray-800 disabled:bg-gray-400 disabled:cursor-not-allowed rounded transition-colors"
           >
-            {isSubmitting ? 'Submitting...' : t('confirmOrder')}
+            {isSubmitting ? "Submitting..." : t("confirmOrder")}
           </button>
         </form>
       </div>
     </div>
   );
 }
-
