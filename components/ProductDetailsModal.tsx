@@ -111,7 +111,7 @@ export default function ProductDetailsModal({
 
   return (
     <div
-      className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-3 sm:p-4 overflow-y-auto"
+      className="fixed inset-0 bg-[#2E294E] bg-opacity-50 flex items-center justify-center z-50 p-3 sm:p-4 overflow-y-auto"
       onClick={(e) => e.target === e.currentTarget && onClose()}
     >
       <div className="bg-white rounded-lg max-w-4xl w-full max-h-[90vh] overflow-y-auto">
@@ -233,7 +233,7 @@ export default function ProductDetailsModal({
                 {/* Badges */}
                 <div className="flex gap-2 mb-4">
                   {product.isSoldOut && (
-                    <span className="bg-black text-white px-3 py-1 text-xs font-medium">
+                    <span className="bg-[#2E294E] text-white px-3 py-1 text-xs font-medium">
                       {t("soldOut")}
                     </span>
                   )}
@@ -283,9 +283,9 @@ export default function ProductDetailsModal({
                         key={size}
                         onClick={() => setSelectedSize(size)}
                         disabled={product.isSoldOut}
-                        className={`px-4 py-2 border-2 transition-all text-sm font-medium ${
+                        className={`px-4 py-2 border-2 transition-all text-sm font-medium rounded ${
                           selectedSize === size
-                            ? "border-black bg-black text-white"
+                            ? "border-black bg-[#2E294E] text-white"
                             : product.isSoldOut
                             ? "border-gray-200 text-gray-400 cursor-not-allowed"
                             : "border-gray-300 hover:border-black"
@@ -304,8 +304,8 @@ export default function ProductDetailsModal({
                 disabled={product.isSoldOut || !selectedSize}
                 className={`w-full py-3 px-4 font-medium transition-colors ${
                   product.isSoldOut || !selectedSize
-                    ? "bg-gray-200 text-gray-400 cursor-not-allowed"
-                    : "bg-black text-white hover:bg-gray-800"
+                    ? "bg-gray-200 text-gray-400 cursor-not-allowed rounded"
+                    : "bg-[#2E294E] text-white rounded hover:bg-gray-800"
                 }`}
               >
                 {product.isSoldOut ? t("soldOut") : tCart("addToCart")}

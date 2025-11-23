@@ -26,7 +26,12 @@
   },
   "hero": {
     "title": "Mirë se vini në Lorelei Boutique",
-    "subtitle": "Zbuloni uljet tona për Black Friday!"
+    "subtitle": "Zbuloni uljet tona për Black Friday!",
+    "salesAnnounce":"Uljet e fundit, vetëm deri më 29 Nëntor!",
+    "salesAnnounceSubtitle":"Mos e humbisni mundësinë për të marrë produktet tuaja të preferuara me çmime speciale.",
+    "followInstagram":"Na ndiqni në Instagram:",
+    "thankYou": "Faleminderit që na zgjodhët!",
+    "rightsInfo": "Të gjitha të drejtat e rezervuara. Fotografitë nuk mund të përdoren nga persona të tjerë."
   },
   "product": {
     "soldOut": "Shitur",

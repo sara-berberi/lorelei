@@ -21,7 +21,6 @@ export default function ProductCard({ product }: { product: Product }) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [imageError, setImageError] = useState(false);
 
-  // Get first image for product card (support both single URL and JSON array)
   const getFirstImage = (imageUrl: string): string => {
     try {
       const parsed = JSON.parse(imageUrl);
@@ -60,17 +59,70 @@ export default function ProductCard({ product }: { product: Product }) {
               <span className="text-gray-400 text-sm">No Image</span>
             </div>
           )}
+
+          {/* Sold Out / Sale Badges */}
           {product.isSoldOut && (
-            <div className="absolute top-2 left-2 sm:top-4 sm:left-4 bg-black text-white px-2 py-0.5 sm:px-3 sm:py-1 text-xs font-medium">
+            <div className="absolute top-2 left-2 sm:top-4 sm:left-4 bg-black text-white px-2 py-0.5 sm:px-3 sm:py-1 text-xs rounded font-medium">
               {t("soldOut")}
             </div>
           )}
           {product.isOnSale && !product.isSoldOut && (
-            <div className="absolute top-2 left-2 sm:top-4 sm:left-4 bg-red-500 text-white px-2 py-0.5 sm:px-3 sm:py-1 text-xs font-medium">
+            <div className="absolute top-2 left-2 sm:top-4 sm:left-4 bg-[#EE353B] text-white px-2 py-0.5 sm:px-3 sm:py-1 text-xs rounded font-medium">
               {t("sale")}
             </div>
           )}
+
+          {/* Small Add to Cart Button on bottom-left */}
+          {/* Small Add to Cart Button on bottom-left */}
+          {!product.isSoldOut && (
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                setIsModalOpen(true);
+              }}
+              className="absolute bottom-2 left-2 bg-white text-[#2E294E] p-2 hover:bg-white transition-colors shadow-md flex items-center justify-center"
+              aria-label="Add to Cart"
+            >
+              {/* Shopping Bag SVG */}
+              <svg
+                className="w-5 h-5 sm:w-6 sm:h-6"
+                viewBox="0 0 48 48"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M34.2129 13.7872V13.3787C34.2129 7.96398 29.8234 3.57447 24.4086 3.57447H23.5916C18.1769 3.57447 13.7874 7.96398 13.7874 13.3787V13.7872"
+                  stroke="currentColor"
+                  strokeWidth="2.04255"
+                />
+                <path
+                  fillRule="evenodd"
+                  clipRule="evenodd"
+                  d="M3.5745 12.766H2.55322V13.7872V44.4255V45.4468H3.5745H26V43.4043H4.59578V14.8085H43.4043V27H45.4468V13.7872V12.766H44.4256H3.5745Z"
+                  fill="currentColor"
+                />
+                <line
+                  x1="36"
+                  y1="29"
+                  x2="36"
+                  y2="43"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                />
+                <line
+                  x1="29"
+                  y1="36"
+                  x2="43"
+                  y2="36"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                />
+              </svg>
+            </button>
+          )}
         </div>
+
+        {/* Product Name and Price */}
         <div className="mt-3 sm:mt-4">
           <h3 className="text-base sm:text-lg font-light mb-1.5 sm:mb-2">
             {product.name}
@@ -83,28 +135,15 @@ export default function ProductCard({ product }: { product: Product }) {
             )}
             <span
               className={`text-base sm:text-lg font-medium ${
-                product.isOnSale ? "text-red-600" : "text-black"
+                product.isOnSale ? "text-[#EE353B]" : "text-black"
               }`}
             >
               ALL {displayPrice.toFixed(2)}
             </span>
           </div>
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              setIsModalOpen(true);
-            }}
-            disabled={product.isSoldOut}
-            className={`w-full py-2.5 sm:py-3 px-4 text-xs sm:text-sm font-medium transition-colors ${
-              product.isSoldOut
-                ? "bg-gray-200 text-gray-400 cursor-not-allowed"
-                : "bg-black text-white hover:bg-gray-800"
-            }`}
-          >
-            {t("orderNow")}
-          </button>
         </div>
       </div>
+
       {isModalOpen && (
         <ProductDetailsModal
           product={product}

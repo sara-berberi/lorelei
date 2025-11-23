@@ -26,8 +26,14 @@
   },
   "hero": {
     "title": "Welcome to Lorelei Boutique",
-    "subtitle": "Discover our sales for Black Friday!"
-  },
+    "subtitle": "Discover our sales for Black Friday!",
+    "salesAnnounce": "Last sales, only until November 29th!",
+    "salesAnnounceSubtitle": "Don’t miss the chance to grab your favorite products at special prices.", 
+    "followInstagram": "Follow us on Instagram:",
+    "thankYou": "Thank you for choosing us!",
+    "rightsInfo": "All rights reserved. Images cannot be used by others."
+
+    },
   "product": {
     "soldOut": "Sold Out",
     "sale": "Sale",
