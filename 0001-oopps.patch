@@ -1,0 +1,1172 @@
+From 4091733b621b1dc8db243597103d3f944a5fe4a3 Mon Sep 17 00:00:00 2001
+From: Sara Berberi <sberberi21@epoka.edu.al>
+Date: Mon, 24 Nov 2025 19:11:12 +0100
+Subject: [PATCH] oopps
+
+---
+ app/[locale]/brands/page.tsx       |  25 ++++
+ app/[locale]/layout.tsx            |   3 +
+ app/api/brands/route.ts            |  46 ++++++
+ app/api/products/filters/route.ts  |  90 ++++++++++++
+ app/api/products/route.ts          |  53 ++++++-
+ components/BrandsList.tsx          |  79 +++++++++++
+ components/CartDrawer.tsx          |  25 ++++
+ components/CheckoutModal.tsx       |  38 ++++-
+ components/ProductCard.tsx         |  27 ++++
+ components/ProductDetailsModal.tsx |  32 +++++
+ components/ProductFilters.tsx      | 219 +++++++++++++++++++++++++++++
+ components/ProductGrid.tsx         | 175 +++++++++++++++--------
+ contexts/CartContext.tsx           |   4 +
+ i18n/messages/en.json              |  32 ++++-
+ i18n/messages/sq.json              |  32 ++++-
+ prisma/schema.prisma               |   2 +
+ 16 files changed, 813 insertions(+), 69 deletions(-)
+ create mode 100644 app/[locale]/brands/page.tsx
+ create mode 100644 app/api/brands/route.ts
+ create mode 100644 app/api/products/filters/route.ts
+ create mode 100644 components/BrandsList.tsx
+ create mode 100644 components/ProductFilters.tsx
+
+diff --git a/app/[locale]/brands/page.tsx b/app/[locale]/brands/page.tsx
+new file mode 100644
+index 0000000..599f48c
+--- /dev/null
++++ b/app/[locale]/brands/page.tsx
+@@ -0,0 +1,25 @@
++import { getTranslations } from 'next-intl/server';
++import BrandsList from '@/components/BrandsList';
++
++export default async function BrandsPage({
++  params,
++}: {
++  params: Promise<{ locale: string }>;
++}) {
++  const { locale } = await params;
++  const t = await getTranslations('brands');
++
++  return (
++    <div className="min-h-screen">
++      <section className="py-8 sm:py-12 md:py-16 px-4 sm:px-6 lg:px-8">
++        <div className="max-w-7xl mx-auto">
++          <h1 className="text-2xl sm:text-3xl font-light text-center mb-8 sm:mb-12">
++            {t('title')}
++          </h1>
++          <BrandsList locale={locale} />
++        </div>
++      </section>
++    </div>
++  );
++}
++
+diff --git a/app/[locale]/layout.tsx b/app/[locale]/layout.tsx
+index b1e4d48..17f53a4 100644
+--- a/app/[locale]/layout.tsx
++++ b/app/[locale]/layout.tsx
+@@ -41,6 +41,9 @@ export default async function LocaleLayout({
+                   <Link href={`/${locale}#products`} className="text-xs sm:text-sm font-medium hover:text-gray-600 hidden sm:block">
+                     {t('products')}
+                   </Link>
++                  <Link href={`/${locale}/brands`} className="text-xs sm:text-sm font-medium hover:text-gray-600 hidden sm:block">
++                    {t('brands')}
++                  </Link>
+                   <CartButton />
+                   <div className="relative z-20">
+                     <LanguageToggle currentLocale={locale} />
+diff --git a/app/api/brands/route.ts b/app/api/brands/route.ts
+new file mode 100644
+index 0000000..bbfe084
+--- /dev/null
++++ b/app/api/brands/route.ts
+@@ -0,0 +1,46 @@
++import { NextResponse } from 'next/server';
++import { prisma } from '@/lib/prisma';
++
++export async function GET() {
++  try {
++    await prisma.$connect();
++    
++    // Get all unique brands from products
++    const products = await prisma.product.findMany({
++      where: {
++        deletedAt: null,
++        brand: {
++          not: null,
++        },
++      },
++      select: {
++        brand: true,
++      },
++      distinct: ['brand'],
++      orderBy: {
++        brand: 'asc',
++      },
++    });
++    
++    const brands = products
++      .map((p) => p.brand)
++      .filter((b): b is string => b !== null && b !== undefined);
++    
++    return NextResponse.json(brands);
++  } catch (error: any) {
++    console.error('Error fetching brands:', error);
++    
++    if (error.code === 'P1001' || error.message?.includes('connect')) {
++      console.error('Database connection error. Check your DATABASE_URL in .env');
++      return NextResponse.json([], { status: 200 });
++    }
++    
++    return NextResponse.json(
++      { error: 'Failed to fetch brands', details: error.message },
++      { status: 500 }
++    );
++  } finally {
++    await prisma.$disconnect().catch(() => {});
++  }
++}
++
+diff --git a/app/api/products/filters/route.ts b/app/api/products/filters/route.ts
+new file mode 100644
+index 0000000..7aa0ab1
+--- /dev/null
++++ b/app/api/products/filters/route.ts
+@@ -0,0 +1,90 @@
++import { NextResponse } from 'next/server';
++import { prisma } from '@/lib/prisma';
++
++export async function GET() {
++  try {
++    await prisma.$connect();
++    
++    // Get all products (not deleted)
++    const products = await prisma.product.findMany({
++      where: {
++        deletedAt: null,
++      },
++      select: {
++        category: true,
++        brand: true,
++        sizes: true,
++        price: true,
++        salePrice: true,
++        isOnSale: true,
++      },
++    });
++    
++    // Extract unique categories
++    const categories = Array.from(
++      new Set(
++        products
++          .map((p) => p.category)
++          .filter((c): c is string => c !== null && c !== undefined)
++      )
++    ).sort();
++    
++    // Extract unique brands
++    const brands = Array.from(
++      new Set(
++        products
++          .map((p) => p.brand)
++          .filter((b): b is string => b !== null && b !== undefined)
++      )
++    ).sort();
++    
++    // Extract unique sizes from all products
++    const allSizes = new Set<string>();
++    products.forEach((product) => {
++      if (product.sizes) {
++        try {
++          const sizes = JSON.parse(product.sizes);
++          if (Array.isArray(sizes)) {
++            sizes.forEach((size: string) => allSizes.add(size));
++          }
++        } catch {
++          // Ignore parsing errors
++        }
++      }
++    });
++    const sizes = Array.from(allSizes).sort();
++    
++    // Calculate price range
++    const prices = products.map((p) => (p.isOnSale && p.salePrice ? p.salePrice : p.price));
++    const minPrice = prices.length > 0 ? Math.min(...prices) : 0;
++    const maxPrice = prices.length > 0 ? Math.max(...prices) : 0;
++    
++    return NextResponse.json({
++      categories,
++      brands,
++      sizes,
++      priceRange: {
++        min: minPrice,
++        max: maxPrice,
++      },
++    });
++  } catch (error: any) {
++    console.error('Error fetching filters:', error);
++    
++    if (error.code === 'P1001' || error.message?.includes('connect')) {
++      console.error('Database connection error. Check your DATABASE_URL in .env');
++      return NextResponse.json(
++        { categories: [], brands: [], sizes: [], priceRange: { min: 0, max: 0 } },
++        { status: 200 }
++      );
++    }
++    
++    return NextResponse.json(
++      { error: 'Failed to fetch filters', details: error.message },
++      { status: 500 }
++    );
++  } finally {
++    await prisma.$disconnect().catch(() => {});
++  }
++}
++
+diff --git a/app/api/products/route.ts b/app/api/products/route.ts
+index 3acc77c..d02e974 100644
+--- a/app/api/products/route.ts
++++ b/app/api/products/route.ts
+@@ -1,21 +1,64 @@
+ import { NextResponse } from 'next/server';
+ import { prisma } from '@/lib/prisma';
+ 
+-export async function GET() {
++export async function GET(request: Request) {
+   try {
+     // Test database connection first
+     await prisma.$connect();
+     
++    // Get query parameters for filtering
++    const { searchParams } = new URL(request.url);
++    const category = searchParams.get('category');
++    const brand = searchParams.get('brand');
++    const size = searchParams.get('size');
++    const minPrice = searchParams.get('minPrice');
++    const maxPrice = searchParams.get('maxPrice');
++    
++    // Build where clause
++    const where: any = {
++      deletedAt: null,
++    };
++    
++    // Add category filter
++    if (category && category !== 'all') {
++      where.category = category;
++    }
++    
++    // Add brand filter
++    if (brand && brand !== 'all') {
++      where.brand = brand;
++    }
++    
++    // Add price filters
++    if (minPrice) {
++      where.price = { ...where.price, gte: parseFloat(minPrice) };
++    }
++    if (maxPrice) {
++      where.price = { ...where.price, lte: parseFloat(maxPrice) };
++    }
++    
+     const products = await prisma.product.findMany({
+-      where: {
+-        deletedAt: null,
+-      },
++      where,
+       orderBy: {
+         createdAt: 'desc',
+       },
+     });
++    
++    // Filter by size if specified (size is stored as JSON string)
++    let filteredProducts = products;
++    if (size && size !== 'all') {
++      filteredProducts = products.filter((product) => {
++        if (!product.sizes) return false;
++        try {
++          const sizes = JSON.parse(product.sizes);
++          return Array.isArray(sizes) && sizes.includes(size);
++        } catch {
++          return false;
++        }
++      });
++    }
+ 
+-    return NextResponse.json(products);
++    return NextResponse.json(filteredProducts);
+   } catch (error: any) {
+     console.error('Error fetching products:', error);
+     
+diff --git a/components/BrandsList.tsx b/components/BrandsList.tsx
+new file mode 100644
+index 0000000..77f4faa
+--- /dev/null
++++ b/components/BrandsList.tsx
+@@ -0,0 +1,79 @@
++'use client';
++
++import { useEffect, useState } from 'react';
++import { useTranslations } from 'next-intl';
++import { useRouter } from 'next/navigation';
++import Link from 'next/link';
++
++interface BrandsListProps {
++  locale: string;
++}
++
++export default function BrandsList({ locale }: BrandsListProps) {
++  const t = useTranslations('brands');
++  const router = useRouter();
++  const [brands, setBrands] = useState<string[]>([]);
++  const [loading, setLoading] = useState(true);
++
++  useEffect(() => {
++    const fetchBrands = async () => {
++      try {
++        const res = await fetch('/api/brands');
++        if (res.ok) {
++          const data = await res.json();
++          setBrands(data);
++        }
++      } catch (error) {
++        console.error('Error fetching brands:', error);
++      } finally {
++        setLoading(false);
++      }
++    };
++    fetchBrands();
++  }, []);
++
++  if (loading) {
++    return (
++      <div className="flex justify-center items-center py-20">
++        <div className="text-gray-400">Loading...</div>
++      </div>
++    );
++  }
++
++  if (brands.length === 0) {
++    return (
++      <div className="flex justify-center items-center py-20">
++        <div className="text-gray-400">{t('noBrands')}</div>
++      </div>
++    );
++  }
++
++  return (
++    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 sm:gap-6">
++      {brands.map((brand) => (
++        <Link
++          key={brand}
++          href={`/${locale}#products`}
++          onClick={() => {
++            // Store brand filter in sessionStorage to apply when navigating to products
++            sessionStorage.setItem('selectedBrand', brand);
++            // Scroll to products section
++            setTimeout(() => {
++              const productsSection = document.getElementById('products');
++              if (productsSection) {
++                productsSection.scrollIntoView({ behavior: 'smooth' });
++              }
++            }, 100);
++          }}
++          className="group p-4 sm:p-6 border border-gray-200 hover:border-black transition-colors text-center"
++        >
++          <h3 className="text-sm sm:text-base font-medium group-hover:text-black transition-colors">
++            {brand}
++          </h3>
++          <p className="text-xs text-gray-500 mt-2">{t('viewProducts')}</p>
++        </Link>
++      ))}
++    </div>
++  );
++}
++
+diff --git a/components/CartDrawer.tsx b/components/CartDrawer.tsx
+index 167ba2b..3419b2b 100644
+--- a/components/CartDrawer.tsx
++++ b/components/CartDrawer.tsx
+@@ -7,9 +7,28 @@ import CheckoutModal from './CheckoutModal';
+ 
+ export default function CartDrawer() {
+   const t = useTranslations('cart');
++  const tCategories = useTranslations('categories');
+   const { items, isOpen, setIsOpen, removeFromCart, updateQuantity, getTotalPrice, clearCart } = useCart();
+   const [showCheckout, setShowCheckout] = useState(false);
+ 
++  const getCategoryTranslation = (category: string | null): string => {
++    if (!category) return '';
++    const categoryMap: Record<string, string> = {
++      'Tops': 'tops',
++      'Bottoms': 'bottoms',
++      'Dresses': 'dresses',
++      'Coats & Puffers': 'coatsPuffers',
++      'Nightwear': 'nightwear',
++      'Shoes': 'shoes',
++    };
++    const key = categoryMap[category] || category.toLowerCase();
++    try {
++      return tCategories(key);
++    } catch {
++      return category;
++    }
++  };
++
+   return (
+     <>
+       {/* Cart Drawer */}
+@@ -71,7 +90,13 @@ export default function CartDrawer() {
+                       />
+                     </div>
+                     <div className="flex-1 min-w-0">
++                      {item.brand && (
++                        <p className="text-xs text-gray-500 mb-0.5">{item.brand}</p>
++                      )}
+                       <h3 className="font-medium text-sm sm:text-base mb-1 truncate">{item.name}</h3>
++                      {item.category && (
++                        <p className="text-xs text-gray-400 mb-1">{getCategoryTranslation(item.category)}</p>
++                      )}
+                       <p className="text-xs text-gray-500 mb-2">
+                         {t('size')}: <span className="font-medium">{item.size}</span>
+                       </p>
+diff --git a/components/CheckoutModal.tsx b/components/CheckoutModal.tsx
+index 7bd06c7..252a6b8 100644
+--- a/components/CheckoutModal.tsx
++++ b/components/CheckoutModal.tsx
+@@ -26,7 +26,27 @@ const POSTAL_FEE = 5.00; // Fixed postal fee in euros
+ export default function CheckoutModal({ product, cartItems, onClose, onOrderSuccess }: CheckoutModalProps) {
+   const t = useTranslations('checkout');
+   const tOrder = useTranslations('order');
++  const tCart = useTranslations('cart');
++  const tCategories = useTranslations('categories');
+   const router = useRouter();
++
++  const getCategoryTranslation = (category: string | null): string => {
++    if (!category) return '';
++    const categoryMap: Record<string, string> = {
++      'Tops': 'tops',
++      'Bottoms': 'bottoms',
++      'Dresses': 'dresses',
++      'Coats & Puffers': 'coatsPuffers',
++      'Nightwear': 'nightwear',
++      'Shoes': 'shoes',
++    };
++    const key = categoryMap[category] || category.toLowerCase();
++    try {
++      return tCategories(key);
++    } catch {
++      return category;
++    }
++  };
+   const [isSubmitting, setIsSubmitting] = useState(false);
+   const [showSuccess, setShowSuccess] = useState(false);
+ 
+@@ -184,8 +204,22 @@ export default function CheckoutModal({ product, cartItems, onClose, onOrderSucc
+                 const itemPrice = item.isOnSale && item.salePrice ? item.salePrice : item.price;
+                 return (
+                   <div key={item.id} className="flex justify-between text-xs sm:text-sm">
+-                    <span>{item.name} ({item.size}) × {item.quantity}</span>
+-                    <span>€{(itemPrice * item.quantity).toFixed(2)}</span>
++                    <div className="flex-1">
++                      <div className="flex items-center gap-2">
++                        <span className="font-medium">{item.name}</span>
++                        {item.brand && (
++                          <span className="text-gray-500 text-xs">({item.brand})</span>
++                        )}
++                      </div>
++                      <div className="text-gray-500 text-xs mt-0.5">
++                        {item.category && getCategoryTranslation(item.category)}
++                        {item.category && item.size && ' • '}
++                        {item.size && `${tCart('size')}: ${item.size}`}
++                        {' × '}
++                        {item.quantity}
++                      </div>
++                    </div>
++                    <span className="ml-2">€{(itemPrice * item.quantity).toFixed(2)}</span>
+                   </div>
+                 );
+               })}
+diff --git a/components/ProductCard.tsx b/components/ProductCard.tsx
+index f999b21..0ea399b 100644
+--- a/components/ProductCard.tsx
++++ b/components/ProductCard.tsx
+@@ -12,15 +12,36 @@ interface Product {
+   salePrice: number | null;
+   imageUrl: string;
+   sizes: string | null;
++  category: string | null;
++  brand: string | null;
+   isSoldOut: boolean;
+   isOnSale: boolean;
+ }
+ 
+ export default function ProductCard({ product }: { product: Product }) {
+   const t = useTranslations('common');
++  const tCategories = useTranslations('categories');
+   const [isModalOpen, setIsModalOpen] = useState(false);
+   const [imageError, setImageError] = useState(false);
+ 
++  const getCategoryTranslation = (category: string | null): string => {
++    if (!category) return '';
++    const categoryMap: Record<string, string> = {
++      'Tops': 'tops',
++      'Bottoms': 'bottoms',
++      'Dresses': 'dresses',
++      'Coats & Puffers': 'coatsPuffers',
++      'Nightwear': 'nightwear',
++      'Shoes': 'shoes',
++    };
++    const key = categoryMap[category] || category.toLowerCase();
++    try {
++      return tCategories(key);
++    } catch {
++      return category;
++    }
++  };
++
+   // Get first image for product card (support both single URL and JSON array)
+   const getFirstImage = (imageUrl: string): string => {
+     try {
+@@ -67,7 +88,13 @@ export default function ProductCard({ product }: { product: Product }) {
+           )}
+         </div>
+         <div className="mt-3 sm:mt-4">
++          {product.brand && (
++            <p className="text-xs text-gray-500 mb-1">{product.brand}</p>
++          )}
+           <h3 className="text-base sm:text-lg font-light mb-1.5 sm:mb-2">{product.name}</h3>
++          {product.category && (
++            <p className="text-xs text-gray-400 mb-2">{getCategoryTranslation(product.category)}</p>
++          )}
+           <div className="flex items-center gap-2 mb-3 sm:mb-4">
+             {originalPrice && (
+               <span className="text-gray-400 line-through text-xs sm:text-sm">
+diff --git a/components/ProductDetailsModal.tsx b/components/ProductDetailsModal.tsx
+index 2df4cf3..d73feb5 100644
+--- a/components/ProductDetailsModal.tsx
++++ b/components/ProductDetailsModal.tsx
+@@ -12,6 +12,8 @@ interface Product {
+   salePrice: number | null;
+   imageUrl: string;
+   sizes: string | null; // JSON string
++  category: string | null;
++  brand: string | null;
+   isSoldOut: boolean;
+   isOnSale: boolean;
+ }
+@@ -24,7 +26,27 @@ interface ProductDetailsModalProps {
+ export default function ProductDetailsModal({ product, onClose }: ProductDetailsModalProps) {
+   const t = useTranslations('product');
+   const tCart = useTranslations('cart');
++  const tCommon = useTranslations('common');
++  const tCategories = useTranslations('categories');
+   const { addToCart } = useCart();
++
++  const getCategoryTranslation = (category: string | null): string => {
++    if (!category) return '';
++    const categoryMap: Record<string, string> = {
++      'Tops': 'tops',
++      'Bottoms': 'bottoms',
++      'Dresses': 'dresses',
++      'Coats & Puffers': 'coatsPuffers',
++      'Nightwear': 'nightwear',
++      'Shoes': 'shoes',
++    };
++    const key = categoryMap[category] || category.toLowerCase();
++    try {
++      return tCategories(key);
++    } catch {
++      return category;
++    }
++  };
+   
+   const [selectedSize, setSelectedSize] = useState<string>('');
+   const [currentImageIndex, setCurrentImageIndex] = useState(0);
+@@ -201,6 +223,16 @@ export default function ProductDetailsModal({ product, onClose }: ProductDetails
+                   )}
+                 </div>
+ 
++                {/* Brand and Category */}
++                <div className="mb-2">
++                  {product.brand && (
++                    <p className="text-sm text-gray-500 mb-1">{product.brand}</p>
++                  )}
++                  {product.category && (
++                    <p className="text-xs text-gray-400">{getCategoryTranslation(product.category)}</p>
++                  )}
++                </div>
++
+                 {/* Title */}
+                 <h1 className="text-2xl sm:text-3xl font-light mb-4">{product.name}</h1>
+ 
+diff --git a/components/ProductFilters.tsx b/components/ProductFilters.tsx
+new file mode 100644
+index 0000000..ce734e6
+--- /dev/null
++++ b/components/ProductFilters.tsx
+@@ -0,0 +1,219 @@
++'use client';
++
++import { useState, useEffect } from 'react';
++import { useTranslations } from 'next-intl';
++
++interface FilterOptions {
++  categories: string[];
++  brands: string[];
++  sizes: string[];
++  priceRange: {
++    min: number;
++    max: number;
++  };
++}
++
++interface ProductFiltersProps {
++  onFilterChange: (filters: {
++    category: string;
++    brand: string;
++    size: string;
++    minPrice: string;
++    maxPrice: string;
++  }) => void;
++  initialFilters?: {
++    category?: string;
++    brand?: string;
++    size?: string;
++    minPrice?: string;
++    maxPrice?: string;
++  };
++}
++
++export default function ProductFilters({ onFilterChange, initialFilters }: ProductFiltersProps) {
++  const t = useTranslations('filters');
++  const tCategories = useTranslations('categories');
++  const [filterOptions, setFilterOptions] = useState<FilterOptions>({
++    categories: [],
++    brands: [],
++    sizes: [],
++    priceRange: { min: 0, max: 0 },
++  });
++  const [loading, setLoading] = useState(true);
++  
++  const [selectedCategory, setSelectedCategory] = useState<string>(initialFilters?.category || 'all');
++  const [selectedBrand, setSelectedBrand] = useState<string>(initialFilters?.brand || 'all');
++  const [selectedSize, setSelectedSize] = useState<string>(initialFilters?.size || 'all');
++  const [minPrice, setMinPrice] = useState<string>(initialFilters?.minPrice || '');
++  const [maxPrice, setMaxPrice] = useState<string>(initialFilters?.maxPrice || '');
++
++  // Fetch filter options
++  useEffect(() => {
++    const fetchFilterOptions = async () => {
++      try {
++        const res = await fetch('/api/products/filters');
++        if (res.ok) {
++          const data = await res.json();
++          setFilterOptions(data);
++        }
++      } catch (error) {
++        console.error('Error fetching filter options:', error);
++      } finally {
++        setLoading(false);
++      }
++    };
++    fetchFilterOptions();
++  }, []);
++
++  // Notify parent of filter changes
++  useEffect(() => {
++    onFilterChange({
++      category: selectedCategory,
++      brand: selectedBrand,
++      size: selectedSize,
++      minPrice,
++      maxPrice,
++    });
++  }, [selectedCategory, selectedBrand, selectedSize, minPrice, maxPrice, onFilterChange]);
++
++  const handleClearAll = () => {
++    setSelectedCategory('all');
++    setSelectedBrand('all');
++    setSelectedSize('all');
++    setMinPrice('');
++    setMaxPrice('');
++  };
++
++  const getCategoryTranslation = (category: string): string => {
++    const categoryMap: Record<string, string> = {
++      'Tops': 'tops',
++      'Bottoms': 'bottoms',
++      'Dresses': 'dresses',
++      'Coats & Puffers': 'coatsPuffers',
++      'Nightwear': 'nightwear',
++      'Shoes': 'shoes',
++    };
++    const key = categoryMap[category] || category.toLowerCase();
++    try {
++      return tCategories(key);
++    } catch {
++      return category;
++    }
++  };
++
++  if (loading) {
++    return (
++      <div className="mb-8">
++        <div className="text-sm text-gray-400">Loading filters...</div>
++      </div>
++    );
++  }
++
++  const hasActiveFilters =
++    selectedCategory !== 'all' ||
++    selectedBrand !== 'all' ||
++    selectedSize !== 'all' ||
++    minPrice !== '' ||
++    maxPrice !== '';
++
++  return (
++    <div className="mb-8 border-b border-gray-200 pb-6">
++      <div className="flex items-center justify-between mb-6">
++        <h2 className="text-lg font-medium">{t('title')}</h2>
++        {hasActiveFilters && (
++          <button
++            onClick={handleClearAll}
++            className="text-sm text-gray-600 hover:text-black underline"
++          >
++            {t('clearAll')}
++          </button>
++        )}
++      </div>
++
++      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
++        {/* Category Filter */}
++        {filterOptions.categories.length > 0 && (
++          <div>
++            <label className="block text-sm font-medium mb-2">{t('category')}</label>
++            <select
++              value={selectedCategory}
++              onChange={(e) => setSelectedCategory(e.target.value)}
++              className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-black text-sm"
++            >
++              <option value="all">{t('allCategories')}</option>
++              {filterOptions.categories.map((category) => (
++                <option key={category} value={category}>
++                  {getCategoryTranslation(category)}
++                </option>
++              ))}
++            </select>
++          </div>
++        )}
++
++        {/* Brand Filter */}
++        {filterOptions.brands.length > 0 && (
++          <div>
++            <label className="block text-sm font-medium mb-2">{t('brand')}</label>
++            <select
++              value={selectedBrand}
++              onChange={(e) => setSelectedBrand(e.target.value)}
++              className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-black text-sm"
++            >
++              <option value="all">{t('allBrands')}</option>
++              {filterOptions.brands.map((brand) => (
++                <option key={brand} value={brand}>
++                  {brand}
++                </option>
++              ))}
++            </select>
++          </div>
++        )}
++
++        {/* Size Filter */}
++        {filterOptions.sizes.length > 0 && (
++          <div>
++            <label className="block text-sm font-medium mb-2">{t('size')}</label>
++            <select
++              value={selectedSize}
++              onChange={(e) => setSelectedSize(e.target.value)}
++              className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-black text-sm"
++            >
++              <option value="all">{t('allSizes')}</option>
++              {filterOptions.sizes.map((size) => (
++                <option key={size} value={size}>
++                  {size}
++                </option>
++              ))}
++            </select>
++          </div>
++        )}
++
++        {/* Price Filter */}
++        <div>
++          <label className="block text-sm font-medium mb-2">{t('price')}</label>
++          <div className="flex gap-2">
++            <input
++              type="number"
++              placeholder={t('minPrice')}
++              value={minPrice}
++              onChange={(e) => setMinPrice(e.target.value)}
++              min="0"
++              step="0.01"
++              className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-black text-sm"
++            />
++            <input
++              type="number"
++              placeholder={t('maxPrice')}
++              value={maxPrice}
++              onChange={(e) => setMaxPrice(e.target.value)}
++              min="0"
++              step="0.01"
++              className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-black text-sm"
++            />
++          </div>
++        </div>
++      </div>
++    </div>
++  );
++}
++
+diff --git a/components/ProductGrid.tsx b/components/ProductGrid.tsx
+index 19e4eee..bd5c08c 100644
+--- a/components/ProductGrid.tsx
++++ b/components/ProductGrid.tsx
+@@ -1,7 +1,9 @@
+ 'use client';
+ 
+-import { useEffect, useState } from 'react';
++import { useEffect, useState, useCallback } from 'react';
++import { useTranslations } from 'next-intl';
+ import ProductCard from './ProductCard';
++import ProductFilters from './ProductFilters';
+ 
+ interface Product {
+   id: number;
+@@ -11,79 +13,132 @@ interface Product {
+   salePrice: number | null;
+   imageUrl: string;
+   sizes: string | null;
++  category: string | null;
++  brand: string | null;
+   isSoldOut: boolean;
+   isOnSale: boolean;
+ }
+ 
++interface FilterState {
++  category: string;
++  brand: string;
++  size: string;
++  minPrice: string;
++  maxPrice: string;
++}
++
+ export default function ProductGrid() {
++  const t = useTranslations('filters');
+   const [products, setProducts] = useState<Product[]>([]);
+   const [loading, setLoading] = useState(true);
++  
++  // Check for brand filter from sessionStorage (when navigating from brands page)
++  const getInitialBrand = () => {
++    if (typeof window !== 'undefined') {
++      const storedBrand = sessionStorage.getItem('selectedBrand');
++      if (storedBrand) {
++        sessionStorage.removeItem('selectedBrand');
++        return storedBrand;
++      }
++    }
++    return 'all';
++  };
++  
++  const [filters, setFilters] = useState<FilterState>({
++    category: 'all',
++    brand: getInitialBrand(),
++    size: 'all',
++    minPrice: '',
++    maxPrice: '',
++  });
+ 
+-  useEffect(() => {
+-    const fetchProducts = async () => {
+-      try {
+-        // Add timeout to prevent hanging
+-        const controller = new AbortController();
+-        const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
+-        
+-        const res = await fetch('/api/products', {
+-          signal: controller.signal,
+-          headers: {
+-            'Content-Type': 'application/json',
+-          },
+-        });
+-        
+-        clearTimeout(timeoutId);
+-        
+-        if (!res.ok) {
+-          throw new Error(`Failed to fetch products: ${res.status}`);
+-        }
+-        
+-        const data = await res.json();
+-        
+-        // Handle both array and error response
+-        if (Array.isArray(data)) {
+-          setProducts(data);
+-        } else {
+-          console.error('Unexpected response format:', data);
+-          setProducts([]);
+-        }
+-      } catch (err: any) {
+-        console.error('Error fetching products:', err);
+-        if (err.name === 'AbortError') {
+-          console.error('Request timed out. Check your database connection.');
+-        }
+-        setProducts([]); // Set empty array so page still renders
+-      } finally {
+-        setLoading(false);
++  const fetchProducts = useCallback(async (filterState: FilterState) => {
++    try {
++      setLoading(true);
++      // Add timeout to prevent hanging
++      const controller = new AbortController();
++      const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
++      
++      // Build query string
++      const params = new URLSearchParams();
++      if (filterState.category !== 'all') params.append('category', filterState.category);
++      if (filterState.brand !== 'all') params.append('brand', filterState.brand);
++      if (filterState.size !== 'all') params.append('size', filterState.size);
++      if (filterState.minPrice) params.append('minPrice', filterState.minPrice);
++      if (filterState.maxPrice) params.append('maxPrice', filterState.maxPrice);
++      
++      const url = `/api/products${params.toString() ? `?${params.toString()}` : ''}`;
++      
++      const res = await fetch(url, {
++        signal: controller.signal,
++        headers: {
++          'Content-Type': 'application/json',
++        },
++      });
++      
++      clearTimeout(timeoutId);
++      
++      if (!res.ok) {
++        throw new Error(`Failed to fetch products: ${res.status}`);
+       }
+-    };
+-    
+-    fetchProducts();
++      
++      const data = await res.json();
++      
++      // Handle both array and error response
++      if (Array.isArray(data)) {
++        setProducts(data);
++      } else {
++        console.error('Unexpected response format:', data);
++        setProducts([]);
++      }
++    } catch (err: any) {
++      console.error('Error fetching products:', err);
++      if (err.name === 'AbortError') {
++        console.error('Request timed out. Check your database connection.');
++      }
++      setProducts([]); // Set empty array so page still renders
++    } finally {
++      setLoading(false);
++    }
+   }, []);
+ 
+-  if (loading) {
+-    return (
+-      <div className="flex justify-center items-center py-20">
+-        <div className="text-gray-400">Loading...</div>
+-      </div>
+-    );
+-  }
++  useEffect(() => {
++    fetchProducts(filters);
++  }, [filters, fetchProducts]);
+ 
+-  if (products.length === 0) {
+-    return (
+-      <div className="flex justify-center items-center py-20">
+-        <div className="text-gray-400">No products available</div>
+-      </div>
+-    );
+-  }
++  const handleFilterChange = useCallback((newFilters: FilterState) => {
++    setFilters(newFilters);
++  }, []);
+ 
+   return (
+-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6 lg:gap-8">
+-      {products.map((product) => (
+-        <ProductCard key={product.id} product={product} />
+-      ))}
+-    </div>
++    <>
++      <ProductFilters 
++        onFilterChange={handleFilterChange}
++        initialFilters={{
++          category: filters.category,
++          brand: filters.brand,
++          size: filters.size,
++          minPrice: filters.minPrice,
++          maxPrice: filters.maxPrice,
++        }}
++      />
++      
++      {loading ? (
++        <div className="flex justify-center items-center py-20">
++          <div className="text-gray-400">Loading...</div>
++        </div>
++      ) : products.length === 0 ? (
++        <div className="flex justify-center items-center py-20">
++          <div className="text-gray-400">{t('noResults')}</div>
++        </div>
++      ) : (
++        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6 lg:gap-8">
++          {products.map((product) => (
++            <ProductCard key={product.id} product={product} />
++          ))}
++        </div>
++      )}
++    </>
+   );
+ }
+ 
+diff --git a/contexts/CartContext.tsx b/contexts/CartContext.tsx
+index 80ff498..7f69ede 100644
+--- a/contexts/CartContext.tsx
++++ b/contexts/CartContext.tsx
+@@ -11,6 +11,8 @@ export interface CartItem {
+   isOnSale: boolean;
+   imageUrl: string;
+   size: string;
++  category: string | null;
++  brand: string | null;
+   quantity: number;
+ }
+ 
+@@ -76,6 +78,8 @@ export function CartProvider({ children }: { children: ReactNode }) {
+         isOnSale: product.isOnSale,
+         imageUrl: product.imageUrl,
+         size,
++        category: product.category || null,
++        brand: product.brand || null,
+         quantity: 1,
+       };
+       setItems([...items, newItem]);
+diff --git a/i18n/messages/en.json b/i18n/messages/en.json
+index 3639a1f..6d0d74f 100644
+--- a/i18n/messages/en.json
++++ b/i18n/messages/en.json
+@@ -2,9 +2,34 @@
+   "common": {
+     "home": "Home",
+     "products": "Products",
++    "brands": "Brands",
+     "orderNow": "Order Now",
+     "soldOut": "Sold Out",
+-    "sale": "Sale"
++    "sale": "Sale",
++    "category": "Category",
++    "brand": "Brand"
++  },
++  "categories": {
++    "tops": "Tops",
++    "bottoms": "Bottoms",
++    "dresses": "Dresses",
++    "coatsPuffers": "Coats & Puffers",
++    "nightwear": "Nightwear",
++    "shoes": "Shoes"
++  },
++  "filters": {
++    "title": "Filters",
++    "category": "Category",
++    "brand": "Brand",
++    "size": "Size",
++    "price": "Price",
++    "clearAll": "Clear All",
++    "noResults": "No products found",
++    "allCategories": "All Categories",
++    "allBrands": "All Brands",
++    "allSizes": "All Sizes",
++    "minPrice": "Min Price",
++    "maxPrice": "Max Price"
+   },
+   "checkout": {
+     "title": "Checkout",
+@@ -42,6 +67,11 @@
+     "total": "Total",
+     "checkout": "Checkout",
+     "checkoutComingSoon": "Checkout feature coming soon"
++  },
++  "brands": {
++    "title": "All Brands",
++    "noBrands": "No brands available",
++    "viewProducts": "View Products"
+   }
+ }
+ 
+diff --git a/i18n/messages/sq.json b/i18n/messages/sq.json
+index c29f35b..1828564 100644
+--- a/i18n/messages/sq.json
++++ b/i18n/messages/sq.json
+@@ -2,9 +2,34 @@
+   "common": {
+     "home": "Kryefaqja",
+     "products": "Produktet",
++    "brands": "Markat",
+     "orderNow": "Porosit Tani",
+     "soldOut": "Shitur",
+-    "sale": "Ulje"
++    "sale": "Ulje",
++    "category": "Kategoria",
++    "brand": "Marka"
++  },
++  "categories": {
++    "tops": "Tops",
++    "bottoms": "Fund",
++    "dresses": "Fustan",
++    "coatsPuffers": "Pallto & Xhaketa",
++    "nightwear": "Rroba Gjumi",
++    "shoes": "Këpucë"
++  },
++  "filters": {
++    "title": "Filtrat",
++    "category": "Kategoria",
++    "brand": "Marka",
++    "size": "Madhësia",
++    "price": "Çmimi",
++    "clearAll": "Pastro Të Gjitha",
++    "noResults": "Nuk u gjetën produkte",
++    "allCategories": "Të Gjitha Kategoritë",
++    "allBrands": "Të Gjitha Markat",
++    "allSizes": "Të Gjitha Madhësitë",
++    "minPrice": "Çmimi Minimal",
++    "maxPrice": "Çmimi Maksimal"
+   },
+   "checkout": {
+     "title": "Porosia",
+@@ -42,6 +67,11 @@
+     "total": "Totali",
+     "checkout": "Porosit",
+     "checkoutComingSoon": "Funksioni i porosisë vjen së shpejti"
++  },
++  "brands": {
++    "title": "Të Gjitha Markat",
++    "noBrands": "Nuk ka marka të disponueshme",
++    "viewProducts": "Shiko Produktet"
+   }
+ }
+ 
+diff --git a/prisma/schema.prisma b/prisma/schema.prisma
+index 5a5f8e2..a9526ff 100644
+--- a/prisma/schema.prisma
++++ b/prisma/schema.prisma
+@@ -18,6 +18,8 @@ model Product {
+   salePrice   Float?
+   imageUrl    String
+   sizes       String?   @db.Text // JSON array of available sizes, e.g. ["S", "M", "L", "XL"]
++  category    String?   @db.VarChar(100) // Category: Tops, Bottoms, Dresses, Coats & Puffers, Nightwear, Shoes
++  brand       String?   @db.VarChar(100) // Brand name
+   isSoldOut   Boolean   @default(false)
+   isOnSale    Boolean   @default(false)
+   createdAt   DateTime  @default(now())
+-- 
+2.41.0.windows.1
+

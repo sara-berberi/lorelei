@@ -10,18 +10,19 @@
     "brand": "Marka"
   },
   "categories": {
-    "tops": "Tops",
-    "bottoms": "Fund",
-    "dresses": "Fustan",
+    "tops": "Bluza & Kemisha",
+    "bottoms": "Funde & Pantallona",
+    "dresses": "Fustane",
     "coatsPuffers": "Pallto & Xhaketa",
-    "nightwear": "Rroba Gjumi",
-    "shoes": "Këpucë"
+    "nightwear": "Pizhame",
+    "shoes": "Këpucë",
+    "activewear": "Veshje Sportive"
   },
   "filters": {
     "title": "Filtrat",
     "category": "Kategoria",
     "brand": "Marka",
-    "size": "Madhësia",
+    "size": "Masa",
     "price": "Çmimi",
     "clearAll": "Pastro Të Gjitha",
     "noResults": "Nuk u gjetën produkte",
@@ -67,7 +68,7 @@
     "cart": "Shporta",
     "addToCart": "Shto në Shportë",
     "emptyCart": "Shporta juaj është e zbrazët",
-    "size": "Madhësia",
+    "size": "Masa",
     "remove": "Hiq",
     "total": "Totali",
     "checkout": "Porosit",

@@ -44,6 +44,7 @@ export default function CheckoutModal({
       "Coats & Puffers": "coatsPuffers",
       Nightwear: "nightwear",
       Shoes: "shoes",
+      Activewear: "activewear",
     };
     const key = categoryMap[category] || category.toLowerCase();
     try {
