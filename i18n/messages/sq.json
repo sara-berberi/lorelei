@@ -2,9 +2,34 @@
   "common": {
     "home": "Kryefaqja",
     "products": "Produktet",
+    "brands": "Markat",
     "orderNow": "Porosit Tani",
     "soldOut": "Shitur",
-    "sale": "Ulje"
+    "sale": "Ulje",
+    "category": "Kategoria",
+    "brand": "Marka"
+  },
+  "categories": {
+    "tops": "Tops",
+    "bottoms": "Fund",
+    "dresses": "Fustan",
+    "coatsPuffers": "Pallto & Xhaketa",
+    "nightwear": "Rroba Gjumi",
+    "shoes": "Këpucë"
+  },
+  "filters": {
+    "title": "Filtrat",
+    "category": "Kategoria",
+    "brand": "Marka",
+    "size": "Madhësia",
+    "price": "Çmimi",
+    "clearAll": "Pastro Të Gjitha",
+    "noResults": "Nuk u gjetën produkte",
+    "allCategories": "Të Gjitha Kategoritë",
+    "allBrands": "Të Gjitha Markat",
+    "allSizes": "Të Gjitha Madhësitë",
+    "minPrice": "Çmimi Minimal",
+    "maxPrice": "Çmimi Maksimal"
   },
   "checkout": {
     "title": "Porosia",
@@ -47,6 +72,11 @@
     "total": "Totali",
     "checkout": "Porosit",
     "checkoutComingSoon": "Funksioni i porosisë vjen së shpejti"
+  },
+  "brands": {
+    "title": "Të Gjitha Markat",
+    "noBrands": "Nuk ka marka të disponueshme",
+    "viewProducts": "Shiko Produktet"
   }
 }
 

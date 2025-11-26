@@ -11,6 +11,8 @@ export interface CartItem {
   isOnSale: boolean;
   imageUrl: string;
   size: string;
+  category: string | null;
+  brand: string | null;
   quantity: number;
 }
 
@@ -76,6 +78,8 @@ export function CartProvider({ children }: { children: ReactNode }) {
         isOnSale: product.isOnSale,
         imageUrl: product.imageUrl,
         size,
+        category: product.category || null,
+        brand: product.brand || null,
         quantity: 1,
       };
       setItems([...items, newItem]);

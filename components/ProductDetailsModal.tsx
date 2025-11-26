@@ -12,6 +12,8 @@ interface Product {
   salePrice: number | null;
   imageUrl: string;
   sizes: string | null; // JSON string
+  category: string | null;
+  brand: string | null;
   isSoldOut: boolean;
   isOnSale: boolean;
 }
@@ -27,7 +29,27 @@ export default function ProductDetailsModal({
 }: ProductDetailsModalProps) {
   const t = useTranslations("product");
   const tCart = useTranslations("cart");
+  const tCommon = useTranslations("common");
+  const tCategories = useTranslations("categories");
   const { addToCart } = useCart();
+
+  const getCategoryTranslation = (category: string | null): string => {
+    if (!category) return "";
+    const categoryMap: Record<string, string> = {
+      Tops: "tops",
+      Bottoms: "bottoms",
+      Dresses: "dresses",
+      "Coats & Puffers": "coatsPuffers",
+      Nightwear: "nightwear",
+      Shoes: "shoes",
+    };
+    const key = categoryMap[category] || category.toLowerCase();
+    try {
+      return tCategories(key);
+    } catch {
+      return category;
+    }
+  };
 
   const [selectedSize, setSelectedSize] = useState<string>("");
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
@@ -241,6 +263,20 @@ export default function ProductDetailsModal({
                     <span className="bg-red-500 text-white px-3 py-1 text-xs font-medium">
                       {t("sale")}
                     </span>
+                  )}
+                </div>
+
+                {/* Brand and Category */}
+                <div className="mb-2">
+                  {product.brand && (
+                    <p className="text-sm text-gray-500 mb-1">
+                      {product.brand}
+                    </p>
+                  )}
+                  {product.category && (
+                    <p className="text-xs text-gray-400">
+                      {getCategoryTranslation(product.category)}
+                    </p>
                   )}
                 </div>
 

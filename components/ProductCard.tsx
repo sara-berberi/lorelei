@@ -12,15 +12,37 @@ interface Product {
   salePrice: number | null;
   imageUrl: string;
   sizes: string | null;
+  category: string | null;
+  brand: string | null;
   isSoldOut: boolean;
   isOnSale: boolean;
 }
 
 export default function ProductCard({ product }: { product: Product }) {
   const t = useTranslations("common");
+  const tCategories = useTranslations("categories");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [imageError, setImageError] = useState(false);
 
+  const getCategoryTranslation = (category: string | null): string => {
+    if (!category) return "";
+    const categoryMap: Record<string, string> = {
+      Tops: "tops",
+      Bottoms: "bottoms",
+      Dresses: "dresses",
+      "Coats & Puffers": "coatsPuffers",
+      Nightwear: "nightwear",
+      Shoes: "shoes",
+    };
+    const key = categoryMap[category] || category.toLowerCase();
+    try {
+      return tCategories(key);
+    } catch {
+      return category;
+    }
+  };
+
+  // Get first image for product card (support both single URL and JSON array)
   const getFirstImage = (imageUrl: string): string => {
     try {
       const parsed = JSON.parse(imageUrl);
@@ -124,9 +146,17 @@ export default function ProductCard({ product }: { product: Product }) {
 
         {/* Product Name and Price */}
         <div className="mt-3 sm:mt-4">
+          {product.brand && (
+            <p className="text-xs text-gray-500 mb-1">{product.brand}</p>
+          )}
           <h3 className="text-base sm:text-lg font-light mb-1.5 sm:mb-2">
             {product.name}
           </h3>
+          {product.category && (
+            <p className="text-xs text-gray-400 mb-2">
+              {getCategoryTranslation(product.category)}
+            </p>
+          )}
           <div className="flex items-center gap-2 mb-3 sm:mb-4">
             {originalPrice && (
               <span className="text-gray-400 line-through text-xs sm:text-sm">

@@ -2,9 +2,34 @@
   "common": {
     "home": "Home",
     "products": "Products",
+    "brands": "Brands",
     "orderNow": "Order Now",
     "soldOut": "Sold Out",
-    "sale": "Sale"
+    "sale": "Sale",
+    "category": "Category",
+    "brand": "Brand"
+  },
+  "categories": {
+    "tops": "Tops",
+    "bottoms": "Bottoms",
+    "dresses": "Dresses",
+    "coatsPuffers": "Coats & Puffers",
+    "nightwear": "Nightwear",
+    "shoes": "Shoes"
+  },
+  "filters": {
+    "title": "Filters",
+    "category": "Category",
+    "brand": "Brand",
+    "size": "Size",
+    "price": "Price",
+    "clearAll": "Clear All",
+    "noResults": "No products found",
+    "allCategories": "All Categories",
+    "allBrands": "All Brands",
+    "allSizes": "All Sizes",
+    "minPrice": "Min Price",
+    "maxPrice": "Max Price"
   },
   "checkout": {
     "title": "Checkout",
@@ -48,6 +73,11 @@
     "total": "Total",
     "checkout": "Checkout",
     "checkoutComingSoon": "Checkout feature coming soon"
+  },
+  "brands": {
+    "title": "All Brands",
+    "noBrands": "No brands available",
+    "viewProducts": "View Products"
   }
 }
 

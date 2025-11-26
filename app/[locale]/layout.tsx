@@ -52,6 +52,9 @@ export default async function LocaleLayout({
                   >
                     {t("products")}
                   </Link>
+                  <Link href={`/${locale}/brands`} className="text-xs sm:text-sm font-medium hover:text-gray-600 hidden sm:block">
+                    {t('brands')}
+                  </Link>
                   <CartButton />
                   <div className="relative z-20">
                     <LanguageToggle currentLocale={locale} />

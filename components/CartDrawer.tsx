@@ -7,6 +7,7 @@ import CheckoutModal from "./CheckoutModal";
 
 export default function CartDrawer() {
   const t = useTranslations("cart");
+  const tCategories = useTranslations("categories");
   const {
     items,
     isOpen,
@@ -17,6 +18,24 @@ export default function CartDrawer() {
     clearCart,
   } = useCart();
   const [showCheckout, setShowCheckout] = useState(false);
+
+  const getCategoryTranslation = (category: string | null): string => {
+    if (!category) return "";
+    const categoryMap: Record<string, string> = {
+      Tops: "tops",
+      Bottoms: "bottoms",
+      Dresses: "dresses",
+      "Coats & Puffers": "coatsPuffers",
+      Nightwear: "nightwear",
+      Shoes: "shoes",
+    };
+    const key = categoryMap[category] || category.toLowerCase();
+    try {
+      return tCategories(key);
+    } catch {
+      return category;
+    }
+  };
 
   return (
     <>
@@ -92,9 +111,19 @@ export default function CartDrawer() {
                           />
                         </div>
                         <div className="flex-1 min-w-0">
+                          {item.brand && (
+                            <p className="text-xs text-gray-500 mb-0.5">
+                              {item.brand}
+                            </p>
+                          )}
                           <h3 className="font-medium text-sm sm:text-base mb-1 truncate">
                             {item.name}
                           </h3>
+                          {item.category && (
+                            <p className="text-xs text-gray-400 mb-1">
+                              {getCategoryTranslation(item.category)}
+                            </p>
+                          )}
                           <p className="text-xs text-gray-500 mb-2">
                             {t("size")}:{" "}
                             <span className="font-medium">{item.size}</span>
@@ -123,11 +152,11 @@ export default function CartDrawer() {
                             </div>
                             <div className="text-right">
                               <p className="text-sm font-medium">
-                                ALL {(price * item.quantity).toFixed(2)}
+                                €{(price * item.quantity).toFixed(2)}
                               </p>
                               {item.isOnSale && (
                                 <p className="text-xs text-gray-400 line-through">
-                                  ALL {(item.price * item.quantity).toFixed(2)}
+                                  €{(item.price * item.quantity).toFixed(2)}
                                 </p>
                               )}
                             </div>

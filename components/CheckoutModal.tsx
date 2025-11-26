@@ -31,7 +31,27 @@ export default function CheckoutModal({
 }: CheckoutModalProps) {
   const t = useTranslations("checkout");
   const tOrder = useTranslations("order");
+  const tCart = useTranslations("cart");
+  const tCategories = useTranslations("categories");
   const router = useRouter();
+
+  const getCategoryTranslation = (category: string | null): string => {
+    if (!category) return "";
+    const categoryMap: Record<string, string> = {
+      Tops: "tops",
+      Bottoms: "bottoms",
+      Dresses: "dresses",
+      "Coats & Puffers": "coatsPuffers",
+      Nightwear: "nightwear",
+      Shoes: "shoes",
+    };
+    const key = categoryMap[category] || category.toLowerCase();
+    try {
+      return tCategories(key);
+    } catch {
+      return category;
+    }
+  };
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
 
@@ -201,10 +221,26 @@ export default function CheckoutModal({
                     key={item.id}
                     className="flex justify-between text-xs sm:text-sm"
                   >
-                    <span>
-                      {item.name} ({item.size}) × {item.quantity}
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2">
+                        <span className="font-medium">{item.name}</span>
+                        {item.brand && (
+                          <span className="text-gray-500 text-xs">
+                            ({item.brand})
+                          </span>
+                        )}
+                      </div>
+                      <div className="text-gray-500 text-xs mt-0.5">
+                        {item.category && getCategoryTranslation(item.category)}
+                        {item.category && item.size && " • "}
+                        {item.size && `${tCart("size")}: ${item.size}`}
+                        {" × "}
+                        {item.quantity}
+                      </div>
+                    </div>
+                    <span className="ml-2">
+                      €{(itemPrice * item.quantity).toFixed(2)}
                     </span>
-                    <span>ALL {(itemPrice * item.quantity).toFixed(2)}</span>
                   </div>
                 );
               })}

@@ -18,6 +18,8 @@ model Product {
   salePrice   Float?
   imageUrl    String
   sizes       String?   @db.Text // JSON array of available sizes, e.g. ["S", "M", "L", "XL"]
+  category    String?   @db.VarChar(100) // Category: Tops, Bottoms, Dresses, Coats & Puffers, Nightwear, Shoes
+  brand       String?   @db.VarChar(100) // Brand name
   isSoldOut   Boolean   @default(false)
   isOnSale    Boolean   @default(false)
   createdAt   DateTime  @default(now())
