@@ -104,7 +104,7 @@ export default function ProductFilters({
       Tops: "tops",
       Bottoms: "bottoms",
       Dresses: "dresses",
-      "Coats & Puffers": "coatsPuffers",
+      Coats: "coatsPuffers",
       Nightwear: "nightwear",
       Shoes: "shoes",
       Activewear: "activewear",
