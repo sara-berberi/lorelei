@@ -153,7 +153,7 @@ export default function CartDrawer() {
                             </div>
                             <div className="text-right">
                               <p className="text-sm font-medium">
-                                €{(price * item.quantity).toFixed(2)}
+                                ALL{(price * item.quantity).toFixed(2)}
                               </p>
                               {item.isOnSale && (
                                 <p className="text-xs text-gray-400 line-through">
