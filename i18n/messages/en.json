@@ -7,7 +7,12 @@
     "soldOut": "Sold Out",
     "sale": "Sale",
     "category": "Category",
-    "brand": "Brand"
+    "categories": "Categories",
+    "brand": "Brand", 
+    "onSale": "On Sale",
+    "filters": "Filters", 
+    "price": "Price", 
+    "applyFilters": "Apply Filters"
   },
   "categories": {
     "tops": "Tops",
@@ -16,7 +21,9 @@
     "coatsPuffers": "Coats & Puffers",
     "nightwear": "Nightwear",
     "shoes": "Shoes",
-    "activewear": "Activewear"
+    "activewear": "Activewear",
+    "sets" : "Sets",
+    "coatspuffers": "Coats & Puffers"
   },
   "filters": {
     "title": "Filters",
@@ -30,7 +37,8 @@
     "allBrands": "All Brands",
     "allSizes": "All Sizes",
     "minPrice": "Min Price",
-    "maxPrice": "Max Price"
+    "maxPrice": "Max Price", 
+    "loading": "Loading..."
   },
   "checkout": {
     "title": "Checkout",

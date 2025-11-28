@@ -1,6 +1,7 @@
 import { getTranslations } from "next-intl/server";
 import ProductGrid from "@/components/ProductGrid";
 import Hero from "@/components/Hero";
+import MobileMenu from "@/components/MobileMenu";
 
 export default async function Home({
   params,

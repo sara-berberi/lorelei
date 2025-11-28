@@ -240,7 +240,7 @@ export default function CheckoutModal({
                       </div>
                     </div>
                     <span className="ml-2">
-                      €{(itemPrice * item.quantity).toFixed(2)}
+                      ALL {(itemPrice * item.quantity).toFixed(2)}
                     </span>
                   </div>
                 );

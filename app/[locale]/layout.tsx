@@ -7,6 +7,7 @@ import CartButton from "@/components/CartButton";
 import CartDrawer from "@/components/CartDrawer";
 import { CartProvider } from "@/contexts/CartContext";
 import Link from "next/link";
+import MobileMenu from "@/components/MobileMenu";
 
 export default async function LocaleLayout({
   children,
@@ -28,17 +29,25 @@ export default async function LocaleLayout({
     <NextIntlClientProvider messages={messages}>
       <CartProvider>
         <div className="min-h-screen bg-white">
-          <header className="sticky top-0 z-50 bg-white border-b border-gray-200">
+          <header className="sticky top-0 z-[50] bg-white border-b border-gray-200">
             <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-8">
               <div className="flex justify-between items-center h-14 sm:h-16">
-                <Link href={`/${locale}`}>
-                  <img
-                    src="https://res.cloudinary.com/dj6ono36y/image/upload/v1763922421/_979F0DC6-3FB1-4148-AF21-52C979B86FD4_-removebg-preview_bpaz6n.png"
-                    alt="Lorelei Boutique"
-                    className="w-16 h-16 sm:w-22 sm:h-22"
-                  />
-                </Link>
+                {/* Left side: Hamburger + Logo */}
+                <div className="flex items-center gap-2">
+                  {/* Hamburger Menu Button - Mobile Only */}
+                  <MobileMenu locale={locale} />
 
+                  {/* Logo */}
+                  <Link href={`/${locale}`}>
+                    <img
+                      src="https://res.cloudinary.com/dj6ono36y/image/upload/v1763922421/_979F0DC6-3FB1-4148-AF21-52C979B86FD4_-removebg-preview_bpaz6n.png"
+                      alt="Lorelei Boutique"
+                      className="w-16 h-16 sm:w-22 sm:h-22"
+                    />
+                  </Link>
+                </div>
+
+                {/* Right side: Links + Cart + Language */}
                 <div className="flex items-center gap-3 sm:gap-6 relative z-10">
                   <Link
                     href={`/${locale}`}
@@ -52,8 +61,11 @@ export default async function LocaleLayout({
                   >
                     {t("products")}
                   </Link>
-                  <Link href={`/${locale}/brands`} className="text-xs sm:text-sm font-medium hover:text-gray-600 hidden sm:block">
-                    {t('brands')}
+                  <Link
+                    href={`/${locale}/brands`}
+                    className="text-xs sm:text-sm font-medium hover:text-gray-600 hidden sm:block"
+                  >
+                    {t("brands")}
                   </Link>
                   <CartButton />
                   <div className="relative z-20">

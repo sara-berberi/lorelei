@@ -157,7 +157,7 @@ export default function CartDrawer() {
                               </p>
                               {item.isOnSale && (
                                 <p className="text-xs text-gray-400 line-through">
-                                  €{(item.price * item.quantity).toFixed(2)}
+                                  ALL{(item.price * item.quantity).toFixed(2)}
                                 </p>
                               )}
                             </div>

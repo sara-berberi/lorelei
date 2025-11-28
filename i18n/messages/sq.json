@@ -7,16 +7,23 @@
     "soldOut": "Shitur",
     "sale": "Ulje",
     "category": "Kategoria",
-    "brand": "Marka"
+    "brand": "Marka", 
+    "categories": "Kategoritë",
+    "onSale": "Ulje", 
+    "filters": "Filtrat",
+    "price": "Çmimi",
+    "applyFilters": "Apliko Filtrat"
   },
   "categories": {
     "tops": "Bluza & Kemisha",
     "bottoms": "Funde & Pantallona",
     "dresses": "Fustane",
     "coatsPuffers": "Pallto & Xhaketa",
+    "coatspuffers": "Pallto & Xhaketa",
     "nightwear": "Pizhame",
     "shoes": "Këpucë",
-    "activewear": "Veshje Sportive"
+    "activewear": "Veshje Sportive", 
+    "sets" : "Kostume"
   },
   "filters": {
     "title": "Filtrat",
@@ -30,7 +37,8 @@
     "allBrands": "Të Gjitha Markat",
     "allSizes": "Të Gjitha Madhësitë",
     "minPrice": "Çmimi Minimal",
-    "maxPrice": "Çmimi Maksimal"
+    "maxPrice": "Çmimi Maksimal", 
+    "loading": "Duke Ngarkuar..."
   },
   "checkout": {
     "title": "Porosia",
