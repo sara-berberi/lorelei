@@ -1,5 +1,7 @@
-import { NextResponse } from 'next/server';
-import { prisma } from '@/lib/prisma';
+import { NextResponse } from "next/server";
+import { prisma } from "@/lib/prisma";
+
+export const dynamic = "force-dynamic"; // ensures this API is never prerendered
 
 export async function POST(request: Request) {
   try {
@@ -31,7 +33,7 @@ export async function POST(request: Request) {
       totalPriceWithPostalFee === undefined
     ) {
       return NextResponse.json(
-        { error: 'Missing required fields' },
+        { error: "Missing required fields" },
         { status: 400 }
       );
     }
@@ -53,12 +55,12 @@ export async function POST(request: Request) {
     });
 
     return NextResponse.json(order, { status: 201 });
-  } catch (error) {
-    console.error('Error creating order:', error);
+  } catch (error: any) {
+    console.error("Error creating order:", error);
+
     return NextResponse.json(
-      { error: 'Failed to create order' },
+      { error: "Failed to create order", details: error.message },
       { status: 500 }
     );
   }
 }
-
