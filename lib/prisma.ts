@@ -1,28 +1,24 @@
 import { PrismaClient } from "@prisma/client";
 
-// Prevent multiple instances during dev & enable safe config for Vercel serverless
-const globalForPrisma = globalThis as unknown as {
-  prisma: PrismaClient | undefined;
-};
+// Global singleton for serverless environments
+declare global {
+  // eslint-disable-next-line no-var
+  var prisma: PrismaClient | undefined;
+}
 
 export const prisma =
-  globalForPrisma.prisma ??
+  global.prisma ??
   new PrismaClient({
     datasources: {
       db: {
         url: process.env.DATABASE_URL,
       },
     },
-    // @ts-ignore
-    __internal: {
-      useStatementCache: false, // disable statement cache
-    },
     log: ["error", "warn"],
+    __internal: { useStatementCache: false } as never, // TS bypass
   });
 
-// Store the client globally in development only
+// Only assign global in development to avoid multiple instances
 if (process.env.NODE_ENV !== "production") {
-  globalForPrisma.prisma = prisma;
+  global.prisma = prisma;
 }
-
-export default prisma;
