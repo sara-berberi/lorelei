@@ -8,11 +8,14 @@ const globalForPrisma = globalThis as unknown as {
 export const prisma =
   globalForPrisma.prisma ??
   new PrismaClient({
-    // Disable prepared statements - fixes "s1 already exists" on Vercel
     datasources: {
       db: {
         url: process.env.DATABASE_URL,
       },
+    },
+    // @ts-ignore
+    __internal: {
+      useStatementCache: false, // disable statement cache
     },
     log: ["error", "warn"],
   });
