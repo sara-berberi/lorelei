@@ -59,13 +59,14 @@
     "success": "Faleminderit për porosinë tuaj, @lorelei_boutique do t'ju kontaktojë për ta konfirmuar."
   },
   "hero": {
-    "title": "Mirë se vini në Lorelei Boutique",
+    "title": "Mirësevini në Lorelei Boutique",
     "subtitle": "Zbuloni uljet tona për Black Friday!",
     "salesAnnounce":"Uljet e fundit, vetëm deri më 29 Nëntor!",
     "salesAnnounceSubtitle":"Mos e humbisni mundësinë për të marrë produktet tuaja të preferuara me çmime speciale.",
     "followInstagram":"Na ndiqni në Instagram:",
     "thankYou": "Faleminderit që na zgjodhët!",
     "rightsInfo": "Të gjitha të drejtat e rezervuara. Fotografitë nuk mund të përdoren nga persona të tjerë."
+    ,"cta": "Shih Produktet"
   },
   "product": {
     "soldOut": "Shitur",
@@ -86,6 +87,28 @@
     "title": "Të Gjitha Markat",
     "noBrands": "Nuk ka marka të disponueshme",
     "viewProducts": "Shiko Produktet"
+  },
+  "footer": {
+    "brandName": "Lorelei Boutique",
+    "brandDescription": "Një koleksion i zgjedhur me kujdes i copëve elegante të modës të dizajnuara për gruan moderne. Ju sjellim stile të përzgjedhura me kujdes që kombinojnë sofistikimin e përjetshëm me tendencat bashkëkohore, të dërguara direkt në derën tuaj me kujdes dhe përsosmëri.",
+    "paymentTitle": "Përvojë e Sigurt Blerjeje — Pagesa në Dorëzim",
+    "paymentSubtitle": "Të gjitha pagesat përpunohen në mënyrë të përshtatshme në marrjen e porosisë tuaj",
+    "faqTitle": "Pyetje të Shpeshta",
+    "faq1Question": "Si mund të bëj një porosi?",
+    "faq1Answer": "Thjesht shfletoni koleksionin tonë, zgjidhni artikujt që dëshironi dhe na kontaktoni drejtpërdrejt përmes Instagram ose kanaleve të ofruara për të përfunduar porosinë tuaj.",
+    "faq2Question": "Kur do të arrijë pakoja ime?",
+    "faq2Answer": "Dorëzimi standard zakonisht zgjat 1-2 ditë pune brenda Shqipërisë. Do të merrni informacion për gjurmimin sapo porosi juaj të dërgohet.",
+    "faq3Question": "A mund ta ndryshoj ose anuloj porosinë time?",
+    "faq3Answer": "Po, ju mund të modifikoni ose anuloni porosinë tuaj brenda 24 orëve nga bërja e saj. Ju lutemi na kontaktoni menjëherë për ndihmë.",
+    "faq4Question": "A dërgoni jashtë Shqipërisë?",
+    "faq4Answer": "Aktualisht, ne ofrojmë dorëzim ekskluzivisht brenda Shqipërisë. Po punojmë për të zgjeruar opsionet tona të dërgesës në të ardhmen e afërt.",
+    "faq5Question": "Si funksionon zgjedhja e madhësisë?",
+    "faq5Answer": "Çdo faqe produkti përfshin udhëzues të detajuar të madhësisë. Nëse keni nevojë për ndihmë të personalizuar, ekipi ynë është i lumtur t'ju ndihmojë të gjeni përshtatjen perfekte.",
+    "faq6Question": "Cilat metoda pagese pranoni?",
+    "faq6Answer": "Pagesa bëhet në para në dorëzim, duke siguruar një transaksion të sigurt dhe të drejtpërdrejtë kur merrni porosinë tuaj.",
+    "socialTitle": "Lidhuni me ne në Instagram",
+    "thankYou": "Faleminderit që zgjodhët Lorelei Boutique — ku eleganca takon përsosmërinë",
+    "copyright": "© 2024 Lorelei Boutique. Të gjitha të drejtat e rezervuara."
   }
 }
 

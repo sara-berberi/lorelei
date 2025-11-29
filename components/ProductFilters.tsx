@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useTranslations } from "next-intl";
+import { ChevronDown, SlidersHorizontal, X } from "lucide-react";
 
 interface FilterOptions {
   categories: string[];
@@ -42,6 +43,7 @@ export default function ProductFilters({
   });
 
   const [loading, setLoading] = useState(true);
+  const [mobileOpen, setMobileOpen] = useState(false);
 
   const [selectedCategory, setSelectedCategory] = useState(
     initialFilters?.category || "all"
@@ -120,8 +122,10 @@ export default function ProductFilters({
 
   if (loading) {
     return (
-      <div className="text-sm text-gray-400 py-4">
-        {t("loading") || "Loading filters…"}
+      <div className="flex items-center justify-center py-12">
+        <div className="text-sm text-gray-400 tracking-wide">
+          {t("loading") || "Loading filters…"}
+        </div>
       </div>
     );
   }
@@ -133,118 +137,175 @@ export default function ProductFilters({
     minPrice !== "" ||
     maxPrice !== "";
 
-  return (
-    <div className="mb-10 border-b border-gray-200 pb-8">
+  const filterContent = (
+    <>
       {/* Header */}
-      <div className="flex items-center justify-between mb-8">
-        <h2 className="text-xl font-medium tracking-tight text-gray-800">
-          {t("title")}
-        </h2>
+      <div className="flex items-center justify-between mb-8 pb-6 border-b border-gray-100">
+        <div className="flex items-center gap-3">
+          <SlidersHorizontal className="w-5 h-5 text-gray-700" />
+          <h2 className="text-lg font-light tracking-wider uppercase text-gray-900">
+            {t("title")}
+          </h2>
+        </div>
 
         {hasActiveFilters && (
           <button
             onClick={handleClearAll}
-            className="text-sm text-gray-500 hover:text-gray-800 underline underline-offset-2 transition"
+            className="text-xs tracking-wide uppercase text-gray-500 hover:text-gray-900 transition-colors duration-200 font-medium"
           >
             {t("clearAll")}
           </button>
         )}
       </div>
 
-      {/* Filters grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-        {/* Select Component (Shopify style) */}
+      {/* Filters */}
+      <div className="space-y-8">
         {filterOptions.categories.length > 0 && (
-          <FilterSelect
-            label={t("category")}
-            value={selectedCategory}
-            onChange={setSelectedCategory}
-            options={[
-              { label: t("allCategories"), value: "all" },
-              ...filterOptions.categories.map((c) => ({
-                label: getCategoryTranslation(c),
-                value: c,
-              })),
-            ]}
-          />
+          <FilterGroup label={t("category")}>
+            <ChicSelect
+              value={selectedCategory}
+              onChange={setSelectedCategory}
+              options={[
+                { label: t("allCategories"), value: "all" },
+                ...filterOptions.categories.map((c) => ({
+                  label: getCategoryTranslation(c),
+                  value: c,
+                })),
+              ]}
+            />
+          </FilterGroup>
         )}
 
         {filterOptions.brands.length > 0 && (
-          <FilterSelect
-            label={t("brand")}
-            value={selectedBrand}
-            onChange={setSelectedBrand}
-            options={[
-              { label: t("allBrands"), value: "all" },
-              ...filterOptions.brands.map((b) => ({
-                label: b,
-                value: b,
-              })),
-            ]}
-          />
+          <FilterGroup label={t("brand")}>
+            <ChicSelect
+              value={selectedBrand}
+              onChange={setSelectedBrand}
+              options={[
+                { label: t("allBrands"), value: "all" },
+                ...filterOptions.brands.map((b) => ({
+                  label: b,
+                  value: b,
+                })),
+              ]}
+            />
+          </FilterGroup>
         )}
 
         {filterOptions.sizes.length > 0 && (
-          <FilterSelect
-            label={t("size")}
-            value={selectedSize}
-            onChange={setSelectedSize}
-            options={[
-              { label: t("allSizes"), value: "all" },
-              ...filterOptions.sizes.map((s) => ({ label: s, value: s })),
-            ]}
-          />
+          <FilterGroup label={t("size")}>
+            <ChicSelect
+              value={selectedSize}
+              onChange={setSelectedSize}
+              options={[
+                { label: t("allSizes"), value: "all" },
+                ...filterOptions.sizes.map((s) => ({ label: s, value: s })),
+              ]}
+            />
+          </FilterGroup>
         )}
 
-        {/* Price */}
-        <div>
-          <label className="block text-sm font-medium mb-2 text-gray-700">
-            {t("price")}
-          </label>
-
+        {/* Price Range */}
+        <FilterGroup label={t("price")}>
           <div className="flex gap-3">
-            <FilterInput
+            <PriceInput
               placeholder={t("minPrice")}
               value={minPrice}
               onChange={setMinPrice}
             />
-            <FilterInput
+            <span className="text-gray-300 self-center text-sm">—</span>
+            <PriceInput
               placeholder={t("maxPrice")}
               value={maxPrice}
               onChange={setMaxPrice}
             />
           </div>
-        </div>
+        </FilterGroup>
       </div>
-    </div>
+    </>
+  );
+
+  return (
+    <>
+      {/* Mobile Filter Button */}
+      <button
+        onClick={() => setMobileOpen(true)}
+        className="lg:hidden fixed bottom-6 right-6 z-40 bg-gray-900 text-white px-6 py-3 rounded-full shadow-lg hover:bg-gray-800 transition-all duration-200 flex items-center gap-2"
+      >
+        <SlidersHorizontal className="w-4 h-4" />
+        <span className="text-sm font-medium tracking-wide">Filters</span>
+      </button>
+
+      {/* Mobile Drawer */}
+      {mobileOpen && (
+        <>
+          <div
+            className="lg:hidden fixed inset-0 bg-black/30 backdrop-blur-sm z-40 transition-opacity"
+            onClick={() => setMobileOpen(false)}
+          />
+          <div className="lg:hidden fixed inset-y-0 right-0 w-full max-w-sm bg-white z-50 shadow-2xl overflow-y-auto">
+            <div className="p-6">
+              <button
+                onClick={() => setMobileOpen(false)}
+                className="absolute top-6 right-6 text-gray-400 hover:text-gray-900 transition-colors"
+              >
+                <X className="w-6 h-6" />
+              </button>
+              {filterContent}
+            </div>
+          </div>
+        </>
+      )}
+
+      {/* Desktop Filters */}
+      <div className="hidden lg:block bg-white rounded-lg border border-gray-100 p-8 shadow-sm">
+        {filterContent}
+      </div>
+    </>
   );
 }
 
 /* --------------------- */
-/* CHIC SHOPIFY COMPONENTS */
+/* ELEGANT COMPONENTS */
 /* --------------------- */
 
-function FilterSelect({
+function FilterGroup({
   label,
+  children,
+}: {
+  label: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <div className="space-y-3">
+      <label className="block text-xs font-medium uppercase tracking-widest text-gray-600">
+        {label}
+      </label>
+      {children}
+    </div>
+  );
+}
+
+function ChicSelect({
   value,
   onChange,
   options,
 }: {
-  label: string;
   value: string;
   onChange: (v: string) => void;
   options: { label: string; value: string }[];
 }) {
   return (
-    <div className="flex flex-col">
-      <label className="text-sm font-medium mb-2 text-gray-700">{label}</label>
+    <div className="relative">
       <select
         className="
-          w-full px-3 py-2
-          border border-gray-300 bg-white rounded-md
-          text-sm text-gray-700
-          focus:outline-none focus:ring-2 focus:ring-black/10
-          transition
+          w-full px-4 py-3
+          border border-gray-200 bg-white rounded-lg
+          text-sm text-gray-800
+          appearance-none cursor-pointer
+          focus:outline-none focus:border-gray-400 focus:ring-1 focus:ring-gray-200
+          transition-all duration-200
+          pr-10
         "
         value={value}
         onChange={(e) => onChange(e.target.value)}
@@ -255,11 +316,12 @@ function FilterSelect({
           </option>
         ))}
       </select>
+      <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
     </div>
   );
 }
 
-function FilterInput({
+function PriceInput({
   placeholder,
   value,
   onChange,
@@ -277,11 +339,11 @@ function FilterInput({
       step="0.01"
       onChange={(e) => onChange(e.target.value)}
       className="
-        w-full px-3 py-2
-        border border-gray-300 bg-white rounded-md
-        text-sm text-gray-700 placeholder-gray-400
-        focus:outline-none focus:ring-2 focus:ring-black/10
-        transition
+        flex-1 px-4 py-3
+        border border-gray-200 bg-white rounded-lg
+        text-sm text-gray-800 placeholder-gray-400
+        focus:outline-none focus:border-gray-400 focus:ring-1 focus:ring-gray-200
+        transition-all duration-200
       "
     />
   );

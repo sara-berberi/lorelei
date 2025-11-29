@@ -65,8 +65,8 @@
     "salesAnnounceSubtitle": "Don’t miss the chance to grab your favorite products at special prices.", 
     "followInstagram": "Follow us on Instagram:",
     "thankYou": "Thank you for choosing us!",
-    "rightsInfo": "All rights reserved. Images cannot be used by others."
-
+    "rightsInfo": "All rights reserved. Images cannot be used by others.",
+    "cta": "Shop Now"
     },
   "product": {
     "soldOut": "Sold Out",
@@ -87,6 +87,29 @@
     "title": "All Brands",
     "noBrands": "No brands available",
     "viewProducts": "View Products"
-  }
+  }, 
+  "footer": {
+    "brandName": "Lorelei Boutique",
+    "brandDescription": "A curated collection of elegant fashion pieces designed for the modern woman. We bring you carefully selected styles that blend timeless sophistication with contemporary trends, delivered directly to your doorstep with care and excellence.",
+    "paymentTitle": "Secure Shopping Experience — Payment on Delivery",
+    "paymentSubtitle": "All payments are conveniently processed upon receiving your order",
+    "faqTitle": "Frequently Asked Questions",
+    "faq1Question": "How can I place an order?",
+    "faq1Answer": "Simply browse our collection, select your desired items, and contact us directly through Instagram or the provided channels to complete your order.",
+    "faq2Question": "When will my package arrive?",
+    "faq2Answer": "Standard delivery typically takes 1-2 business days within Albania. You'll receive tracking information once your order is dispatched.",
+    "faq3Question": "Can I change or cancel my order?",
+    "faq3Answer": "Yes, you can modify or cancel your order within 24 hours of placing it. Please contact us immediately for assistance.",
+    "faq4Question": "Do you ship outside Albania?",
+    "faq4Answer": "Currently, we offer delivery exclusively within Albania. We're working to expand our shipping options in the near future.",
+    "faq5Question": "How does size selection work?",
+    "faq5Answer": "Each product page includes detailed size guides. If you need personalized assistance, our team is happy to help you find the perfect fit.",
+    "faq6Question": "What payment methods do you accept?",
+    "faq6Answer": "Payment is made in cash upon delivery, ensuring a secure and straightforward transaction when you receive your order.",
+    "socialTitle": "Connect with us on Instagram",
+    "thankYou": "Thank you for choosing Lorelei Boutique — where elegance meets excellence",
+    "copyright": "© 2024 Lorelei Boutique. All rights reserved."
 }
+}
+
 
