@@ -3,6 +3,9 @@ import ProductGrid from "@/components/ProductGrid";
 import Hero from "@/components/Hero";
 import MobileMenu from "@/components/MobileMenu";
 
+export const dynamic = "force-dynamic";
+export const fetchCache = "force-no-store";
+
 export default async function Home({
   params,
 }: {
