@@ -29,6 +29,14 @@ export default async function LocaleLayout({
     <NextIntlClientProvider messages={messages}>
       <CartProvider>
         <div className="min-h-screen bg-white">
+          {/* Announcement Bar */}
+          <div className="bg-black text-white text-center py-2 px-4">
+            <div className="max-w-7xl mx-auto">
+              <p className="text-xs sm:text-sm font-medium">
+                {t("announcement-text")}
+              </p>
+            </div>
+          </div>
           <header className="sticky top-0 z-[50] bg-white border-b border-gray-200">
             <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-8">
               <div className="flex justify-between items-center h-14 sm:h-16">

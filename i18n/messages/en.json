@@ -8,11 +8,12 @@
     "sale": "Sale",
     "category": "Category",
     "categories": "Categories",
-    "brand": "Brand", 
+    "brand": "Brand",
     "onSale": "On Sale",
-    "filters": "Filters", 
-    "price": "Price", 
-    "applyFilters": "Apply Filters"
+    "filters": "Filters",
+    "price": "Price",
+    "applyFilters": "Apply Filters",
+    "announcement-text": "🎉 DECEMBER SALE | ORDER NOW PAY ON DELIVERY | FREE SHIPPING OVER 4000ALL 🎉"
   },
   "categories": {
     "tops": "Tops",
@@ -22,7 +23,7 @@
     "nightwear": "Nightwear",
     "shoes": "Shoes",
     "activewear": "Activewear",
-    "sets" : "Sets",
+    "sets": "Sets",
     "coatspuffers": "Coats & Puffers"
   },
   "filters": {
@@ -37,7 +38,7 @@
     "allBrands": "All Brands",
     "allSizes": "All Sizes",
     "minPrice": "Min Price",
-    "maxPrice": "Max Price", 
+    "maxPrice": "Max Price",
     "loading": "Loading..."
   },
   "checkout": {
@@ -60,14 +61,26 @@
   },
   "hero": {
     "title": "Welcome to Lorelei Boutique",
-    "subtitle": "Discover our sales for Black Friday!",
+    "subtitle": "If you’re not ready to shop… get ready.",
     "salesAnnounce": "Last sales, only until November 29th!",
-    "salesAnnounceSubtitle": "Don’t miss the chance to grab your favorite products at special prices.", 
+    "salesAnnounceSubtitle": "Don’t miss the chance to grab your favorite products at special prices.",
     "followInstagram": "Follow us on Instagram:",
     "thankYou": "Thank you for choosing us!",
     "rightsInfo": "All rights reserved. Images cannot be used by others.",
     "cta": "Shop Now"
-    },
+  },
+  "affordableFashion": {
+    "title": "Affordable Pieces",
+    "description": "Chic styles that don't break the bank. Chic doesn't have to mean expensive."
+  },
+  "fastShipping": {
+    "title": "Fast Shipping",
+    "description": "Orders ship within 1–2 days via trusted carriers."
+  },
+  "returnsAllowed": {
+    "title": "Returns Allowed",
+    "description": "Shop with confidence, easy returns if it's not the perfect fit."
+  },
   "product": {
     "soldOut": "Sold Out",
     "sale": "Sale",
@@ -87,12 +100,12 @@
     "title": "All Brands",
     "noBrands": "No brands available",
     "viewProducts": "View Products"
-  }, 
+  },
   "footer": {
     "brandName": "Lorelei Boutique",
-    "brandDescription": "A curated collection of elegant fashion pieces designed for the modern woman. We bring you carefully selected styles that blend timeless sophistication with contemporary trends, delivered directly to your doorstep with care and excellence.",
-    "paymentTitle": "Secure Shopping Experience — Payment on Delivery",
-    "paymentSubtitle": "All payments are conveniently processed upon receiving your order",
+    "brandDescription": "A carefully curated collection full of elegant pieces for the modern woman — yes, for you who want to look great even when you're short on time. We bring you styles that blend timeless classics with today’s trends, delivered right to your door so you don’t have to lift a finger. A bit of style, a bit of comfort, a bit of magic — all ready to wear.",
+    "paymentTitle": "Safe Shopping Experience, Cash on Delivery",
+    "paymentSubtitle": "No need to enter sensitive information online. With Lorelei, you pay on delivery — simply settle the payment when your order arrives.",
     "faqTitle": "Frequently Asked Questions",
     "faq1Question": "How can I place an order?",
     "faq1Answer": "Simply browse our collection, select your desired items, and contact us directly through Instagram or the provided channels to complete your order.",
@@ -109,7 +122,11 @@
     "socialTitle": "Connect with us on Instagram",
     "thankYou": "Thank you for choosing Lorelei Boutique — where elegance meets excellence",
     "copyright": "© 2024 Lorelei Boutique. All rights reserved."
+  },
+  "christmasCollection": {
+    "title": "The Christmas & NYE Collection Is Coming! ✨",
+    "description": "Get ready to shine at every celebration — from office Christmas parties to glamorous New Year’s Eve nights. Dazzling dresses, glittering details, and elegant fits… everything you need to look unforgettable.",
+    "tagline": "Find the perfect look for the work party (and every party).",
+    "button": "Coming Soon ⏰"
+  }
 }
-}
-
-

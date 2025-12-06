@@ -7,12 +7,13 @@
     "soldOut": "Shitur",
     "sale": "Ulje",
     "category": "Kategoria",
-    "brand": "Marka", 
+    "brand": "Marka",
     "categories": "Kategoritë",
-    "onSale": "Ulje", 
+    "onSale": "Ulje",
     "filters": "Filtrat",
     "price": "Çmimi",
-    "applyFilters": "Apliko Filtrat"
+    "applyFilters": "Apliko Filtrat",
+    "announcement-text": "🎉 ULJET E DHJETORIT JANE KETU! | POROSIT TANI, PAGUAJ NË DORËZIM | TRANSPORT FALAS MBI 4000ALL 🎉"
   },
   "categories": {
     "tops": "Bluza & Kemisha",
@@ -22,8 +23,8 @@
     "coatspuffers": "Pallto & Xhaketa",
     "nightwear": "Pizhame",
     "shoes": "Këpucë",
-    "activewear": "Veshje Sportive", 
-    "sets" : "Kostume"
+    "activewear": "Veshje Sportive",
+    "sets": "Kostume"
   },
   "filters": {
     "title": "Filtrat",
@@ -37,7 +38,7 @@
     "allBrands": "Të Gjitha Markat",
     "allSizes": "Të Gjitha Madhësitë",
     "minPrice": "Çmimi Minimal",
-    "maxPrice": "Çmimi Maksimal", 
+    "maxPrice": "Çmimi Maksimal",
     "loading": "Duke Ngarkuar..."
   },
   "checkout": {
@@ -60,13 +61,25 @@
   },
   "hero": {
     "title": "Mirësevini në Lorelei Boutique",
-    "subtitle": "Zbuloni uljet tona për Black Friday!",
-    "salesAnnounce":"Uljet e fundit, vetëm deri më 29 Nëntor!",
-    "salesAnnounceSubtitle":"Mos e humbisni mundësinë për të marrë produktet tuaja të preferuara me çmime speciale.",
-    "followInstagram":"Na ndiqni në Instagram:",
+    "subtitle": "Nëse s’je gati të blesh… bëhu gati.",
+    "salesAnnounce": "Uljet e fundit, vetëm deri më 29 Nëntor!",
+    "salesAnnounceSubtitle": "Mos e humbisni mundësinë për të marrë produktet tuaja të preferuara me çmime speciale.",
+    "followInstagram": "Na ndiqni në Instagram:",
     "thankYou": "Faleminderit që na zgjodhët!",
-    "rightsInfo": "Të gjitha të drejtat e rezervuara. Fotografitë nuk mund të përdoren nga persona të tjerë."
-    ,"cta": "Shih Produktet"
+    "rightsInfo": "Të gjitha të drejtat e rezervuara. Fotografitë nuk mund të përdoren nga persona të tjerë.",
+    "cta": "Shih Produktet"
+  },
+  "affordableFashion": {
+    "title": "Veshje të Përballueshme",
+    "description": "Copëza elegante që nuk u shkatërrojnë buxhetin. Eleganca nuk do të thotë gjithmonë e shtrenjtë."
+  },
+  "fastShipping": {
+    "title": "Dërgesë e Shpejtë",
+    "description": "Porositë dërgohen brenda 1–2 ditësh në Shqipëri."
+  },
+  "returnsAllowed": {
+    "title": "Kthime të Lejuara",
+    "description": "Blini me besim, nese nuk ju përshtatet, kthimet janë të lejuara."
   },
   "product": {
     "soldOut": "Shitur",
@@ -90,9 +103,9 @@
   },
   "footer": {
     "brandName": "Lorelei Boutique",
-    "brandDescription": "Një koleksion i zgjedhur me kujdes i copëve elegante të modës të dizajnuara për gruan moderne. Ju sjellim stile të përzgjedhura me kujdes që kombinojnë sofistikimin e përjetshëm me tendencat bashkëkohore, të dërguara direkt në derën tuaj me kujdes dhe përsosmëri.",
-    "paymentTitle": "Përvojë e Sigurt Blerjeje — Pagesa në Dorëzim",
-    "paymentSubtitle": "Të gjitha pagesat përpunohen në mënyrë të përshtatshme në marrjen e porosisë tuaj",
+    "brandDescription": "Një koleksion i përzgjedhur me kujdes, plot me veshje elegante për gruan moderne—pra, për ty që do të dukesh bukur edhe kur s’ke kohë fare. Ne sjellim stile që kombinojnë klasiken me trendet e momentit, dhe po, t’i sjellim direkt te dera që të mos lodhesh fare. Pak stil, pak rehati, pak magji—gjithçka gati për t’u veshur.",
+    "paymentTitle": "Përvojë e Sigurt Blerjeje, Pagesa në Dorëzim",
+    "paymentSubtitle": "S’ka nevojë të vendosni të dhënat tuaja sensitive online. Te Lorelei, pagesa bëhet në dorëzim — paguani thjesht kur merrni porosinë tuaj.",
     "faqTitle": "Pyetje të Shpeshta",
     "faq1Question": "Si mund të bëj një porosi?",
     "faq1Answer": "Thjesht shfletoni koleksionin tonë, zgjidhni artikujt që dëshironi dhe na kontaktoni drejtpërdrejt përmes Instagram ose kanaleve të ofruara për të përfunduar porosinë tuaj.",
@@ -109,6 +122,11 @@
     "socialTitle": "Lidhuni me ne në Instagram",
     "thankYou": "Faleminderit që zgjodhët Lorelei Boutique — ku eleganca takon përsosmërinë",
     "copyright": "© 2024 Lorelei Boutique. Të gjitha të drejtat e rezervuara."
+  },
+  "christmasCollection": {
+    "title": "Koleksioni i Krishtlindjeve & Vitit të Ri po vjen! ✨",
+    "description": "Përgatitu të shkëlqesh në çdo festë — nga festat e zyrës për Krishtlindje tek netët glamuroze të Vitit të Ri. Fustane mahnitëse, detaje shkëlqyese dhe prerje elegante… gjithçka që të duhet për të dukur të paharrueshme.",
+    "tagline": "Gjej pamjen perfekte për festën e punës (dhe çdo festë tjetër).",
+    "button": "Se shpejti ⏰"
   }
 }
-

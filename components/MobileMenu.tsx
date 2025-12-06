@@ -175,6 +175,16 @@ export default function MobileMenu({ locale }: MobileMenuProps) {
               {t("products")}
             </Link>
           </li>
+
+          <li>
+            <Link
+              href={`/${locale}/brands`}
+              className="block px-4 py-3 text-base font-medium hover:bg-gray-100 rounded-md"
+              onClick={closeMenu}
+            >
+              {t("brands")}
+            </Link>
+          </li>
         </ul>
       </nav>
     </>
