@@ -94,7 +94,19 @@
     "remove": "Remove",
     "total": "Total",
     "checkout": "Checkout",
-    "checkoutComingSoon": "Checkout feature coming soon"
+    "checkoutComingSoon": "Checkout feature coming soon",
+    "completeOrder": "Complete your order details",
+    "name": "Full Name",
+    "phoneNumber": "Phone Number",
+    "shippingAddress": "Shipping Address",
+    "streetAddress": "Street Address",
+    "city": "City",
+    "orderNotes": "Order Notes",
+    "orderSummary": "Order Summary",
+    "subtotal": "Subtotal",
+    "shippingFee": "Shipping Fee",
+    "confirmOrder": "Confirm Order",
+    "processing": "Processing"
   },
   "brands": {
     "title": "All Brands",

@@ -38,6 +38,17 @@ export default function CartDrawer() {
     }
   };
 
+  // Transform cart items for checkout modal
+  const checkoutItems = items.map((item) => {
+    const price = item.isOnSale && item.salePrice ? item.salePrice : item.price;
+    return {
+      productId: item.productId,
+      quantity: item.quantity,
+      price: price,
+      name: item.name,
+    };
+  });
+
   return (
     <>
       {/* Cart Drawer */}
@@ -202,11 +213,13 @@ export default function CartDrawer() {
           </div>
         </>
       )}
-
       {/* Checkout Modal - rendered outside drawer for proper z-index */}
       {showCheckout && (
         <CheckoutModal
-          cartItems={items}
+          isOpen={showCheckout}
+          cartItems={checkoutItems}
+          totalPrice={getTotalPrice()}
+          postalFee={200}
           onClose={() => {
             setShowCheckout(false);
           }}

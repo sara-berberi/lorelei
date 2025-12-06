@@ -1,403 +1,314 @@
 "use client";
 
-import { useState, FormEvent } from "react";
+import { useState } from "react";
 import { useTranslations } from "next-intl";
-import { useRouter } from "next/navigation";
-import { albanianCities } from "@/lib/albanian-cities";
-import { CartItem } from "@/contexts/CartContext";
 
-interface Product {
-  id: number;
-  name: string;
+interface ProductItem {
+  productId: number;
+  quantity: number;
   price: number;
-  salePrice: number | null;
-  isOnSale: boolean;
+  name?: string;
 }
 
 interface CheckoutModalProps {
-  product?: Product;
-  cartItems?: CartItem[];
+  isOpen: boolean;
   onClose: () => void;
-  onOrderSuccess?: () => void;
+  cartItems: ProductItem[];
+  totalPrice: number;
+  postalFee: number;
+  onOrderSuccess: () => void;
 }
 
-const POSTAL_FEE = 200; // Fixed postal fee in euros
-
 export default function CheckoutModal({
-  product,
-  cartItems,
+  isOpen,
   onClose,
+  cartItems,
+  totalPrice,
+  postalFee,
   onOrderSuccess,
 }: CheckoutModalProps) {
-  const t = useTranslations("checkout");
-  const tOrder = useTranslations("order");
-  const tCart = useTranslations("cart");
-  const tCategories = useTranslations("categories");
-  const router = useRouter();
+  const [fullName, setFullName] = useState("");
+  const [instagramUsername, setInstagramUsername] = useState("");
+  const [address, setAddress] = useState("");
+  const [city, setCity] = useState("");
+  const [phoneNumber, setPhoneNumber] = useState("");
+  const [notes, setNotes] = useState("");
 
-  const getCategoryTranslation = (category: string | null): string => {
-    if (!category) return "";
-    const categoryMap: Record<string, string> = {
-      Tops: "tops",
-      Bottoms: "bottoms",
-      Dresses: "dresses",
-      Coats: "coatsPuffers",
-      Nightwear: "nightwear",
-      Shoes: "shoes",
-      Activewear: "activewear",
-    };
-    const key = categoryMap[category] || category.toLowerCase();
-    try {
-      return tCategories(key);
-    } catch {
-      return category;
+  const [loading, setLoading] = useState(false);
+  const totalPriceWithPostalFee = totalPrice + postalFee;
+
+  const t = useTranslations("cart");
+
+  if (!isOpen) return null;
+
+  const handleSubmit = async () => {
+    if (!fullName || !instagramUsername || !address || !city || !phoneNumber) {
+      alert("Please fill in all required fields.");
+      return;
     }
-  };
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [showSuccess, setShowSuccess] = useState(false);
-
-  // Determine if this is a cart checkout or single product checkout
-  const isCartCheckout = !!cartItems && cartItems.length > 0;
-
-  // Calculate totals
-  const totalPrice = isCartCheckout
-    ? cartItems.reduce((sum, item) => {
-        const price =
-          item.isOnSale && item.salePrice ? item.salePrice : item.price;
-        return sum + price * item.quantity;
-      }, 0)
-    : product?.isOnSale && product?.salePrice
-    ? product.salePrice
-    : product?.price || 0;
-
-  const totalWithFee = totalPrice + POSTAL_FEE;
-
-  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    setIsSubmitting(true);
-
-    const formData = new FormData(e.currentTarget);
-    const fullName = `${formData.get("name")} ${formData.get("surname")}`;
-    const instagramUsername = formData.get("instagramUsername");
-    const address = formData.get("address");
-    const city = formData.get("city");
-    const phoneNumber = formData.get("phoneNumber");
-    const notes = formData.get("notes") || null;
 
     try {
-      if (isCartCheckout && cartItems) {
-        // Create one order per cart item
-        const orderPromises = cartItems.map(async (item) => {
-          const itemPrice =
-            item.isOnSale && item.salePrice ? item.salePrice : item.price;
-          const itemTotal = itemPrice * item.quantity;
-          const itemTotalWithFee = itemTotal + POSTAL_FEE;
+      setLoading(true);
 
-          const orderData = {
-            fullName,
-            instagramUsername,
-            address,
-            city,
-            phoneNumber,
-            productId: item.productId,
-            totalPrice: itemTotal,
-            postalFee: POSTAL_FEE,
-            totalPriceWithPostalFee: itemTotalWithFee,
-            notes: notes
-              ? `${notes} | Size: ${item.size}, Qty: ${item.quantity}`
-              : `Size: ${item.size}, Qty: ${item.quantity}`,
-          };
+      // Transform cart items to ensure productId is included
+      const productsForOrder = cartItems.map((item) => ({
+        productId: Number(item.productId), // Ensure it's a number
+        quantity: Number(item.quantity || 1), // Ensure it's a number with fallback
+        price: Number(item.price), // Ensure it's a number
+      }));
 
-          return fetch("/api/orders", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify(orderData),
-          });
-        });
+      // Log for debugging
+      console.log("Cart items received:", cartItems);
+      console.log("Products being sent:", productsForOrder);
+      console.log("Full request body:", {
+        fullName,
+        instagramUsername,
+        address,
+        city,
+        phoneNumber,
+        products: productsForOrder,
+        totalPrice: Number(totalPrice),
+        postalFee: Number(postalFee),
+        totalPriceWithPostalFee: Number(totalPriceWithPostalFee),
+        notes: notes || undefined,
+      });
 
-        const responses = await Promise.all(orderPromises);
-        const allSuccessful = responses.every((res) => res.ok);
+      // Validate that all productIds are present and valid
+      const invalidProducts = productsForOrder.filter(
+        (p) => !p.productId || isNaN(p.productId)
+      );
+      if (invalidProducts.length > 0) {
+        console.error("Invalid products found:", invalidProducts);
+        alert(
+          "Error: Some products are missing IDs. Please refresh and try again."
+        );
+        setLoading(false);
+        return;
+      }
 
-        if (allSuccessful) {
-          setShowSuccess(true);
-          if (onOrderSuccess) {
-            onOrderSuccess(); // Clear cart
-          }
-          setTimeout(() => {
-            onClose();
-            router.refresh();
-          }, 3000);
-        } else {
-          alert("Error submitting some orders. Please try again.");
-        }
-      } else if (product) {
-        // Single product checkout
-        const orderData = {
+      const res = await fetch("/api/orders", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
           fullName,
           instagramUsername,
           address,
           city,
           phoneNumber,
-          productId: product.id,
-          totalPrice: totalPrice,
-          postalFee: POSTAL_FEE,
-          totalPriceWithPostalFee: totalWithFee,
-          notes: notes || null,
-        };
+          products: productsForOrder,
+          totalPrice: Number(totalPrice),
+          postalFee: Number(postalFee),
+          totalPriceWithPostalFee: Number(totalPriceWithPostalFee),
+          notes: notes || undefined,
+        }),
+      });
 
-        const response = await fetch("/api/orders", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(orderData),
-        });
+      const data = await res.json();
 
-        if (response.ok) {
-          setShowSuccess(true);
-          setTimeout(() => {
-            onClose();
-            router.refresh();
-          }, 3000);
-        } else {
-          alert("Error submitting order. Please try again.");
-        }
+      if (!res.ok) {
+        console.error("Order creation failed:", data);
+        alert("❌ Failed: " + (data.error || "Unknown error"));
+        return;
       }
+
+      alert("✅ Order created successfully!");
+
+      // Reset form
+      setFullName("");
+      setInstagramUsername("");
+      setAddress("");
+      setCity("");
+      setPhoneNumber("");
+      setNotes("");
+
+      onOrderSuccess();
+      onClose();
     } catch (error) {
-      console.error("Error:", error);
-      alert("Error submitting order. Please try again.");
+      console.error("Order submission error:", error);
+      alert("Something went wrong. Please try again.");
     } finally {
-      setIsSubmitting(false);
+      setLoading(false);
     }
   };
 
-  if (showSuccess) {
-    return (
-      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[60] p-4">
-        <div className="bg-white rounded-lg p-6 max-w-sm w-full text-center">
-          <div className="text-3xl mb-3">✓</div>
-          <p className="text-base mb-4">{tOrder("success")}</p>
-          <button
-            onClick={onClose}
-            className="bg-black text-white px-5 py-2 text-sm hover:bg-gray-800"
-          >
-            Close
-          </button>
-        </div>
-      </div>
-    );
-  }
-
   return (
-    <div
-      className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[60] p-3 sm:p-4 overflow-y-auto"
-      onClick={(e) => e.target === e.currentTarget && onClose()}
-    >
-      <div className="bg-white rounded-lg p-4 sm:p-6 max-w-lg w-full my-4 sm:my-8 max-h-[90vh] overflow-y-auto">
-        <div className="flex justify-between items-center mb-4 sm:mb-5">
-          <h2 className="text-xl sm:text-2xl font-light">{t("title")}</h2>
+    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 overflow-y-auto">
+      <div className="bg-white w-full max-w-lg rounded-2xl shadow-2xl relative my-8 max-h-[90vh] flex flex-col">
+        {/* Header */}
+        <div className="px-8 pt-8 pb-6 border-b border-gray-100">
           <button
-            onClick={onClose}
-            className="text-gray-400 hover:text-gray-600 text-2xl sm:text-3xl leading-none"
-            aria-label="Close"
+            disabled={loading}
+            onClick={!loading ? onClose : undefined}
+            className="absolute right-6 top-6 w-8 h-8 flex items-center justify-center rounded-full text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-all disabled:opacity-40"
           >
-            ×
+            ✕
           </button>
+          <h2 className="text-3xl font-bold text-gray-900">Checkout</h2>
+          <p className="text-sm text-gray-500 mt-1">{t("completeOrder")}</p>
         </div>
 
-        {/* Product/Cart Summary */}
-        {isCartCheckout && cartItems ? (
-          <div className="mb-4 sm:mb-5 p-3 bg-gray-50 rounded max-h-40 overflow-y-auto">
-            <p className="font-medium text-sm sm:text-base mb-2">
-              {t("orderSummary")}
-            </p>
-            <div className="space-y-2">
-              {cartItems.map((item) => {
-                const itemPrice =
-                  item.isOnSale && item.salePrice ? item.salePrice : item.price;
-                return (
+        {/* Scrollable Content */}
+        <div className="px-8 py-6 overflow-y-auto flex-1">
+          <div className="space-y-5">
+            {/* Contact Information */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                {t("name")} *
+              </label>
+              <input
+                type="text"
+                className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-black focus:border-transparent transition-all outline-none"
+                value={fullName}
+                onChange={(e) => setFullName(e.target.value)}
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Instagram Username *
+              </label>
+              <input
+                type="text"
+                className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-black focus:border-transparent transition-all outline-none"
+                placeholder="@username"
+                value={instagramUsername}
+                onChange={(e) => setInstagramUsername(e.target.value)}
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                {t("phoneNumber")} *
+              </label>
+              <input
+                type="tel"
+                className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-black focus:border-transparent transition-all outline-none"
+                placeholder="+355 69 123 4567"
+                value={phoneNumber}
+                onChange={(e) => setPhoneNumber(e.target.value)}
+              />
+            </div>
+
+            {/* Shipping Information */}
+            <div className="pt-4">
+              <h3 className="text-sm font-semibold text-gray-900 mb-3 uppercase tracking-wide">
+                {t("shippingAddress")}
+              </h3>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                {t("streetAddress")} *
+              </label>
+              <input
+                type="text"
+                className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-black focus:border-transparent transition-all outline-none"
+                value={address}
+                onChange={(e) => setAddress(e.target.value)}
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                {t("city")} *
+              </label>
+              <input
+                type="text"
+                className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-black focus:border-transparent transition-all outline-none"
+                placeholder="Tirana"
+                value={city}
+                onChange={(e) => setCity(e.target.value)}
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                {t("orderNotes")}
+              </label>
+              <textarea
+                rows={3}
+                className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-black focus:border-transparent transition-all outline-none resize-none"
+                placeholder={t("orderNotes")}
+                value={notes}
+                onChange={(e) => setNotes(e.target.value)}
+              />
+            </div>
+
+            {/* Order Summary */}
+            <div className="bg-gray-50 rounded-xl p-6 mt-6">
+              <h3 className="font-semibold text-gray-900 mb-4 text-lg">
+                {t("orderSummary")}
+              </h3>
+
+              <div className="space-y-3">
+                {cartItems.map((item, idx) => (
                   <div
-                    key={item.id}
-                    className="flex justify-between text-xs sm:text-sm"
+                    key={idx}
+                    className="flex justify-between text-sm text-gray-700"
                   >
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2">
-                        <span className="font-medium">{item.name}</span>
-                        {item.brand && (
-                          <span className="text-gray-500 text-xs">
-                            ({item.brand})
-                          </span>
-                        )}
-                      </div>
-                      <div className="text-gray-500 text-xs mt-0.5">
-                        {item.category && getCategoryTranslation(item.category)}
-                        {item.category && item.size && " • "}
-                        {item.size && `${tCart("size")}: ${item.size}`}
-                        {" × "}
-                        {item.quantity}
-                      </div>
-                    </div>
-                    <span className="ml-2">
-                      ALL {(itemPrice * item.quantity).toFixed(2)}
+                    <span className="flex-1">
+                      {item.name ?? `Product #${item.productId}`} ×{" "}
+                      {item.quantity}
+                    </span>
+                    <span className="font-medium">
+                      {item.price * item.quantity} Lek
                     </span>
                   </div>
-                );
-              })}
+                ))}
+
+                <div className="border-t border-gray-200 pt-3 mt-3 space-y-2">
+                  <div className="flex justify-between text-sm text-gray-600">
+                    <span>{t("subtotal")}</span>
+                    <span>{totalPrice} Lek</span>
+                  </div>
+
+                  <div className="flex justify-between text-sm text-gray-600">
+                    <span>{t("shippingFee")}</span>
+                    <span>{postalFee} Lek</span>
+                  </div>
+
+                  <div className="flex justify-between font-bold text-lg text-gray-900 pt-2 border-t border-gray-200">
+                    <span>{t("total")}</span>
+                    <span>{totalPriceWithPostalFee} Lek</span>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
-        ) : product ? (
-          <div className="mb-4 sm:mb-5 p-3 bg-gray-50 rounded">
-            <p className="font-medium text-sm sm:text-base mb-1">
-              {product.name}
-            </p>
-            <p className="text-base sm:text-lg">ALL {totalPrice.toFixed(2)}</p>
-          </div>
-        ) : null}
+        </div>
 
-        <form onSubmit={handleSubmit} className="space-y-3 sm:space-y-4">
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
-            <div>
-              <label
-                htmlFor="name"
-                className="block text-xs sm:text-sm font-medium mb-1"
-              >
-                {t("name")}
-              </label>
-              <input
-                type="text"
-                id="name"
-                name="name"
-                required
-                className="w-full border border-gray-300 px-3 py-2 text-sm sm:text-base focus:outline-none focus:ring-1 focus:ring-black rounded"
-              />
-            </div>
-            <div>
-              <label
-                htmlFor="surname"
-                className="block text-xs sm:text-sm font-medium mb-1"
-              >
-                {t("surname")}
-              </label>
-              <input
-                type="text"
-                id="surname"
-                name="surname"
-                required
-                className="w-full border border-gray-300 px-3 py-2 text-sm sm:text-base focus:outline-none focus:ring-1 focus:ring-black rounded"
-              />
-            </div>
-          </div>
-
-          <div>
-            <label
-              htmlFor="instagramUsername"
-              className="block text-xs sm:text-sm font-medium mb-1"
-            >
-              {t("instagramUsername")}
-            </label>
-            <input
-              type="text"
-              id="instagramUsername"
-              name="instagramUsername"
-              required
-              className="w-full border border-gray-300 px-3 py-2 text-sm sm:text-base focus:outline-none focus:ring-1 focus:ring-black rounded"
-            />
-          </div>
-
-          <div>
-            <label
-              htmlFor="address"
-              className="block text-xs sm:text-sm font-medium mb-1"
-            >
-              {t("address")}
-            </label>
-            <input
-              type="text"
-              id="address"
-              name="address"
-              required
-              className="w-full border border-gray-300 px-3 py-2 text-sm sm:text-base focus:outline-none focus:ring-1 focus:ring-black rounded"
-            />
-          </div>
-
-          <div>
-            <label
-              htmlFor="city"
-              className="block text-xs sm:text-sm font-medium mb-1"
-            >
-              {t("city")}
-            </label>
-            <select
-              id="city"
-              name="city"
-              required
-              className="w-full border border-gray-300 px-3 py-2 text-sm sm:text-base focus:outline-none focus:ring-1 focus:ring-black rounded"
-            >
-              <option value="">Select a city</option>
-              {albanianCities.map((city) => (
-                <option key={city} value={city}>
-                  {city}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          <div>
-            <label
-              htmlFor="phoneNumber"
-              className="block text-xs sm:text-sm font-medium mb-1"
-            >
-              {t("phoneNumber")}
-            </label>
-            <input
-              type="tel"
-              id="phoneNumber"
-              name="phoneNumber"
-              required
-              className="w-full border border-gray-300 px-3 py-2 text-sm sm:text-base focus:outline-none focus:ring-1 focus:ring-black rounded"
-            />
-          </div>
-
-          <div>
-            <label
-              htmlFor="notes"
-              className="block text-xs sm:text-sm font-medium mb-1"
-            >
-              {t("notes")}
-            </label>
-            <textarea
-              id="notes"
-              name="notes"
-              rows={2}
-              className="w-full border border-gray-300 px-3 py-2 text-sm sm:text-base focus:outline-none focus:ring-1 focus:ring-black rounded resize-none"
-            />
-          </div>
-
-          <div className="border-t pt-3 sm:pt-4 space-y-1.5 sm:space-y-2">
-            <div className="flex justify-between text-xs sm:text-sm">
-              <span>{t("totalPrice")}:</span>
-              <span>ALL {totalPrice.toFixed(2)}</span>
-            </div>
-            <div className="flex justify-between text-xs sm:text-sm">
-              <span>{t("postalFee")}:</span>
-              <span>ALL {POSTAL_FEE.toFixed(2)}</span>
-            </div>
-            <div className="flex justify-between font-medium text-sm sm:text-base pt-2 border-t">
-              <span>{t("totalWithFee")}:</span>
-              <span>ALL {totalWithFee.toFixed(2)}</span>
-            </div>
-          </div>
-
+        {/* Footer with Button */}
+        <div className="px-8 py-6 border-t border-gray-100 bg-gray-50 rounded-b-2xl">
           <button
-            type="submit"
-            disabled={isSubmitting}
-            className="w-full bg-black text-white py-2.5 sm:py-3 px-4 text-sm sm:text-base font-medium hover:bg-gray-800 disabled:bg-gray-400 disabled:cursor-not-allowed rounded transition-colors"
+            onClick={handleSubmit}
+            disabled={loading}
+            className="w-full bg-black text-white py-4 rounded-xl font-semibold hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
           >
-            {isSubmitting ? "Submitting..." : t("confirmOrder")}
+            {loading ? (
+              <span className="flex items-center justify-center gap-2">
+                <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
+                  <circle
+                    className="opacity-25"
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="currentColor"
+                    strokeWidth="4"
+                    fill="none"
+                  />
+                  <path
+                    className="opacity-75"
+                    fill="currentColor"
+                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                  />
+                </svg>
+                {t("processing")}
+              </span>
+            ) : (
+              t("confirmOrder")
+            )}
           </button>
-        </form>
+        </div>
       </div>
     </div>
   );

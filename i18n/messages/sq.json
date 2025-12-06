@@ -94,7 +94,19 @@
     "remove": "Hiq",
     "total": "Totali",
     "checkout": "Porosit",
-    "checkoutComingSoon": "Funksioni i porosisë vjen së shpejti"
+    "checkoutComingSoon": "Funksioni i porosisë vjen së shpejti",
+    "completeOrder": "Përfundo detajet e porosisë",
+    "name": "Emri i plotë",
+    "phoneNumber": "Numri i telefonit",
+    "shippingAddress": "Adresa e dërgesës",
+    "streetAddress": "Rruga",
+    "city": "Qyteti",
+    "orderNotes": "Shënime për porosinë",
+    "orderSummary": "Përmbledhje e porosisë",
+    "subtotal": "Nëntotali",
+    "shippingFee": "Tarifa e dërgesës",
+    "confirmOrder": "Konfirmo porosinë",
+    "processing": "Duke përpunuar"
   },
   "brands": {
     "title": "Të Gjitha Markat",
