@@ -50,6 +50,7 @@ model OrderItem {
   productId Int
   quantity  Int     @default(1)
   price     Float
+  size      String? 
 
   @@map("order_items")
 }

@@ -8,6 +8,7 @@ interface ProductItem {
   quantity: number;
   price: number;
   name?: string;
+  size?: string;
 }
 
 interface CheckoutModalProps {
@@ -55,6 +56,7 @@ export default function CheckoutModal({
         productId: Number(item.productId), // Ensure it's a number
         quantity: Number(item.quantity || 1), // Ensure it's a number with fallback
         price: Number(item.price), // Ensure it's a number
+        size: item.size || "N/A",
       }));
 
       // Log for debugging

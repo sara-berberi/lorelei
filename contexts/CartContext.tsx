@@ -1,6 +1,12 @@
-'use client';
+"use client";
 
-import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  ReactNode,
+} from "react";
 
 export interface CartItem {
   id: number;
@@ -36,19 +42,19 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
   // Load cart from localStorage on mount
   useEffect(() => {
-    const savedCart = localStorage.getItem('lorelei_cart');
+    const savedCart = localStorage.getItem("lorelei_cart");
     if (savedCart) {
       try {
         setItems(JSON.parse(savedCart));
       } catch (e) {
-        console.error('Error loading cart from localStorage:', e);
+        console.error("Error loading cart from localStorage:", e);
       }
     }
   }, []);
 
   // Save cart to localStorage whenever it changes
   useEffect(() => {
-    localStorage.setItem('lorelei_cart', JSON.stringify(items));
+    localStorage.setItem("lorelei_cart", JSON.stringify(items));
   }, [items]);
 
   const addToCart = (product: any, size: string) => {
@@ -96,9 +102,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
       removeFromCart(itemId);
     } else {
       setItems(
-        items.map((item) =>
-          item.id === itemId ? { ...item, quantity } : item
-        )
+        items.map((item) => (item.id === itemId ? { ...item, quantity } : item))
       );
     }
   };
@@ -113,7 +117,8 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
   const getTotalPrice = () => {
     return items.reduce((total, item) => {
-      const price = item.isOnSale && item.salePrice ? item.salePrice : item.price;
+      const price =
+        item.isOnSale && item.salePrice ? item.salePrice : item.price;
       return total + price * item.quantity;
     }, 0);
   };
@@ -140,8 +145,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
 export function useCart() {
   const context = useContext(CartContext);
   if (context === undefined) {
-    throw new Error('useCart must be used within a CartProvider');
+    throw new Error("useCart must be used within a CartProvider");
   }
   return context;
 }
-

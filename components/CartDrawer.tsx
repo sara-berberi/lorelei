@@ -46,6 +46,7 @@ export default function CartDrawer() {
       quantity: item.quantity,
       price: price,
       name: item.name,
+      size: item.size || "N/A",
     };
   });
 

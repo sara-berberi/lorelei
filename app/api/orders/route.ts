@@ -8,6 +8,7 @@ type ProductInput = {
   productId: number;
   quantity?: number;
   price: number;
+  size?: string;
 };
 
 export async function POST(request: Request) {
@@ -78,6 +79,7 @@ export async function POST(request: Request) {
             productId: Number(p.productId),
             quantity: Number(p.quantity || 1),
             price: Number(p.price),
+            size: p.size || null,
           },
         })
       )
