@@ -54,24 +54,7 @@ export async function POST(request: Request) {
       );
     }
 
-    // Validate products array
-    console.log("Received products:", JSON.stringify(products, null, 2));
-
-    // Check for invalid productIds
-    const invalidProducts = products.filter(
-      (p) =>
-        !p.productId || typeof p.productId !== "number" || isNaN(p.productId)
-    );
-
-    if (invalidProducts.length > 0) {
-      console.error("Invalid products found:", invalidProducts);
-      return NextResponse.json(
-        { error: "Invalid product data", details: invalidProducts },
-        { status: 400 }
-      );
-    }
-
-    // Create order first
+    // Create order
     const order = await prisma.order.create({
       data: {
         fullName,
@@ -86,51 +69,29 @@ export async function POST(request: Request) {
       },
     });
 
-    console.log("Order created with ID:", order.id);
-
-    // Then create order items separately
+    // Create order items
     const orderItems = await Promise.all(
-      products.map((p: ProductInput) => {
-        console.log("Creating order item with data:", {
-          orderId: order.id,
-          productId: Number(p.productId),
-          quantity: Number(p.quantity || 1),
-          price: Number(p.price),
-        });
-
-        return prisma.orderItem.create({
+      products.map((p) =>
+        prisma.orderItem.create({
           data: {
             orderId: order.id,
             productId: Number(p.productId),
             quantity: Number(p.quantity || 1),
             price: Number(p.price),
           },
-        });
-      })
+        })
+      )
     );
 
-    console.log("Order items created:", orderItems.length);
-
-    // Fetch the complete order with items
-    const completeOrder = await prisma.order.findUnique({
-      where: { id: order.id },
-      include: {
-        items: {
-          include: {
-            product: true,
-          },
-        },
-      },
-    });
+    // Return the order + items manually (no relations)
+    const completeOrder = {
+      ...order,
+      items: orderItems,
+    };
 
     return NextResponse.json(completeOrder, { status: 201 });
   } catch (error: any) {
     console.error("Error creating order:", error);
-    console.error("Error details:", {
-      message: error.message,
-      code: error.code,
-      meta: error.meta,
-    });
     return NextResponse.json(
       {
         error: "Failed to create order",

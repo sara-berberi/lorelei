@@ -24,55 +24,6 @@ export default async function Home({
     <div className="min-h-screen bg-white text-gray-800 font-sans">
       <Hero />
 
-      {/* Christmas & NYE Collection Banner */}
-      <section className="relative w-full bg-gradient-to-br from-red-900 via-red-800 to-black overflow-hidden">
-        {/* Sparkle decorations */}
-        <div className="absolute top-4 left-4 w-2 h-2 bg-yellow-300 rounded-full opacity-60 animate-pulse"></div>
-        <div className="absolute top-8 left-12 w-1 h-1 bg-yellow-200 rounded-full opacity-50"></div>
-        <div className="absolute bottom-6 left-8 w-1.5 h-1.5 bg-yellow-300 rounded-full opacity-70 animate-pulse"></div>
-        <div className="absolute top-6 right-6 w-2 h-2 bg-yellow-300 rounded-full opacity-60 animate-pulse"></div>
-        <div className="absolute top-12 right-16 w-1 h-1 bg-yellow-200 rounded-full opacity-50"></div>
-        <div className="absolute bottom-8 right-10 w-1.5 h-1.5 bg-yellow-300 rounded-full opacity-70 animate-pulse"></div>
-
-        {/* Gold shimmer overlay */}
-        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-yellow-600/10 to-transparent opacity-30"></div>
-
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16 lg:py-20">
-          <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-center">
-            {/* Left: Text Content */}
-            <div className="text-white space-y-6 z-10">
-              <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold leading-tight">
-                {christmasCollection("title")}
-              </h2>
-              <p className="text-base sm:text-lg lg:text-xl text-gray-100 leading-relaxed">
-                {christmasCollection("description")}
-              </p>
-              <p className="text-sm sm:text-base text-yellow-200 italic font-light">
-                {christmasCollection("tagline")}
-              </p>
-              <a
-                href="#products"
-                className="inline-block bg-gradient-to-r from-yellow-500 to-yellow-600 hover:from-yellow-600 hover:to-yellow-700 text-black font-semibold px-8 py-3 rounded-lg shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300"
-              >
-                {christmasCollection("button")}
-              </a>
-            </div>
-
-            {/* Right: Image Placeholder */}
-            <div className="relative h-64 sm:h-80 lg:h-96 rounded-lg overflow-hidden shadow-2xl">
-              <img
-                src="https://res.cloudinary.com/dj6ono36y/image/upload/v1765025542/bb3a254f-4387-492b-9890-0eb65c653cf9.png" // <-- your image link here
-                alt="Festive Collection"
-                className="w-full h-full object-cover"
-              />
-              <div className="absolute inset-0 bg-gradient-to-br from-yellow-600/20 via-red-900/40 to-black/60 flex items-center justify-center">
-                <div className="text-center text-white/80 space-y-2"></div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
       <section id="products" className="py-12 sm:py-16 px-4 sm:px-6 lg:px-8">
         <div className="max-w-5xl mx-auto text-center">
           {/* Product grid */}

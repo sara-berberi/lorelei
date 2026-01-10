@@ -27,109 +27,101 @@ export default function CheckoutModal({
   postalFee,
   onOrderSuccess,
 }: CheckoutModalProps) {
-  // const [fullName, setFullName] = useState("");
-  // const [instagramUsername, setInstagramUsername] = useState("");
-  // const [address, setAddress] = useState("");
-  // const [city, setCity] = useState("");
-  // const [phoneNumber, setPhoneNumber] = useState("");
-  // const [notes, setNotes] = useState("");
+  const [fullName, setFullName] = useState("");
+  const [instagramUsername, setInstagramUsername] = useState("");
+  const [address, setAddress] = useState("");
+  const [city, setCity] = useState("");
+  const [phoneNumber, setPhoneNumber] = useState("");
+  const [notes, setNotes] = useState("");
 
-  // const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(false);
   const totalPriceWithPostalFee = totalPrice + postalFee;
 
   const t = useTranslations("cart");
 
   if (!isOpen) return null;
 
-  // const handleSubmit = async () => {
-  //   if (!fullName || !instagramUsername || !address || !city || !phoneNumber) {
-  //     alert("Please fill in all required fields.");
-  //     return;
-  //   }
+  const handleSubmit = async () => {
+    if (!fullName || !instagramUsername || !address || !city || !phoneNumber) {
+      alert("Please fill in all required fields.");
+      return;
+    }
 
-  //   try {
-  //     setLoading(true);
+    try {
+      setLoading(true);
 
-  //     // Transform cart items to ensure productId is included
-  //     const productsForOrder = cartItems.map((item) => ({
-  //       productId: Number(item.productId), // Ensure it's a number
-  //       quantity: Number(item.quantity || 1), // Ensure it's a number with fallback
-  //       price: Number(item.price), // Ensure it's a number
-  //     }));
+      // Transform cart items to ensure productId is included
+      const productsForOrder = cartItems.map((item) => ({
+        productId: Number(item.productId), // Ensure it's a number
+        quantity: Number(item.quantity || 1), // Ensure it's a number with fallback
+        price: Number(item.price), // Ensure it's a number
+      }));
 
-  //     // Log for debugging
-  //     console.log("Cart items received:", cartItems);
-  //     console.log("Products being sent:", productsForOrder);
-  //     console.log("Full request body:", {
-  //       fullName,
-  //       instagramUsername,
-  //       address,
-  //       city,
-  //       phoneNumber,
-  //       products: productsForOrder,
-  //       totalPrice: Number(totalPrice),
-  //       postalFee: Number(postalFee),
-  //       totalPriceWithPostalFee: Number(totalPriceWithPostalFee),
-  //       notes: notes || undefined,
-  //     });
+      // Log for debugging
+      console.log("Cart items received:", cartItems);
+      console.log("Products being sent:", productsForOrder);
+      console.log("Full request body:", {
+        fullName,
+        instagramUsername,
+        address,
+        city,
+        phoneNumber,
+        products: productsForOrder,
+        totalPrice: Number(totalPrice),
+        postalFee: Number(postalFee),
+        totalPriceWithPostalFee: Number(totalPriceWithPostalFee),
+        notes: notes || undefined,
+      });
+      if (productsForOrder.length === 0) {
+        alert("Your cart is empty.");
+        setLoading(false);
+        return;
+      }
 
-  //     // Validate that all productIds are present and valid
-  //     const invalidProducts = productsForOrder.filter(
-  //       (p) => !p.productId || isNaN(p.productId)
-  //     );
-  //     if (invalidProducts.length > 0) {
-  //       console.error("Invalid products found:", invalidProducts);
-  //       alert(
-  //         "Error: Some products are missing IDs. Please refresh and try again."
-  //       );
-  //       setLoading(false);
-  //       return;
-  //     }
+      const res = await fetch("/api/orders", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          fullName,
+          instagramUsername,
+          address,
+          city,
+          phoneNumber,
+          products: productsForOrder,
+          totalPrice: Number(totalPrice),
+          postalFee: Number(postalFee),
+          totalPriceWithPostalFee: Number(totalPriceWithPostalFee),
+          notes: notes || undefined,
+        }),
+      });
 
-  //     const res = await fetch("/api/orders", {
-  //       method: "POST",
-  //       headers: { "Content-Type": "application/json" },
-  //       body: JSON.stringify({
-  //         fullName,
-  //         instagramUsername,
-  //         address,
-  //         city,
-  //         phoneNumber,
-  //         products: productsForOrder,
-  //         totalPrice: Number(totalPrice),
-  //         postalFee: Number(postalFee),
-  //         totalPriceWithPostalFee: Number(totalPriceWithPostalFee),
-  //         notes: notes || undefined,
-  //       }),
-  //     });
+      const data = await res.json();
 
-  //     const data = await res.json();
+      if (!res.ok) {
+        console.error("Order creation failed:", data);
+        alert("❌ Failed: " + (data.error || "Unknown error"));
+        return;
+      }
 
-  //     if (!res.ok) {
-  //       console.error("Order creation failed:", data);
-  //       alert("❌ Failed: " + (data.error || "Unknown error"));
-  //       return;
-  //     }
+      alert("✅ Order created successfully!");
 
-  //     alert("✅ Order created successfully!");
+      // Reset form
+      setFullName("");
+      setInstagramUsername("");
+      setAddress("");
+      setCity("");
+      setPhoneNumber("");
+      setNotes("");
 
-  //     // Reset form
-  //     setFullName("");
-  //     setInstagramUsername("");
-  //     setAddress("");
-  //     setCity("");
-  //     setPhoneNumber("");
-  //     setNotes("");
-
-  //     onOrderSuccess();
-  //     onClose();
-  //   } catch (error) {
-  //     console.error("Order submission error:", error);
-  //     alert("Something went wrong. Please try again.");
-  //   } finally {
-  //     setLoading(false);
-  //   }
-  // };
+      onOrderSuccess();
+      onClose();
+    } catch (error) {
+      console.error("Order submission error:", error);
+      alert("Something went wrong. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 overflow-y-auto">
@@ -189,40 +181,7 @@ export default function CheckoutModal({
             </div>
           </div>
 
-          {/* Instagram DM Notice */}
-          <div className="bg-gradient-to-br from-purple-50 to-pink-50 border-2 border-purple-200 rounded-xl p-6 text-center">
-            <div className="mb-4">
-              <svg
-                className="w-16 h-16 mx-auto text-purple-600"
-                fill="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path d="M12 2c2.717 0 3.056.01 4.122.06 1.065.05 1.79.217 2.428.465.66.254 1.216.598 1.772 1.153a4.908 4.908 0 0 1 1.153 1.772c.247.637.415 1.363.465 2.428.047 1.066.06 1.405.06 4.122 0 2.717-.01 3.056-.06 4.122-.05 1.065-.218 1.79-.465 2.428a4.883 4.883 0 0 1-1.153 1.772 4.915 4.915 0 0 1-1.772 1.153c-.637.247-1.363.415-2.428.465-1.066.047-1.405.06-4.122.06-2.717 0-3.056-.01-4.122-.06-1.065-.05-1.79-.218-2.428-.465a4.89 4.89 0 0 1-1.772-1.153 4.904 4.904 0 0 1-1.153-1.772c-.248-.637-.415-1.363-.465-2.428C2.013 15.056 2 14.717 2 12c0-2.717.01-3.056.06-4.122.05-1.066.217-1.79.465-2.428a4.88 4.88 0 0 1 1.153-1.772A4.897 4.897 0 0 1 5.45 2.525c.638-.248 1.362-.415 2.428-.465C8.944 2.013 9.283 2 12 2zm0 5a5 5 0 1 0 0 10 5 5 0 0 0 0-10zm6.5-.25a1.25 1.25 0 0 0-2.5 0 1.25 1.25 0 0 0 2.5 0zM12 9a3 3 0 1 1 0 6 3 3 0 0 1 0-6z" />
-              </svg>
-            </div>
-            <h3 className="text-xl font-bold text-gray-900 mb-3">
-              Web Checkout Temporarily Unavailable
-            </h3>
-            <p className="text-gray-700 mb-4 leading-relaxed">
-              We are currently working to fix our web checkout system. In the
-              meantime, please send us a message on Instagram with your order
-              details and shipping information.
-            </p>
-            <a
-              href="https://instagram.com/lorelei_boutique"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 bg-gradient-to-r from-purple-600 to-pink-600 text-white px-6 py-3 rounded-lg font-semibold hover:from-purple-700 hover:to-pink-700 transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
-            >
-              <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M12 2c2.717 0 3.056.01 4.122.06 1.065.05 1.79.217 2.428.465.66.254 1.216.598 1.772 1.153a4.908 4.908 0 0 1 1.153 1.772c.247.637.415 1.363.465 2.428.047 1.066.06 1.405.06 4.122 0 2.717-.01 3.056-.06 4.122-.05 1.065-.218 1.79-.465 2.428a4.883 4.883 0 0 1-1.153 1.772 4.915 4.915 0 0 1-1.772 1.153c-.637.247-1.363.415-2.428.465-1.066.047-1.405.06-4.122.06-2.717 0-3.056-.01-4.122-.06-1.065-.05-1.79-.218-2.428-.465a4.89 4.89 0 0 1-1.772-1.153 4.904 4.904 0 0 1-1.153-1.772c-.248-.637-.415-1.363-.465-2.428C2.013 15.056 2 14.717 2 12c0-2.717.01-3.056.06-4.122.05-1.066.217-1.79.465-2.428a4.88 4.88 0 0 1 1.153-1.772A4.897 4.897 0 0 1 5.45 2.525c.638-.248 1.362-.415 2.428-.465C8.944 2.013 9.283 2 12 2zm0 5a5 5 0 1 0 0 10 5 5 0 0 0 0-10zm6.5-.25a1.25 1.25 0 0 0-2.5 0 1.25 1.25 0 0 0 2.5 0zM12 9a3 3 0 1 1 0 6 3 3 0 0 1 0-6z" />
-              </svg>
-              Send Message on Instagram
-            </a>
-          </div>
-
-          {/* Form fields - COMMENTED OUT */}
-          {/* <div className="space-y-5">
+          <div className="space-y-5">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 {t("name")} *
@@ -304,11 +263,10 @@ export default function CheckoutModal({
                 onChange={(e) => setNotes(e.target.value)}
               />
             </div>
-          </div> */}
+          </div>
         </div>
 
-        {/* Footer - COMMENTED OUT */}
-        {/* <div className="px-8 py-6 border-t border-gray-100 bg-gray-50 rounded-b-2xl">
+        <div className="px-8 py-6 border-t border-gray-100 bg-gray-50 rounded-b-2xl">
           <button
             onClick={handleSubmit}
             disabled={loading}
@@ -338,7 +296,7 @@ export default function CheckoutModal({
               t("confirmOrder")
             )}
           </button>
-        </div> */}
+        </div>
       </div>
     </div>
   );
