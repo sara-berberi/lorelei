@@ -105,3 +105,24 @@ export async function POST(request: Request) {
     );
   }
 }
+
+export async function GET() {
+  const orders = await prisma.order.findMany({
+    orderBy: { id: "desc" },
+  });
+
+  const items = await prisma.orderItem.findMany();
+  const products = await prisma.product.findMany();
+
+  const ordersWithItems = orders.map((order) => ({
+    ...order,
+    items: items
+      .filter((i) => i.orderId === order.id)
+      .map((i) => ({
+        ...i,
+        product: products.find((p) => p.id === i.productId),
+      })),
+  }));
+
+  return NextResponse.json(ordersWithItems);
+}
