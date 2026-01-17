@@ -61,13 +61,17 @@
   },
   "hero": {
     "title": "Mirësevini në Lorelei Boutique",
-    "subtitle": "Nëse s’je gati të blesh… bëhu gati.",
+    "subtitle": "Nëse s'je gati të blesh… bëhu gati.",
     "salesAnnounce": "Uljet e fundit, vetëm deri më 29 Nëntor!",
     "salesAnnounceSubtitle": "Mos e humbisni mundësinë për të marrë produktet tuaja të preferuara me çmime speciale.",
     "followInstagram": "Na ndiqni në Instagram:",
     "thankYou": "Faleminderit që na zgjodhët!",
     "rightsInfo": "Të gjitha të drejtat e rezervuara. Fotografitë nuk mund të përdoren nga persona të tjerë.",
     "cta": "Shih Produktet"
+  },
+  "brandStatement": {
+    "title": "Modë e Përzgjedhur, Stil i Përjetshëm",
+    "description": "Zbuloni copëza premium të përzgjedhura me kujdes për gruan moderne që vlerëson cilësinë, elegancën dhe individualitetin."
   },
   "affordableFashion": {
     "title": "Veshje të Përballueshme",
@@ -80,6 +84,36 @@
   "returnsAllowed": {
     "title": "Kthime të Lejuara",
     "description": "Blini me besim, nese nuk ju përshtatet, kthimet janë të lejuara."
+  },
+  "trustSection": {
+    "title": "Premtimi i Lorelei",
+    "subtitle": "Përsosmëri në çdo detaj, nga përzgjedhja deri në dorëzim"
+  },
+  "testimonials": {
+    "title": "Çfarë thonë klientët tanë",
+    "subtitle": "Bashkohuni me vajzat e kënaqura",
+    "testimonial1": {
+      "text": "Shumë të kënaqur me blerjet! Materialet janë shumë të mira dhe erdhi super shpejt.",
+      "name": "Ana M.",
+      "label": "Blerëse e Verifikuar"
+    },
+    "testimonial2": {
+      "text": "Produktet janë të bukura dhe çmimet e mira. Shërbimi është shumë i sjellshëm!",
+      "name": "Elisa K.",
+      "label": "Blerëse e Verifikuar"
+    },
+    "testimonial3": {
+      "text": "Më pëlqen që ky butik ka gjithmonë gjëra të bukura dhe cilësore. Çdo gjë që kam marrë ka qenë super!",
+      "name": "Maria S.",
+      "label": "Blerëse e Verifikuar"
+    }
+  },
+  "newsletter": {
+    "title": "Bashkohu me Komunitetin Tonë të Stilit",
+    "subtitle": "Jini të parët që zbuloni koleksionet e reja, ofertat ekskluzive dhe frymëzim stili drejtpërdrejt në email-in tuaj",
+    "placeholder": "Vendosni email-in tuaj",
+    "button": "Regjistrohu",
+    "privacy": "Respektojmë privatësinë tuaj. Çregjistrohu në çdo kohë."
   },
   "product": {
     "soldOut": "Shitur",
@@ -115,9 +149,9 @@
   },
   "footer": {
     "brandName": "Lorelei Boutique",
-    "brandDescription": "Një koleksion i përzgjedhur me kujdes, plot me veshje elegante për gruan moderne—pra, për ty që do të dukesh bukur edhe kur s’ke kohë fare. Ne sjellim stile që kombinojnë klasiken me trendet e momentit, dhe po, t’i sjellim direkt te dera që të mos lodhesh fare. Pak stil, pak rehati, pak magji—gjithçka gati për t’u veshur.",
+    "brandDescription": "Një koleksion i përzgjedhur me kujdes, plot me veshje elegante për gruan moderne—pra, për ty që do të dukesh bukur edhe kur s'ke kohë fare. Ne sjellim stile që kombinojnë klasiken me trendet e momentit, dhe po, t'i sjellim direkt te dera që të mos lodhesh fare. Pak stil, pak rehati, pak magji—gjithçka gati për t'u veshur.",
     "paymentTitle": "Përvojë e Sigurt Blerjeje, Pagesa në Dorëzim",
-    "paymentSubtitle": "S’ka nevojë të vendosni të dhënat tuaja sensitive online. Te Lorelei, pagesa bëhet në dorëzim — paguani thjesht kur merrni porosinë tuaj.",
+    "paymentSubtitle": "S'ka nevojë të vendosni të dhënat tuaja sensitive online. Te Lorelei, pagesa bëhet në dorëzim — paguani thjesht kur merrni porosinë tuaj.",
     "faqTitle": "Pyetje të Shpeshta",
     "faq1Question": "Si mund të bëj një porosi?",
     "faq1Answer": "Thjesht shfletoni koleksionin tonë, zgjidhni artikujt që dëshironi dhe na kontaktoni drejtpërdrejt përmes Instagram ose kanaleve të ofruara për të përfunduar porosinë tuaj.",
