@@ -30,7 +30,7 @@ export default async function LocaleLayout({
       <CartProvider>
         <div className="min-h-screen bg-white">
           {/* Announcement Bar */}
-          <div className="bg-black text-white text-center py-2 px-4">
+          <div className="bg-[#25092E] text-white text-center py-2 px-4">
             <div className="max-w-7xl mx-auto">
               <p className="text-xs sm:text-sm font-medium">
                 {t("announcement-text")}

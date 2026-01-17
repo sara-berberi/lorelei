@@ -27,24 +27,6 @@ export default async function Home({
     <div className="min-h-screen bg-white text-gray-800 font-sans">
       <Hero />
 
-      {/* Subtle Brand Statement */}
-      <section className="py-16 px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-white via-gray-50 to-white">
-        <div className="max-w-3xl mx-auto text-center space-y-4">
-          <div className="inline-block">
-            <div className="h-px w-16 bg-gradient-to-r from-transparent via-pink-400 to-transparent mx-auto mb-6"></div>
-          </div>
-          <h2 className="text-3xl md:text-4xl font-light tracking-tight text-gray-900">
-            {brandStatement("title")}
-          </h2>
-          <p className="text-gray-600 text-lg font-light leading-relaxed max-w-2xl mx-auto">
-            {brandStatement("description")}
-          </p>
-          <div className="inline-block">
-            <div className="h-px w-16 bg-gradient-to-r from-transparent via-pink-400 to-transparent mx-auto mt-6"></div>
-          </div>
-        </div>
-      </section>
-
       <section id="products" className="py-12 sm:py-16 px-4 sm:px-6 lg:px-8">
         <div className="max-w-5xl mx-auto text-center">
           {/* Product grid */}
@@ -53,7 +35,8 @@ export default async function Home({
       </section>
 
       {/* Premium Trust Indicators */}
-      <section className="py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 text-white relative overflow-hidden">
+      <section className="py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-[#25092E] via-[#1a0621] to-[#25092E] text-white relative overflow-hidden">
+        {" "}
         {/* Subtle background pattern */}
         <div className="absolute inset-0 opacity-5">
           <div
@@ -65,7 +48,6 @@ export default async function Home({
             }}
           ></div>
         </div>
-
         <div className="max-w-6xl mx-auto relative z-10">
           <div className="text-center mb-16">
             <div className="inline-block">
@@ -289,7 +271,7 @@ export default async function Home({
       </section>
 
       {/* Newsletter Signup */}
-      <section className="py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-pink-50 via-white to-pink-50">
+      <section className="py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-[#25092E] via-[#1a0621] to-[#25092E] text-white">
         <div className="max-w-4xl mx-auto">
           <div className="bg-gradient-to-br from-gray-900 to-gray-800 rounded-3xl p-12 md:p-16 text-center text-white relative overflow-hidden shadow-2xl">
             {/* Decorative elements */}
@@ -412,7 +394,7 @@ export default async function Home({
                 </p>
               </div>
 
-              <div className="group space-y-3 p-6 rounded-2xl bg-white border border-gray-100 hover:border-pink-200 hover:shadow-lg transition-all duration-300">
+              <div className="group space-y-3 p-6 rounded-2xl bg-whiteebf] border border-gray-100 hover:border-pink-200 hover:shadow-lg transition-all duration-300">
                 <h4 className="text-base font-semibold text-gray-800 flex items-start gap-2">
                   <span className="text-pink-500 mt-1 flex-shrink-0">•</span>
                   <span>{footerT("faq4Question")}</span>

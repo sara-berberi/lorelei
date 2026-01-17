@@ -135,7 +135,7 @@ export default function ProductDetailsModal({
   return (
     <>
       <div
-        className="fixed inset-0 bg-black bg-opacity-40 backdrop-blur-sm flex items-center justify-center z-50 p-4 sm:p-6 overflow-y-auto"
+        className="fixed inset-0 bg-[#25092E] bg-opacity-40 backdrop-blur-sm flex items-center justify-center z-50 p-4 sm:p-6 overflow-y-auto"
         onClick={(e) => e.target === e.currentTarget && onClose()}
       >
         <div className="bg-white rounded-none max-w-5xl w-full max-h-[95vh] overflow-y-auto shadow-2xl">
@@ -283,7 +283,7 @@ export default function ProductDetailsModal({
                       </span>
                     )}
                     {product.isOnSale && !product.isSoldOut && (
-                      <span className="bg-black text-white px-4 py-1.5 text-xs font-light tracking-wider uppercase">
+                      <span className="bg-[#25092E] text-white px-4 py-1.5 text-xs font-light tracking-wider uppercase">
                         {t("sale")}
                       </span>
                     )}
@@ -325,7 +325,7 @@ export default function ProductDetailsModal({
                           disabled={product.isSoldOut}
                           className={`px-5 py-3 border transition-all text-sm font-light tracking-wide ${
                             selectedSize === size
-                              ? "border-black bg-black text-white"
+                              ? "border-black bg-[#25092E] text-white"
                               : product.isSoldOut
                               ? "border-gray-200 text-gray-300 cursor-not-allowed"
                               : "border-gray-300 hover:border-black text-gray-900"
@@ -345,7 +345,7 @@ export default function ProductDetailsModal({
                   className={`w-full py-4 px-6 font-light tracking-widest uppercase text-sm transition-all ${
                     product.isSoldOut || !selectedSize
                       ? "bg-gray-100 text-gray-400 cursor-not-allowed"
-                      : "bg-black text-white hover:bg-gray-800"
+                      : "bg-[#25092E] text-white hover:bg-gray-800"
                   }`}
                 >
                   {product.isSoldOut ? t("soldOut") : tCart("addToCart")}
