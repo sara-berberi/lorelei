@@ -25,6 +25,8 @@ interface FilterState {
   size: string;
   minPrice: string;
   maxPrice: string;
+  isOnSale?: boolean;
+  isSoldOut?: boolean;
 }
 
 export default function ProductGrid() {
@@ -52,6 +54,8 @@ export default function ProductGrid() {
     size: "all",
     minPrice: "",
     maxPrice: "",
+    isOnSale: undefined,
+    isSoldOut: undefined,
   });
 
   const fetchProducts = useCallback(async (filterState: FilterState) => {
@@ -70,6 +74,14 @@ export default function ProductGrid() {
       if (filterState.size !== "all") params.append("size", filterState.size);
       if (filterState.minPrice) params.append("minPrice", filterState.minPrice);
       if (filterState.maxPrice) params.append("maxPrice", filterState.maxPrice);
+
+      if (filterState.isOnSale !== undefined) {
+        params.append("isOnSale", String(filterState.isOnSale));
+      }
+
+      if (filterState.isSoldOut !== undefined) {
+        params.append("isSoldOut", String(filterState.isSoldOut));
+      }
 
       const url = `/api/products${
         params.toString() ? `?${params.toString()}` : ""
@@ -144,6 +156,8 @@ export default function ProductGrid() {
               size: filters.size,
               minPrice: filters.minPrice,
               maxPrice: filters.maxPrice,
+              isOnSale: filters.isOnSale,
+              isSoldOut: filters.isSoldOut,
             }}
           />
         </div>

@@ -18,6 +18,8 @@ interface ProductFiltersProps {
     size: string;
     minPrice: string;
     maxPrice: string;
+    isOnSale?: boolean;
+    isSoldOut?: boolean;
   }) => void;
   initialFilters?: {
     category?: string;
@@ -25,6 +27,8 @@ interface ProductFiltersProps {
     size?: string;
     minPrice?: string;
     maxPrice?: string;
+    isOnSale?: boolean;
+    isSoldOut?: boolean;
   };
 }
 
@@ -34,6 +38,9 @@ export default function ProductFilters({
 }: ProductFiltersProps) {
   const t = useTranslations("filters");
   const tCategories = useTranslations("categories");
+
+  const [isOnSale, setIsOnSale] = useState<boolean | undefined>(undefined);
+  const [isSoldOut, setIsSoldOut] = useState<boolean | undefined>(undefined);
 
   const [filterOptions, setFilterOptions] = useState<FilterOptions>({
     categories: [],
@@ -83,6 +90,8 @@ export default function ProductFilters({
       size: selectedSize,
       minPrice,
       maxPrice,
+      isOnSale,
+      isSoldOut,
     });
   }, [
     selectedCategory,
@@ -90,6 +99,8 @@ export default function ProductFilters({
     selectedSize,
     minPrice,
     maxPrice,
+    isOnSale,
+    isSoldOut,
     onFilterChange,
   ]);
 
@@ -99,6 +110,8 @@ export default function ProductFilters({
     setSelectedSize("all");
     setMinPrice("");
     setMaxPrice("");
+    setIsOnSale(undefined);
+    setIsSoldOut(undefined);
   };
 
   const getCategoryTranslation = (category: string) => {
@@ -204,6 +217,49 @@ export default function ProductFilters({
             />
           </FilterGroup>
         )}
+
+        <FilterGroup label={t("availability") || "Availability"}>
+          <div className="space-y-3">
+            {/* Sale */}
+            <label className="flex items-center gap-2 text-sm text-gray-700">
+              <input
+                type="checkbox"
+                checked={isOnSale === true}
+                onChange={(e) =>
+                  setIsOnSale(e.target.checked ? true : undefined)
+                }
+                className="accent-gray-900"
+              />
+              Sale
+            </label>
+
+            {/* On Stock */}
+            <label className="flex items-center gap-2 text-sm text-gray-700">
+              <input
+                type="checkbox"
+                checked={isSoldOut === false}
+                onChange={(e) =>
+                  setIsSoldOut(e.target.checked ? false : undefined)
+                }
+                className="accent-gray-900"
+              />
+              On Stock
+            </label>
+
+            {/* Out of Stock */}
+            <label className="flex items-center gap-2 text-sm text-gray-700">
+              <input
+                type="checkbox"
+                checked={isSoldOut === true}
+                onChange={(e) =>
+                  setIsSoldOut(e.target.checked ? true : undefined)
+                }
+                className="accent-gray-900"
+              />
+              Out of Stock
+            </label>
+          </div>
+        </FilterGroup>
 
         {/* Price Range */}
         <FilterGroup label={t("price")}>
