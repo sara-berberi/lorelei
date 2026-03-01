@@ -16,7 +16,7 @@ export default async function Hero() {
       />
 
       {/* Optional Dark Overlay (improves text readability) */}
-      <div className="absolute inset-0 bg-black/40"></div>
+      <div className="absolute inset-0 bg-black/10"></div>
 
       {/* Content Container */}
       <div className="relative z-10 max-w-4xl mx-auto px-6 sm:px-8 lg:px-12 py-16 sm:py-20 text-center text-white">
