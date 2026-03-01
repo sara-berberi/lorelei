@@ -174,5 +174,15 @@
     "description": "Get ready to shine at every celebration — from office Christmas parties to glamorous New Year's Eve nights. Dazzling dresses, glittering details, and elegant fits… everything you need to look unforgettable.",
     "tagline": "Find the perfect look for the work party (and every party).",
     "button": "Coming Soon ⏰"
+  },
+  "mysteryBox": {
+    "title": "The Mystery Box",
+    "subtitle": "You don’t choose what’s inside. You choose how bold you want the surprise to be.",
+    "description": "Each Mystery Box is carefully curated with exclusive pieces you won’t find anywhere else. Every size holds a different level of excitement — and maybe your new favorite item.",
+    "sizesTitle": "Choose Your Surprise Size",
+    "small": "Small Box",
+    "medium": "Medium Box",
+    "big": "Big Box",
+    "cta": "Reveal the Surprise"
   }
 }

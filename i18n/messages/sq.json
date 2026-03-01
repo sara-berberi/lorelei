@@ -174,5 +174,15 @@
     "description": "Përgatitu të shkëlqesh në çdo festë — nga festat e zyrës për Krishtlindje tek netët glamuroze të Vitit të Ri. Fustane mahnitëse, detaje shkëlqyese dhe prerje elegante… gjithçka që të duhet për të dukur të paharrueshme.",
     "tagline": "Gjej pamjen perfekte për festën e punës (dhe çdo festë tjetër).",
     "button": "Se shpejti ⏰"
+  },
+  "mysteryBox": {
+    "title": "Kutia Mister",
+    "subtitle": "Nuk zgjedh çfarë ka brenda… zgjedh sa e madhe do jetë surpriza 👀",
+    "description": "Çdo Kuti Mister përgatitet me kujdes dhe pak magji. Brenda mund të gjesh copën tënde të re të preferuar… ose diçka që s’e prisje fare (në sensin e mirë 😌).",
+    "sizesTitle": "Zgjidh Nivelin e Guximit",
+    "small": "Kuti e Vogël (për të kujdesshmet 😇)",
+    "medium": "Kuti Mesatare (pak rrezik s’bën dëm 😏)",
+    "big": "Kuti e Madhe (jeton vetëm një herë 😎)",
+    "cta": "Hap Surprizën"
   }
 }
