@@ -30,48 +30,51 @@ export default async function Home({
 
       <section className="relative py-28 bg-white">
         <div className="max-w-6xl mx-auto px-6">
-          {/* Intro Content */}
-          <div className="text-center mb-16">
-            <div className="flex items-center justify-center mb-6">
-              <div className="h-px w-8 bg-gray-300"></div>
-              <div className="mx-3 w-1 h-1 rounded-full bg-gray-400"></div>
-              <div className="h-px w-8 bg-gray-300"></div>
+          {/* Soft Grey Wrapper */}
+          <div className="bg-gray-100 rounded-3xl py-20 px-6 sm:px-12 shadow-sm">
+            {/* Intro Content */}
+            <div className="text-center mb-16">
+              <div className="flex items-center justify-center mb-6">
+                <div className="h-px w-8 bg-gray-300"></div>
+                <div className="mx-3 w-1 h-1 rounded-full bg-gray-400"></div>
+                <div className="h-px w-8 bg-gray-300"></div>
+              </div>
+
+              <h2 className="font-serif text-3xl sm:text-4xl md:text-5xl font-light text-gray-900 mb-4 tracking-wide">
+                {mysteryBox("title")}
+              </h2>
+
+              <p className="max-w-2xl mx-auto text-gray-700 text-base sm:text-lg leading-relaxed mb-6">
+                {mysteryBox("subtitle")}
+              </p>
+
+              <p className="max-w-2xl mx-auto text-gray-600 text-sm sm:text-base leading-relaxed mb-10">
+                {mysteryBox("description")}
+              </p>
+
+              {/* Sizes */}
+              <div className="flex justify-center gap-4 sm:gap-6 text-sm tracking-widest uppercase text-gray-800">
+                <span>{mysteryBox("small")}</span>
+                <span className="opacity-40">•</span>
+                <span>{mysteryBox("medium")}</span>
+                <span className="opacity-40">•</span>
+                <span>{mysteryBox("big")}</span>
+              </div>
             </div>
 
-            <h2 className="font-serif text-3xl sm:text-4xl md:text-5xl font-light text-gray-900 mb-4 tracking-wide">
-              {mysteryBox("title")}
-            </h2>
-
-            <p className="max-w-2xl mx-auto text-gray-600 text-base sm:text-lg leading-relaxed mb-6">
-              {mysteryBox("subtitle")}
-            </p>
-
-            <p className="max-w-2xl mx-auto text-gray-500 text-sm sm:text-base leading-relaxed mb-10">
-              {mysteryBox("description")}
-            </p>
-
-            {/* Sizes */}
-            <div className="flex justify-center gap-4 sm:gap-6 text-sm tracking-widest uppercase text-gray-800">
-              <span>{mysteryBox("small")}</span>
-              <span className="opacity-40">•</span>
-              <span>{mysteryBox("medium")}</span>
-              <span className="opacity-40">•</span>
-              <span>{mysteryBox("big")}</span>
-            </div>
-          </div>
-
-          {/* 4:5 Video */}
-          <div className="flex justify-center">
-            <div className="w-full max-w-md sm:max-w-lg lg:max-w-xl">
-              <div className="relative w-full aspect-[4/5] overflow-hidden rounded-lg shadow-2xl">
-                <video
-                  className="absolute inset-0 w-full h-full object-contain"
-                  src="https://res.cloudinary.com/dj6ono36y/video/upload/v1772362407/Will_you_be_my_Valentine_aoky77.mp4"
-                  autoPlay
-                  loop
-                  muted
-                  playsInline
-                />
+            {/* 4:5 Video */}
+            <div className="flex justify-center">
+              <div className="w-full max-w-md sm:max-w-lg lg:max-w-xl">
+                <div className="relative w-full aspect-[4/5] overflow-hidden rounded-2xl shadow-xl">
+                  <video
+                    className="absolute inset-0 w-full h-full object-contain"
+                    src="https://res.cloudinary.com/dj6ono36y/video/upload/v1772362407/Will_you_be_my_Valentine_aoky77.mp4"
+                    autoPlay
+                    loop
+                    muted
+                    playsInline
+                  />
+                </div>
               </div>
             </div>
           </div>
