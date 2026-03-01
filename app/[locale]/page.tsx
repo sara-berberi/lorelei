@@ -22,6 +22,7 @@ export default async function Home({
   const testimonials = await getTranslations("testimonials");
   const newsletter = await getTranslations("newsletter");
   const christmasCollection = await getTranslations("christmasCollection");
+  const mysteryBox = await getTranslations("mysteryBox");
 
   return (
     <div className="min-h-screen bg-white text-gray-800 font-sans">
@@ -38,24 +39,24 @@ export default async function Home({
             </div>
 
             <h2 className="font-serif text-3xl sm:text-4xl md:text-5xl font-light text-gray-900 mb-4 tracking-wide">
-              {t("title")}
+              {mysteryBox("title")}
             </h2>
 
             <p className="max-w-2xl mx-auto text-gray-600 text-base sm:text-lg leading-relaxed mb-6">
-              {t("subtitle")}
+              {mysteryBox("subtitle")}
             </p>
 
             <p className="max-w-2xl mx-auto text-gray-500 text-sm sm:text-base leading-relaxed mb-10">
-              {t("description")}
+              {mysteryBox("description")}
             </p>
 
             {/* Sizes */}
             <div className="flex justify-center gap-4 sm:gap-6 text-sm tracking-widest uppercase text-gray-800">
-              <span>{t("small")}</span>
+              <span>{mysteryBox("small")}</span>
               <span className="opacity-40">•</span>
-              <span>{t("medium")}</span>
+              <span>{mysteryBox("medium")}</span>
               <span className="opacity-40">•</span>
-              <span>{t("big")}</span>
+              <span>{mysteryBox("big")}</span>
             </div>
           </div>
 
