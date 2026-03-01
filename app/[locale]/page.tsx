@@ -27,6 +27,22 @@ export default async function Home({
     <div className="min-h-screen bg-white text-gray-800 font-sans">
       <Hero />
 
+      <section className="relative py-20 px-6 bg-white flex justify-center">
+        <div className="w-full max-w-md sm:max-w-lg lg:max-w-xl">
+          {/* 4:5 Video Container */}
+          <div className="relative w-full aspect-[4/5] overflow-hidden rounded-lg shadow-xl">
+            <video
+              className="absolute inset-0 w-full h-full object-contain"
+              src="https://res.cloudinary.com/dj6ono36y/video/upload/v1772362407/Will_you_be_my_Valentine_aoky77.mp4"
+              autoPlay
+              loop
+              muted
+              playsInline
+            />
+          </div>
+        </div>
+      </section>
+
       <section id="products" className="py-12 sm:py-16 px-4 sm:px-6 lg:px-8">
         <div className="max-w-5xl mx-auto text-center">
           {/* Product grid */}

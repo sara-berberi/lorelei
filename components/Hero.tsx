@@ -4,7 +4,8 @@ export default async function Hero() {
   const t = await getTranslations("hero");
 
   return (
-    <section className="relative min-h-[75vh] flex items-center justify-center overflow-hidden">
+    <section className="relative min-h-[60vh] sm:min-h-[75vh] flex items-center justify-center overflow-hidden">
+      {" "}
       {/* Background Video */}
       <video
         className="absolute inset-0 w-full h-full object-cover"
@@ -14,10 +15,8 @@ export default async function Hero() {
         muted
         playsInline
       />
-
       {/* Optional Dark Overlay (improves text readability) */}
-      <div className="absolute inset-0 bg-black/10"></div>
-
+      <div className="absolute inset-0 bg-white/20"></div>
       {/* Content Container */}
       <div className="relative z-10 max-w-4xl mx-auto px-6 sm:px-8 lg:px-12 py-16 sm:py-20 text-center text-white">
         <div className="flex items-center justify-center mb-8">
