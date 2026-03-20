@@ -89,8 +89,9 @@ export default function MobileMenu({ locale }: MobileMenuProps) {
             },
             { label: t("brands"), href: `/${locale}/brands`, onClick: closeMenu },
             { label: t("mysteryBox"), href: `/${locale}/mystery-box`, onClick: closeMenu },
+            { label: t("specialPrices"), href: `/${locale}/special-prices`, onClick: closeMenu, red: true },
             { label: "Admin", href: `/${locale}/admin`, onClick: closeMenu },
-          ].map(({ label, href, onClick }) => (
+          ].map(({ label, href, onClick, red }: { label: string; href: string; onClick: () => void; red?: boolean }) => (
             <li key={label}>
               <Link
                 href={href}
@@ -101,7 +102,7 @@ export default function MobileMenu({ locale }: MobileMenuProps) {
                   fontSize: "11px",
                   letterSpacing: "0.2em",
                   textTransform: "uppercase",
-                  color: "#4b5563",
+                  color: red ? "#fb7185" : "#4b5563",
                   textDecoration: "none",
                   borderBottom: "1px solid #f9fafb",
                 }}

@@ -22,9 +22,10 @@ interface ProductFiltersProps {
     minPrice?: string; maxPrice?: string;
     isOnSale?: boolean; isSoldOut?: boolean;
   };
+  hideSaleFilter?: boolean;
 }
 
-export default function ProductFilters({ onFilterChange, initialFilters }: ProductFiltersProps) {
+export default function ProductFilters({ onFilterChange, initialFilters, hideSaleFilter }: ProductFiltersProps) {
   const t = useTranslations("filters");
   const tCategories = useTranslations("categories");
 
@@ -116,7 +117,7 @@ export default function ProductFilters({ onFilterChange, initialFilters }: Produ
       )}
 
       {/* Availability */}
-      <div>
+      {!hideSaleFilter && <div>
         <p className="text-[9px] tracking-[0.3em] uppercase text-gray-300 mb-3">{t("availability")}</p>
         <div className="space-y-2.5">
           {[
@@ -132,7 +133,7 @@ export default function ProductFilters({ onFilterChange, initialFilters }: Produ
             </label>
           ))}
         </div>
-      </div>
+      </div>}
 
       {/* Price */}
       <div>
@@ -201,16 +202,18 @@ export default function ProductFilters({ onFilterChange, initialFilters }: Produ
             <input type="number" placeholder={t("maxPrice")} value={maxPrice} min="0" onChange={(e) => setMaxPrice(e.target.value)} className="w-20 border-0 border-b border-gray-200 bg-transparent px-0 py-1.5 text-[11px] text-gray-600 placeholder-gray-300 focus:outline-none focus:border-gray-600 transition-colors" />
           </div>
         </div>
-        <div className="flex items-end gap-4 pb-1">
-          {[
-            { label: t("onSale"), active: isOnSale === true, toggle: () => setIsOnSale(isOnSale === true ? undefined : true) },
-            { label: t("inStock"), active: isSoldOut === false, toggle: () => setIsSoldOut(isSoldOut === false ? undefined : false) },
-          ].map(({ label, active, toggle }) => (
-            <button key={label} onClick={toggle} className={`text-[10px] tracking-widest uppercase transition-colors ${active ? "text-gray-900" : "text-gray-400 hover:text-gray-700"}`}>
-              {label}
-            </button>
-          ))}
-        </div>
+        {!hideSaleFilter && (
+          <div className="flex items-end gap-4 pb-1">
+            {[
+              { label: t("onSale"), active: isOnSale === true, toggle: () => setIsOnSale(isOnSale === true ? undefined : true) },
+              { label: t("inStock"), active: isSoldOut === false, toggle: () => setIsSoldOut(isSoldOut === false ? undefined : false) },
+            ].map(({ label, active, toggle }) => (
+              <button key={label} onClick={toggle} className={`text-[10px] tracking-widest uppercase transition-colors ${active ? "text-gray-900" : "text-gray-400 hover:text-gray-700"}`}>
+                {label}
+              </button>
+            ))}
+          </div>
+        )}
         {hasActiveFilters && (
           <button onClick={handleClearAll} className="ml-auto text-[10px] tracking-[0.2em] uppercase text-gray-400 hover:text-gray-900 transition-colors pb-1">
             {t("clearAll")}

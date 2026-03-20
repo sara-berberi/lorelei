@@ -67,6 +67,9 @@ export default async function LocaleLayout({
                   <Link href={`/${locale}/mystery-box`} className="text-[11px] tracking-[0.2em] uppercase text-gray-500 hover:text-gray-900 transition-colors">
                     {t("mysteryBox")}
                   </Link>
+                  <Link href={`/${locale}/special-prices`} className="text-[11px] tracking-[0.2em] uppercase text-rose-400 hover:text-rose-600 transition-colors">
+                    {t("specialPrices")}
+                  </Link>
                 </nav>
 
                 {/* Right: cart + language + admin */}
