@@ -13,7 +13,7 @@ const CATEGORIES = [
   { value: "bottoms", label: "Bottoms" },
 ];
 
-const ALL_SIZES = ["XS", "S", "M", "L", "XL", "XXL", "One Size"];
+const ALL_SIZES = ["XS", "S", "M", "L", "XL", "XXL", "One Size", "32", "34", "36", "38", "40", "42", "44", "46"];
 
 interface ImageEntry {
   id: string;
