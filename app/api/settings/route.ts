@@ -3,7 +3,6 @@ import { prisma } from "@/lib/prisma";
 
 export async function GET() {
   try {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const rows: any[] = await (prisma as any).$queryRaw`
       SELECT "heroImageUrl" FROM site_settings WHERE id = 1 LIMIT 1
     `;
