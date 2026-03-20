@@ -29,66 +29,59 @@ export default async function LocaleLayout({
     <NextIntlClientProvider messages={messages}>
       <CartProvider>
         <div className="min-h-screen bg-white">
-          {/* Announcement Bar */}
-          <div className="bg-[#25092E] text-white text-center py-2 px-4">
-            <div className="max-w-7xl mx-auto">
-              <p className="text-xs sm:text-sm font-medium">
-                {t("announcement-text")}
-              </p>
-            </div>
+          {/* Announcement bar */}
+          <div className="bg-[#1a0a20] text-white text-center py-2 px-4">
+            <p className="text-[11px] tracking-[0.25em] uppercase font-light text-white/80">
+              {t("announcement-text")}
+            </p>
           </div>
-          <header className="sticky top-0 z-[50] bg-white border-b border-gray-200">
-            <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-8">
-              <div className="flex justify-between items-center h-14 sm:h-16">
-                {/* Left side: Hamburger + Logo */}
-                <div className="flex items-center gap-2">
-                  {/* Hamburger Menu Button - Mobile Only */}
-                  <MobileMenu locale={locale} />
 
-                  {/* Logo */}
-                  <Link href={`/${locale}`}>
+          {/* Header */}
+          <header className="sticky top-0 z-50 bg-white/98 backdrop-blur-md border-b border-gray-100/80">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-12">
+              <div className="flex justify-between items-center h-16 sm:h-20">
+
+                {/* Left: hamburger + logo */}
+                <div className="flex items-center gap-1">
+                  <MobileMenu locale={locale} />
+                  <Link href={`/${locale}`} className="flex items-center">
                     <img
                       src="https://res.cloudinary.com/dj6ono36y/image/upload/v1763922421/_979F0DC6-3FB1-4148-AF21-52C979B86FD4_-removebg-preview_bpaz6n.png"
                       alt="Lorelei Boutique"
-                      className="w-16 h-16 sm:w-22 sm:h-22"
+                      className="w-14 h-14 sm:w-18 sm:h-18 object-contain"
                     />
                   </Link>
                 </div>
 
-                {/* Right side: Links + Cart + Language */}
-                <div className="flex items-center gap-3 sm:gap-6 relative z-10">
-                  <Link
-                    href={`/${locale}`}
-                    className="text-xs sm:text-sm font-medium hover:text-gray-600 hidden sm:block"
-                  >
+                {/* Center: nav links (desktop) */}
+                <nav className="hidden sm:flex items-center gap-8">
+                  <Link href={`/${locale}`} className="text-[11px] tracking-[0.2em] uppercase text-gray-500 hover:text-gray-900 transition-colors">
                     {t("home")}
                   </Link>
-                  <Link
-                    href={`/${locale}#products`}
-                    className="text-xs sm:text-sm font-medium hover:text-gray-600 hidden sm:block"
-                  >
+                  <Link href={`/${locale}#products`} className="text-[11px] tracking-[0.2em] uppercase text-gray-500 hover:text-gray-900 transition-colors">
                     {t("products")}
                   </Link>
-                  <Link
-                    href={`/${locale}/brands`}
-                    className="text-xs sm:text-sm font-medium hover:text-gray-600 hidden sm:block"
-                  >
+                  <Link href={`/${locale}/brands`} className="text-[11px] tracking-[0.2em] uppercase text-gray-500 hover:text-gray-900 transition-colors">
                     {t("brands")}
                   </Link>
-                  <Link
-                    href={`/${locale}/admin`}
-                    className="text-xs sm:text-sm font-medium hover:text-gray-600 hidden sm:block"
-                  >
+                  <Link href={`/${locale}/mystery-box`} className="text-[11px] tracking-[0.2em] uppercase text-gray-500 hover:text-gray-900 transition-colors">
+                    {t("mysteryBox")}
+                  </Link>
+                </nav>
+
+                {/* Right: cart + language + admin */}
+                <div className="flex items-center gap-4 sm:gap-5">
+                  <Link href={`/${locale}/admin`} className="hidden sm:block text-[11px] tracking-[0.2em] uppercase text-gray-400 hover:text-gray-900 transition-colors">
                     Admin
                   </Link>
+                  <div className="w-px h-4 bg-gray-200 hidden sm:block" />
                   <CartButton />
-                  <div className="relative z-20">
-                    <LanguageToggle currentLocale={locale} />
-                  </div>
+                  <LanguageToggle currentLocale={locale} />
                 </div>
               </div>
             </div>
           </header>
+
           <main>{children}</main>
           <CartDrawer />
         </div>

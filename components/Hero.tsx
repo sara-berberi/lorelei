@@ -1,51 +1,56 @@
 import { getTranslations } from "next-intl/server";
+import { prisma } from "@/lib/prisma";
+
+const FALLBACK_IMAGE =
+  "https://res.cloudinary.com/dj6ono36y/image/upload/v1/lorelei_hero/default";
+
+async function getHeroImageUrl(): Promise<string> {
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const rows: any[] = await (prisma as any).$queryRaw`
+      SELECT "heroImageUrl" FROM site_settings WHERE id = 1 LIMIT 1
+    `;
+    return rows?.[0]?.heroImageUrl || FALLBACK_IMAGE;
+  } catch {
+    return FALLBACK_IMAGE;
+  }
+}
 
 export default async function Hero() {
   const t = await getTranslations("hero");
+  const heroImageUrl = await getHeroImageUrl();
 
   return (
-    <section className="relative min-h-[75vh] flex items-center justify-center overflow-hidden">
-      {/* Background Video */}
-      <video
+    <section className="relative h-[85vh] min-h-[560px] flex items-end overflow-hidden">
+      {/* Background photo */}
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
+        src={heroImageUrl}
+        alt=""
         className="absolute inset-0 w-full h-full object-cover"
-        src="https://res.cloudinary.com/dj6ono36y/video/upload/v1772361204/Heading_pldqks.mp4" // put your video in /public/videos
-        autoPlay
-        loop
-        muted
-        playsInline
+        fetchPriority="high"
       />
 
-      {/* Optional Dark Overlay (improves text readability) */}
-      <div className="absolute inset-0 bg-black/30"></div>
+      {/* Gradient overlay */}
+      <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent" />
 
-      {/* Content Container */}
-      <div className="relative z-10 max-w-4xl mx-auto px-6 sm:px-8 lg:px-12 py-16 sm:py-20 text-center text-white">
-        <div className="flex items-center justify-center mb-8">
-          <div className="h-px w-8 bg-white/50"></div>
-          <div className="mx-3 w-1 h-1 rounded-full bg-white/70"></div>
-          <div className="h-px w-8 bg-white/50"></div>
-        </div>
-
-        <h1 className="font-serif text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-light mb-4 leading-tight tracking-wide">
+      {/* Content */}
+      <div className="relative z-10 w-full max-w-5xl mx-auto px-6 lg:px-10 pb-16 sm:pb-20">
+        <p className="text-[10px] tracking-[0.4em] uppercase text-white/60 mb-4">
+          Lorelei Boutique
+        </p>
+        <h1 className="text-4xl sm:text-5xl lg:text-6xl font-light text-white leading-tight tracking-tight mb-5 max-w-2xl">
           {t("title")}
         </h1>
-
-        <p className="text-base sm:text-lg md:text-xl font-light tracking-wide mb-10 max-w-2xl mx-auto">
+        <p className="text-sm sm:text-base text-white/70 font-light tracking-wide mb-8 max-w-md leading-relaxed">
           {t("subtitle")}
         </p>
-
         <a
           href="#products"
-          className="inline-flex items-center justify-center px-8 py-3 text-sm tracking-widest uppercase font-medium bg-white text-black hover:bg-black hover:text-white transition-all duration-300 ease-in-out"
+          className="inline-block px-8 py-3 border border-white/50 text-white text-[11px] tracking-[0.25em] uppercase font-light hover:bg-white hover:text-gray-900 transition-all duration-300"
         >
           {t("cta")}
         </a>
-
-        <div className="flex items-center justify-center mt-12">
-          <div className="h-px w-8 bg-white/50"></div>
-          <div className="mx-3 w-1 h-1 rounded-full bg-white/70"></div>
-          <div className="h-px w-8 bg-white/50"></div>
-        </div>
       </div>
     </section>
   );

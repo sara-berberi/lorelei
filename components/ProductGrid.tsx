@@ -83,6 +83,9 @@ export default function ProductGrid() {
         params.append("isSoldOut", String(filterState.isSoldOut));
       }
 
+      // Never show mystery box products on the main grid
+      params.append("excludeCategory", "mysteryBox");
+
       const url = `/api/products${
         params.toString() ? `?${params.toString()}` : ""
       }`;
@@ -144,7 +147,7 @@ export default function ProductGrid() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-white via-gray-50/30 to-white">
+    <div className="min-h-screen bg-white">
       <div className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-12 xl:px-16 py-8 sm:py-12 lg:py-16">
         {/* Filters Section */}
         <div className="mb-10 sm:mb-14 lg:mb-16">
@@ -177,47 +180,14 @@ export default function ProductGrid() {
 
         {/* Products Grid */}
         {loading ? (
-          <div className="flex flex-col justify-center items-center py-32 sm:py-48">
-            <div className="relative mb-8">
-              {/* Premium loading animation */}
-              <div className="w-16 h-16 border-[3px] border-gray-100 border-t-pink-400 rounded-full animate-spin"></div>
-              <div
-                className="absolute inset-0 w-16 h-16 border-[3px] border-transparent border-b-pink-300 rounded-full animate-spin"
-                style={{
-                  animationDirection: "reverse",
-                  animationDuration: "1.5s",
-                }}
-              ></div>
-            </div>
-            <p className="text-gray-400 font-light tracking-[0.2em] text-xs uppercase">
-              Loading
-            </p>
+          <div className="flex flex-col justify-center items-center py-40">
+            <div className="w-5 h-5 border border-gray-300 border-t-gray-700 rounded-full animate-spin mb-6" />
+            <p className="text-[10px] tracking-[0.3em] uppercase text-gray-300">Loading</p>
           </div>
         ) : products.length === 0 ? (
-          <div className="flex flex-col justify-center items-center py-32 sm:py-48 bg-gradient-to-br from-gray-50 to-white rounded-3xl border border-gray-100">
-            <div className="w-20 h-20 rounded-full bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center mb-8 shadow-sm">
-              <svg
-                className="w-9 h-9 text-gray-300"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={1.5}
-                  d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-                />
-              </svg>
-            </div>
-            <h3 className="text-gray-900 font-light text-xl tracking-tight mb-3">
-              {t("noResults")}
-            </h3>
-            <p className="text-gray-500 text-sm font-light mb-8 max-w-md text-center leading-relaxed">
-              We couldn&apos;t find any pieces matching your criteria. Try
-              adjusting your filters to explore more options.
-            </p>
-            <div className="h-px w-24 bg-gradient-to-r from-transparent via-gray-200 to-transparent"></div>
+          <div className="flex flex-col justify-center items-center py-40 text-center">
+            <p className="text-sm font-light text-gray-400 mb-2">{t("noResults")}</p>
+            <p className="text-xs text-gray-300 tracking-wide">Try adjusting your filters</p>
           </div>
         ) : (
           <>

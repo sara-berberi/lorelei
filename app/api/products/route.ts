@@ -9,6 +9,7 @@ export async function GET(request: Request) {
     const { searchParams } = new URL(request.url);
 
     const category = searchParams.get("category");
+    const excludeCategory = searchParams.get("excludeCategory");
     const brand = searchParams.get("brand");
     const size = searchParams.get("size");
     const minPrice = searchParams.get("minPrice");
@@ -28,7 +29,17 @@ export async function GET(request: Request) {
         ? { deletedAt: { not: null } }
         : { deletedAt: null };
 
-    if (category && category !== "all") where.category = category;
+    // Mystery box products: name contains "kuti" (case-insensitive), matching SQL LIKE '%Kuti%'
+    const isMysteryBox = { name: { contains: "kuti", mode: "insensitive" as const } };
+
+    if (category === "mysteryBox") {
+      Object.assign(where, isMysteryBox);
+    } else if (excludeCategory === "mysteryBox") {
+      where.NOT = isMysteryBox;
+    } else if (category && category !== "all") {
+      where.category = category;
+    }
+
     if (brand && brand !== "all") where.brand = brand;
 
     if (isOnSale !== undefined) where.isOnSale = isOnSale;

@@ -51,8 +51,16 @@ model OrderItem {
   productId Int
   quantity  Int     @default(1)
   price     Float
-  size      String? 
+  size      String?
 
   @@map("order_items")
+}
+
+model SiteSettings {
+  id           Int      @id @default(1)
+  heroImageUrl String?  @db.Text
+  updatedAt    DateTime @updatedAt
+
+  @@map("site_settings")
 }
 

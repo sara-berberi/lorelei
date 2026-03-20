@@ -10,190 +10,85 @@ interface MobileMenuProps {
 
 export default function MobileMenu({ locale }: MobileMenuProps) {
   const t = useTranslations("common");
-
   const [isOpen, setIsOpen] = useState(false);
-  const [filtersOpen, setFiltersOpen] = useState(false);
-  const [brands, setBrands] = useState<string[]>([]);
-  const [categories, setCategories] = useState<string[]>([]);
 
-  const [mobileBrands, setMobileBrands] = useState<string[]>([]);
-  const [mobileCategories, setMobileCategories] = useState<string[]>([]);
-  const [mobilePrice, setMobilePrice] = useState<[number, number]>([0, 50000]);
-
-  // -----------------------------
-  // Load brands/categories from API
-  // -----------------------------
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const resBrands = await fetch("/api/brands");
-        if (resBrands.ok) setBrands(await resBrands.json());
-
-        const resCategories = await fetch("/api/categories");
-        if (resCategories.ok) setCategories(await resCategories.json());
-      } catch (err) {
-        console.error("Failed loading dropdown data:", err);
-      }
-    };
-    fetchData();
-  }, []);
-
-  // -----------------------------
-  // Load saved filters from sessionStorage
-  // -----------------------------
-  useEffect(() => {
-    const storedCategories = sessionStorage.getItem("selectedCategory");
-    const storedBrands = sessionStorage.getItem("selectedBrand");
-    const storedPriceMin = sessionStorage.getItem("priceMin");
-    const storedPriceMax = sessionStorage.getItem("priceMax");
-
-    if (storedCategories) setMobileCategories(JSON.parse(storedCategories));
-    if (storedBrands) setMobileBrands(JSON.parse(storedBrands));
-    if (storedPriceMin && storedPriceMax)
-      setMobilePrice([Number(storedPriceMin), Number(storedPriceMax)]);
-  }, []);
-
-  // -----------------------------
-  // Prevent body scroll when menu open
-  // -----------------------------
   useEffect(() => {
     document.body.style.overflow = isOpen ? "hidden" : "";
+    return () => { document.body.style.overflow = ""; };
   }, [isOpen]);
 
-  // -----------------------------
-  // Toggle checkboxes
-  // -----------------------------
-  const toggleMobileCategory = (category: string) => {
-    setMobileCategories((prev) =>
-      prev.includes(category)
-        ? prev.filter((c) => c !== category)
-        : [...prev, category]
-    );
-  };
-
-  const toggleMobileBrand = (brand: string) => {
-    setMobileBrands((prev) =>
-      prev.includes(brand) ? prev.filter((b) => b !== brand) : [...prev, brand]
-    );
-  };
-
-  // -----------------------------
-  // Apply or Clear filters
-  // -----------------------------
-  const applyMobileFilters = () => {
-    sessionStorage.setItem(
-      "selectedCategory",
-      JSON.stringify(mobileCategories)
-    );
-    sessionStorage.setItem("selectedBrand", JSON.stringify(mobileBrands));
-    sessionStorage.setItem("priceMin", String(mobilePrice[0]));
-    sessionStorage.setItem("priceMax", String(mobilePrice[1]));
-    closeMenu();
-    scrollToProducts();
-  };
-
-  const clearMobileFilters = () => {
-    setMobileCategories([]);
-    setMobileBrands([]);
-    setMobilePrice([0, 50000]);
-    sessionStorage.removeItem("selectedCategory");
-    sessionStorage.removeItem("selectedBrand");
-    sessionStorage.removeItem("priceMin");
-    sessionStorage.removeItem("priceMax");
-    closeMenu();
-    scrollToProducts();
-  };
-
-  const closeMenu = () => {
-    setIsOpen(false);
-    setFiltersOpen(false);
-  };
+  const closeMenu = () => setIsOpen(false);
 
   const scrollToProducts = () => {
     setTimeout(() => {
-      const productsSection = document.getElementById("products");
-      if (productsSection)
-        productsSection.scrollIntoView({ behavior: "smooth" });
+      document.getElementById("products")?.scrollIntoView({ behavior: "smooth" });
     }, 150);
   };
 
-  // -----------------------------
-  // Render
-  // -----------------------------
   return (
     <>
-      {/* Hamburger */}
+      {/* Hamburger — mobile only */}
       <button
         onClick={() => setIsOpen(true)}
-        className="md:hidden text-3xl px-4"
+        className="sm:hidden p-2 text-gray-700 hover:text-gray-900 transition-colors"
+        aria-label="Open menu"
       >
-        ☰
+        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 6h16M4 12h16M4 18h16" />
+        </svg>
       </button>
 
       {/* Backdrop */}
       {isOpen && (
-        <div className="fixed inset-0 bg-black/50 z-40" onClick={closeMenu} />
+        <div
+          className="fixed inset-0 bg-black/30 backdrop-blur-sm z-[9998]"
+          onClick={closeMenu}
+        />
       )}
 
-      {/* Sidebar */}
+      {/* Drawer */}
       <nav
-        className={`fixed top-0 right-0 h-full w-72 bg-white z-50 shadow-xl transform transition-transform duration-300 ${
-          isOpen ? "translate-x-0" : "translate-x-full"
+        className={`fixed top-0 left-0 h-full w-72 bg-white z-[9999] transform transition-transform duration-300 ease-in-out ${
+          isOpen ? "translate-x-0" : "-translate-x-full"
         }`}
       >
-        <button onClick={closeMenu} className="text-3xl p-4 hover:opacity-70">
-          ×
-        </button>
+        {/* Header */}
+        <div className="flex items-center justify-between px-6 h-16 border-b border-gray-100">
+          <p className="text-[10px] tracking-[0.3em] uppercase text-gray-400">Menu</p>
+          <button onClick={closeMenu} className="text-gray-400 hover:text-gray-900 transition-colors">
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
 
-        <ul className="px-4 mt-2 space-y-1">
-          {/* Home */}
-          <li>
-            <Link
-              href={`/${locale}`}
-              className="block px-4 py-3 text-base font-medium hover:bg-gray-100 rounded-md"
-              onClick={closeMenu}
-            >
-              {t("home")}
-            </Link>
-          </li>
-
-          {/* Products */}
-          <li>
-            <Link
-              href={`/${locale}`}
-              className="block px-4 py-3 text-base font-medium hover:bg-gray-100 rounded-md"
-              onClick={() => {
-                sessionStorage.removeItem("selectedCategory");
+        {/* Links */}
+        <ul className="px-6 py-8 space-y-1">
+          {[
+            { label: t("home"), href: `/${locale}`, onClick: closeMenu },
+            {
+              label: t("products"),
+              href: `/${locale}`,
+              onClick: () => {
                 sessionStorage.removeItem("selectedBrand");
-                sessionStorage.removeItem("priceMin");
-                sessionStorage.removeItem("priceMax");
                 closeMenu();
                 scrollToProducts();
-              }}
-            >
-              {t("products")}
-            </Link>
-          </li>
-
-          <li>
-            <Link
-              href={`/${locale}/brands`}
-              className="block px-4 py-3 text-base font-medium hover:bg-gray-100 rounded-md"
-              onClick={closeMenu}
-            >
-              {t("brands")}
-            </Link>
-          </li>
-
-          <li>
-            <Link
-              href={`/${locale}/admin`}
-              className="block px-4 py-3 text-base font-medium hover:bg-gray-100 rounded-md"
-              onClick={closeMenu}
-            >
-              Admin Panel
-            </Link>
-          </li>
+              },
+            },
+            { label: t("brands"), href: `/${locale}/brands`, onClick: closeMenu },
+            { label: t("mysteryBox"), href: `/${locale}/mystery-box`, onClick: closeMenu },
+            { label: "Admin", href: `/${locale}/admin`, onClick: closeMenu },
+          ].map(({ label, href, onClick }) => (
+            <li key={label}>
+              <Link
+                href={href}
+                onClick={onClick}
+                className="block py-3 text-[11px] tracking-[0.2em] uppercase text-gray-600 hover:text-gray-900 border-b border-gray-50 transition-colors"
+              >
+                {label}
+              </Link>
+            </li>
+          ))}
         </ul>
       </nav>
     </>

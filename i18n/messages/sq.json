@@ -3,6 +3,7 @@
     "home": "Kryefaqja",
     "products": "Produktet",
     "brands": "Markat",
+    "mysteryBox": "Kutia Mister",
     "orderNow": "Porosit Tani",
     "soldOut": "Shitur",
     "sale": "Ulje",
@@ -39,6 +40,10 @@
     "allSizes": "Të Gjitha Madhësitë",
     "minPrice": "Çmimi Minimal",
     "maxPrice": "Çmimi Maksimal",
+    "availability": "Disponueshmëria",
+    "onSale": "Në Ulje",
+    "inStock": "Në Stok",
+    "soldOut": "Shitur",
     "loading": "Duke Ngarkuar..."
   },
   "checkout": {

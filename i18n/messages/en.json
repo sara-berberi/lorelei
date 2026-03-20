@@ -3,6 +3,7 @@
     "home": "Home",
     "products": "Products",
     "brands": "Brands",
+    "mysteryBox": "Mystery Box",
     "orderNow": "Order Now",
     "soldOut": "Sold Out",
     "sale": "Sale",
@@ -39,6 +40,10 @@
     "allSizes": "All Sizes",
     "minPrice": "Min Price",
     "maxPrice": "Max Price",
+    "availability": "Availability",
+    "onSale": "On Sale",
+    "inStock": "In Stock",
+    "soldOut": "Sold Out",
     "loading": "Loading..."
   },
   "checkout": {

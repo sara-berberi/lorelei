@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useTranslations } from "next-intl";
-import { ChevronDown, SlidersHorizontal, X } from "lucide-react";
+import { X, SlidersHorizontal } from "lucide-react";
 
 interface FilterOptions {
   categories: string[];
@@ -13,299 +13,159 @@ interface FilterOptions {
 
 interface ProductFiltersProps {
   onFilterChange: (filters: {
-    category: string;
-    brand: string;
-    size: string;
-    minPrice: string;
-    maxPrice: string;
-    isOnSale?: boolean;
-    isSoldOut?: boolean;
+    category: string; brand: string; size: string;
+    minPrice: string; maxPrice: string;
+    isOnSale?: boolean; isSoldOut?: boolean;
   }) => void;
   initialFilters?: {
-    category?: string;
-    brand?: string;
-    size?: string;
-    minPrice?: string;
-    maxPrice?: string;
-    isOnSale?: boolean;
-    isSoldOut?: boolean;
+    category?: string; brand?: string; size?: string;
+    minPrice?: string; maxPrice?: string;
+    isOnSale?: boolean; isSoldOut?: boolean;
   };
 }
 
-export default function ProductFilters({
-  onFilterChange,
-  initialFilters,
-}: ProductFiltersProps) {
+export default function ProductFilters({ onFilterChange, initialFilters }: ProductFiltersProps) {
   const t = useTranslations("filters");
   const tCategories = useTranslations("categories");
 
-  const [isOnSale, setIsOnSale] = useState<boolean | undefined>(undefined);
-  const [isSoldOut, setIsSoldOut] = useState<boolean | undefined>(undefined);
-
-  const [filterOptions, setFilterOptions] = useState<FilterOptions>({
-    categories: [],
-    brands: [],
-    sizes: [],
-    priceRange: { min: 0, max: 0 },
-  });
-
+  const [filterOptions, setFilterOptions] = useState<FilterOptions>({ categories: [], brands: [], sizes: [], priceRange: { min: 0, max: 0 } });
   const [loading, setLoading] = useState(true);
   const [mobileOpen, setMobileOpen] = useState(false);
 
-  const [selectedCategory, setSelectedCategory] = useState(
-    initialFilters?.category || "all"
-  );
-  const [selectedBrand, setSelectedBrand] = useState(
-    initialFilters?.brand || "all"
-  );
-  const [selectedSize, setSelectedSize] = useState(
-    initialFilters?.size || "all"
-  );
+  const [selectedCategory, setSelectedCategory] = useState(initialFilters?.category || "all");
+  const [selectedBrand, setSelectedBrand] = useState(initialFilters?.brand || "all");
+  const [selectedSize, setSelectedSize] = useState(initialFilters?.size || "all");
   const [minPrice, setMinPrice] = useState(initialFilters?.minPrice || "");
   const [maxPrice, setMaxPrice] = useState(initialFilters?.maxPrice || "");
+  const [isOnSale, setIsOnSale] = useState<boolean | undefined>(undefined);
+  const [isSoldOut, setIsSoldOut] = useState<boolean | undefined>(undefined);
 
-  // Fetch options
   useEffect(() => {
-    const fetchFilterOptions = async () => {
-      try {
-        const res = await fetch("/api/products/filters");
-        if (res.ok) {
-          const data = await res.json();
-          setFilterOptions(data);
-        }
-      } catch (e) {
-        console.error(e);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchFilterOptions();
+    fetch("/api/products/filters")
+      .then((r) => r.ok ? r.json() : null)
+      .then((d) => { if (d) setFilterOptions(d); })
+      .finally(() => setLoading(false));
   }, []);
 
-  // Notify parent
   useEffect(() => {
-    onFilterChange({
-      category: selectedCategory,
-      brand: selectedBrand,
-      size: selectedSize,
-      minPrice,
-      maxPrice,
-      isOnSale,
-      isSoldOut,
-    });
-  }, [
-    selectedCategory,
-    selectedBrand,
-    selectedSize,
-    minPrice,
-    maxPrice,
-    isOnSale,
-    isSoldOut,
-    onFilterChange,
-  ]);
+    onFilterChange({ category: selectedCategory, brand: selectedBrand, size: selectedSize, minPrice, maxPrice, isOnSale, isSoldOut });
+  }, [selectedCategory, selectedBrand, selectedSize, minPrice, maxPrice, isOnSale, isSoldOut, onFilterChange]);
+
+  const getCategoryLabel = (c: string) => {
+    const map: Record<string, string> = { Tops: "tops", Bottoms: "bottoms", Dresses: "dresses", Coats: "coatsPuffers", Nightwear: "nightwear", Shoes: "shoes", Activewear: "activewear" };
+    try { return tCategories(map[c] || c.toLowerCase()); } catch { return c; }
+  };
 
   const handleClearAll = () => {
-    setSelectedCategory("all");
-    setSelectedBrand("all");
-    setSelectedSize("all");
-    setMinPrice("");
-    setMaxPrice("");
-    setIsOnSale(undefined);
-    setIsSoldOut(undefined);
+    setSelectedCategory("all"); setSelectedBrand("all"); setSelectedSize("all");
+    setMinPrice(""); setMaxPrice(""); setIsOnSale(undefined); setIsSoldOut(undefined);
   };
 
-  const getCategoryTranslation = (category: string) => {
-    const map: Record<string, string> = {
-      Tops: "tops",
-      Bottoms: "bottoms",
-      Dresses: "dresses",
-      Coats: "coatsPuffers",
-      Nightwear: "nightwear",
-      Shoes: "shoes",
-      Activewear: "activewear",
-    };
+  const hasActiveFilters = selectedCategory !== "all" || selectedBrand !== "all" || selectedSize !== "all" || minPrice !== "" || maxPrice !== "" || isOnSale !== undefined || isSoldOut !== undefined;
 
-    const key = map[category] || category.toLowerCase();
-    try {
-      return tCategories(key);
-    } catch {
-      return category;
-    }
-  };
+  if (loading) return null;
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center py-12">
-        <div className="text-sm text-gray-400 tracking-wide">
-          {t("loading") || "Loading filters…"}
-        </div>
-      </div>
-    );
-  }
-
-  const hasActiveFilters =
-    selectedCategory !== "all" ||
-    selectedBrand !== "all" ||
-    selectedSize !== "all" ||
-    minPrice !== "" ||
-    maxPrice !== "";
+  // ── Shared select ──────────────────────────────────────────────────────────
+  const Select = ({ value, onChange, options }: { value: string; onChange: (v: string) => void; options: { label: string; value: string }[] }) => (
+    <select
+      value={value}
+      onChange={(e) => onChange(e.target.value)}
+      className="appearance-none bg-transparent border-0 border-b border-gray-200 text-[11px] tracking-widest uppercase text-gray-600 focus:outline-none focus:border-gray-600 transition-colors cursor-pointer py-1.5 pr-4 w-full"
+    >
+      {options.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
+    </select>
+  );
 
   const filterContent = (
-    <>
+    <div className="space-y-8">
       {/* Header */}
-      <div className="flex items-center justify-between mb-8 pb-6 border-b border-gray-100">
-        <div className="flex items-center gap-3">
-          <SlidersHorizontal className="w-5 h-5 text-gray-700" />
-          <h2 className="text-lg font-light tracking-wider uppercase text-gray-900">
-            {t("title")}
-          </h2>
-        </div>
-
+      <div className="flex items-center justify-between">
+        <p className="text-[10px] tracking-[0.3em] uppercase text-gray-400">{t("title")}</p>
         {hasActiveFilters && (
-          <button
-            onClick={handleClearAll}
-            className="text-xs tracking-wide uppercase text-gray-500 hover:text-gray-900 transition-colors duration-200 font-medium"
-          >
+          <button onClick={handleClearAll} className="text-[10px] tracking-[0.2em] uppercase text-gray-400 hover:text-gray-900 transition-colors">
             {t("clearAll")}
           </button>
         )}
       </div>
 
-      {/* Filters */}
-      <div className="space-y-8">
-        {filterOptions.categories.length > 0 && (
-          <FilterGroup label={t("category")}>
-            <ChicSelect
-              value={selectedCategory}
-              onChange={setSelectedCategory}
-              options={[
-                { label: t("allCategories"), value: "all" },
-                ...filterOptions.categories.map((c) => ({
-                  label: getCategoryTranslation(c),
-                  value: c,
-                })),
-              ]}
-            />
-          </FilterGroup>
-        )}
+      {filterOptions.categories.length > 0 && (
+        <div>
+          <p className="text-[9px] tracking-[0.3em] uppercase text-gray-300 mb-2">{t("category")}</p>
+          <Select value={selectedCategory} onChange={setSelectedCategory} options={[{ label: t("allCategories"), value: "all" }, ...filterOptions.categories.map((c) => ({ label: getCategoryLabel(c), value: c }))]} />
+        </div>
+      )}
 
-        {filterOptions.brands.length > 0 && (
-          <FilterGroup label={t("brand")}>
-            <ChicSelect
-              value={selectedBrand}
-              onChange={setSelectedBrand}
-              options={[
-                { label: t("allBrands"), value: "all" },
-                ...filterOptions.brands.map((b) => ({
-                  label: b,
-                  value: b,
-                })),
-              ]}
-            />
-          </FilterGroup>
-        )}
+      {filterOptions.brands.length > 0 && (
+        <div>
+          <p className="text-[9px] tracking-[0.3em] uppercase text-gray-300 mb-2">{t("brand")}</p>
+          <Select value={selectedBrand} onChange={setSelectedBrand} options={[{ label: t("allBrands"), value: "all" }, ...filterOptions.brands.map((b) => ({ label: b, value: b }))]} />
+        </div>
+      )}
 
-        {filterOptions.sizes.length > 0 && (
-          <FilterGroup label={t("size")}>
-            <ChicSelect
-              value={selectedSize}
-              onChange={setSelectedSize}
-              options={[
-                { label: t("allSizes"), value: "all" },
-                ...filterOptions.sizes.map((s) => ({ label: s, value: s })),
-              ]}
-            />
-          </FilterGroup>
-        )}
-
-        <FilterGroup label={t("availability") || "Availability"}>
-          <div className="space-y-3">
-            {/* Sale */}
-            <label className="flex items-center gap-2 text-sm text-gray-700">
-              <input
-                type="checkbox"
-                checked={isOnSale === true}
-                onChange={(e) =>
-                  setIsOnSale(e.target.checked ? true : undefined)
-                }
-                className="accent-gray-900"
-              />
-              Sale
-            </label>
-
-            {/* On Stock */}
-            <label className="flex items-center gap-2 text-sm text-gray-700">
-              <input
-                type="checkbox"
-                checked={isSoldOut === false}
-                onChange={(e) =>
-                  setIsSoldOut(e.target.checked ? false : undefined)
-                }
-                className="accent-gray-900"
-              />
-              On Stock
-            </label>
-
-            {/* Out of Stock */}
-            <label className="flex items-center gap-2 text-sm text-gray-700">
-              <input
-                type="checkbox"
-                checked={isSoldOut === true}
-                onChange={(e) =>
-                  setIsSoldOut(e.target.checked ? true : undefined)
-                }
-                className="accent-gray-900"
-              />
-              Out of Stock
-            </label>
+      {filterOptions.sizes.length > 0 && (
+        <div>
+          <p className="text-[9px] tracking-[0.3em] uppercase text-gray-300 mb-3">{t("size")}</p>
+          <div className="flex flex-wrap gap-1.5">
+            {["all", ...filterOptions.sizes].map((s) => (
+              <button key={s} onClick={() => setSelectedSize(s)} className={`px-2.5 py-1 text-[10px] tracking-widest uppercase transition-all border ${selectedSize === s ? "bg-gray-900 text-white border-gray-900" : "text-gray-500 border-gray-200 hover:border-gray-500"}`}>
+                {s === "all" ? t("allSizes") : s}
+              </button>
+            ))}
           </div>
-        </FilterGroup>
+        </div>
+      )}
 
-        {/* Price Range */}
-        <FilterGroup label={t("price")}>
-          <div className="flex gap-3">
-            <PriceInput
-              placeholder={t("minPrice")}
-              value={minPrice}
-              onChange={setMinPrice}
-            />
-            <span className="text-gray-300 self-center text-sm">—</span>
-            <PriceInput
-              placeholder={t("maxPrice")}
-              value={maxPrice}
-              onChange={setMaxPrice}
-            />
-          </div>
-        </FilterGroup>
+      {/* Availability */}
+      <div>
+        <p className="text-[9px] tracking-[0.3em] uppercase text-gray-300 mb-3">{t("availability")}</p>
+        <div className="space-y-2.5">
+          {[
+            { label: t("onSale"), active: isOnSale === true, toggle: () => setIsOnSale(isOnSale === true ? undefined : true) },
+            { label: t("inStock"), active: isSoldOut === false, toggle: () => setIsSoldOut(isSoldOut === false ? undefined : false) },
+            { label: t("soldOut"), active: isSoldOut === true, toggle: () => setIsSoldOut(isSoldOut === true ? undefined : true) },
+          ].map(({ label, active, toggle }) => (
+            <label key={label} className="flex items-center gap-2.5 cursor-pointer">
+              <div onClick={toggle} className={`w-3.5 h-3.5 border transition-colors flex items-center justify-center ${active ? "bg-gray-900 border-gray-900" : "border-gray-300"}`}>
+                {active && <svg className="w-2 h-2 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" /></svg>}
+              </div>
+              <span className="text-[11px] tracking-wider uppercase text-gray-500">{label}</span>
+            </label>
+          ))}
+        </div>
       </div>
-    </>
+
+      {/* Price */}
+      <div>
+        <p className="text-[9px] tracking-[0.3em] uppercase text-gray-300 mb-3">{t("price")}</p>
+        <div className="flex items-center gap-3">
+          <input type="number" placeholder={t("minPrice")} value={minPrice} min="0" onChange={(e) => setMinPrice(e.target.value)} className="flex-1 border-0 border-b border-gray-200 bg-transparent px-0 py-1.5 text-xs text-gray-600 placeholder-gray-300 focus:outline-none focus:border-gray-600 transition-colors w-0" />
+          <span className="text-gray-300 text-xs flex-shrink-0">—</span>
+          <input type="number" placeholder={t("maxPrice")} value={maxPrice} min="0" onChange={(e) => setMaxPrice(e.target.value)} className="flex-1 border-0 border-b border-gray-200 bg-transparent px-0 py-1.5 text-xs text-gray-600 placeholder-gray-300 focus:outline-none focus:border-gray-600 transition-colors w-0" />
+        </div>
+      </div>
+    </div>
   );
 
   return (
     <>
-      {/* Mobile Filter Button */}
+      {/* Mobile filter button */}
       <button
         onClick={() => setMobileOpen(true)}
-        className="lg:hidden fixed bottom-6 right-6 z-40 bg-gray-900 text-white px-6 py-3 rounded-full shadow-lg hover:bg-gray-800 transition-all duration-200 flex items-center gap-2"
+        className="lg:hidden fixed bottom-6 right-6 z-40 bg-[#1a0a20] text-white px-5 py-2.5 shadow-lg flex items-center gap-2 text-[10px] tracking-[0.2em] uppercase"
       >
-        <SlidersHorizontal className="w-4 h-4" />
-        <span className="text-sm font-medium tracking-wide">Filters</span>
+        <SlidersHorizontal className="w-3.5 h-3.5" />
+        {t("title")}
+        {hasActiveFilters && <span className="w-1.5 h-1.5 rounded-full bg-white/60" />}
       </button>
 
-      {/* Mobile Drawer */}
+      {/* Mobile drawer */}
       {mobileOpen && (
         <>
-          <div
-            className="lg:hidden fixed inset-0 bg-black/30 backdrop-blur-sm z-40 transition-opacity"
-            onClick={() => setMobileOpen(false)}
-          />
-          <div className="lg:hidden fixed inset-y-0 right-0 w-full max-w-sm bg-white z-50 shadow-2xl overflow-y-auto">
-            <div className="p-6">
-              <button
-                onClick={() => setMobileOpen(false)}
-                className="absolute top-6 right-6 text-gray-400 hover:text-gray-900 transition-colors"
-              >
-                <X className="w-6 h-6" />
+          <div className="lg:hidden fixed inset-0 bg-black/20 backdrop-blur-sm z-40" onClick={() => setMobileOpen(false)} />
+          <div className="lg:hidden fixed inset-y-0 right-0 w-full max-w-xs bg-white z-50 overflow-y-auto">
+            <div className="p-8 relative">
+              <button onClick={() => setMobileOpen(false)} className="absolute top-6 right-6 text-gray-400 hover:text-gray-900 transition-colors">
+                <X className="w-4 h-4" />
               </button>
               {filterContent}
             </div>
@@ -313,235 +173,50 @@ export default function ProductFilters({
         </>
       )}
 
-      {/* Desktop Filters - Compact Horizontal Layout */}
-      <div className="hidden lg:flex items-center gap-3 bg-white border-b border-gray-200 py-3 px-4">
-        {/* Filter Icon & Label */}
-        <div className="flex items-center gap-2 text-gray-600 mr-2">
-          <SlidersHorizontal className="w-4 h-4" />
-          <span className="text-xs font-medium uppercase tracking-wider">
-            {t("title")}
-          </span>
-        </div>
-
-        {/* Category Filter */}
+      {/* Desktop: horizontal bar */}
+      <div className="hidden lg:flex items-center gap-10 border-b border-gray-100 py-3 px-1">
         {filterOptions.categories.length > 0 && (
-          <CompactSelect
-            value={selectedCategory}
-            onChange={setSelectedCategory}
-            options={[
-              { label: t("allCategories"), value: "all" },
-              ...filterOptions.categories.map((c) => ({
-                label: getCategoryTranslation(c),
-                value: c,
-              })),
-            ]}
-          />
+          <div className="min-w-[120px]">
+            <p className="text-[9px] tracking-[0.25em] uppercase text-gray-300 mb-1">{t("category")}</p>
+            <Select value={selectedCategory} onChange={setSelectedCategory} options={[{ label: t("allCategories"), value: "all" }, ...filterOptions.categories.map((c) => ({ label: getCategoryLabel(c), value: c }))]} />
+          </div>
         )}
-
-        {/* Brand Filter */}
         {filterOptions.brands.length > 0 && (
-          <CompactSelect
-            value={selectedBrand}
-            onChange={setSelectedBrand}
-            options={[
-              { label: t("allBrands"), value: "all" },
-              ...filterOptions.brands.map((b) => ({
-                label: b,
-                value: b,
-              })),
-            ]}
-          />
+          <div className="min-w-[100px]">
+            <p className="text-[9px] tracking-[0.25em] uppercase text-gray-300 mb-1">{t("brand")}</p>
+            <Select value={selectedBrand} onChange={setSelectedBrand} options={[{ label: t("allBrands"), value: "all" }, ...filterOptions.brands.map((b) => ({ label: b, value: b }))]} />
+          </div>
         )}
-
-        {/* Size Filter */}
         {filterOptions.sizes.length > 0 && (
-          <CompactSelect
-            value={selectedSize}
-            onChange={setSelectedSize}
-            options={[
-              { label: t("allSizes"), value: "all" },
-              ...filterOptions.sizes.map((s) => ({ label: s, value: s })),
-            ]}
-          />
+          <div className="min-w-[80px]">
+            <p className="text-[9px] tracking-[0.25em] uppercase text-gray-300 mb-1">{t("size")}</p>
+            <Select value={selectedSize} onChange={setSelectedSize} options={[{ label: t("allSizes"), value: "all" }, ...filterOptions.sizes.map((s) => ({ label: s, value: s }))]} />
+          </div>
         )}
-
-        {/* Price Range */}
-        <div className="flex items-center gap-2">
-          <CompactPriceInput
-            placeholder={t("minPrice")}
-            value={minPrice}
-            onChange={setMinPrice}
-          />
-          <span className="text-gray-300 text-xs">—</span>
-          <CompactPriceInput
-            placeholder={t("maxPrice")}
-            value={maxPrice}
-            onChange={setMaxPrice}
-          />
+        <div>
+          <p className="text-[9px] tracking-[0.25em] uppercase text-gray-300 mb-1">{t("price")}</p>
+          <div className="flex items-center gap-2">
+            <input type="number" placeholder={t("minPrice")} value={minPrice} min="0" onChange={(e) => setMinPrice(e.target.value)} className="w-20 border-0 border-b border-gray-200 bg-transparent px-0 py-1.5 text-[11px] text-gray-600 placeholder-gray-300 focus:outline-none focus:border-gray-600 transition-colors" />
+            <span className="text-gray-300 text-xs">—</span>
+            <input type="number" placeholder={t("maxPrice")} value={maxPrice} min="0" onChange={(e) => setMaxPrice(e.target.value)} className="w-20 border-0 border-b border-gray-200 bg-transparent px-0 py-1.5 text-[11px] text-gray-600 placeholder-gray-300 focus:outline-none focus:border-gray-600 transition-colors" />
+          </div>
         </div>
-
-        {/* Clear All */}
+        <div className="flex items-end gap-4 pb-1">
+          {[
+            { label: t("onSale"), active: isOnSale === true, toggle: () => setIsOnSale(isOnSale === true ? undefined : true) },
+            { label: t("inStock"), active: isSoldOut === false, toggle: () => setIsSoldOut(isSoldOut === false ? undefined : false) },
+          ].map(({ label, active, toggle }) => (
+            <button key={label} onClick={toggle} className={`text-[10px] tracking-widest uppercase transition-colors ${active ? "text-gray-900" : "text-gray-400 hover:text-gray-700"}`}>
+              {label}
+            </button>
+          ))}
+        </div>
         {hasActiveFilters && (
-          <button
-            onClick={handleClearAll}
-            className="ml-auto text-xs uppercase text-gray-500 hover:text-gray-900 transition-colors duration-200 font-medium tracking-wide"
-          >
+          <button onClick={handleClearAll} className="ml-auto text-[10px] tracking-[0.2em] uppercase text-gray-400 hover:text-gray-900 transition-colors pb-1">
             {t("clearAll")}
           </button>
         )}
       </div>
     </>
-  );
-}
-
-/* --------------------- */
-/* MOBILE COMPONENTS */
-/* --------------------- */
-
-function FilterGroup({
-  label,
-  children,
-}: {
-  label: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <div className="space-y-3">
-      <label className="block text-xs font-medium uppercase tracking-widest text-gray-600">
-        {label}
-      </label>
-      {children}
-    </div>
-  );
-}
-
-function ChicSelect({
-  value,
-  onChange,
-  options,
-}: {
-  value: string;
-  onChange: (v: string) => void;
-  options: { label: string; value: string }[];
-}) {
-  return (
-    <div className="relative">
-      <select
-        className="
-          w-full px-4 py-3
-          border border-gray-200 bg-white rounded-lg
-          text-sm text-gray-800
-          appearance-none cursor-pointer
-          focus:outline-none focus:border-gray-400 focus:ring-1 focus:ring-gray-200
-          transition-all duration-200
-          pr-10
-        "
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-      >
-        {options.map((o) => (
-          <option key={o.value} value={o.value}>
-            {o.label}
-          </option>
-        ))}
-      </select>
-      <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
-    </div>
-  );
-}
-
-function PriceInput({
-  placeholder,
-  value,
-  onChange,
-}: {
-  placeholder: string;
-  value: string;
-  onChange: (v: string) => void;
-}) {
-  return (
-    <input
-      type="number"
-      placeholder={placeholder}
-      value={value}
-      min="0"
-      step="0.01"
-      onChange={(e) => onChange(e.target.value)}
-      className="
-        flex-1 px-4 py-3
-        border border-gray-200 bg-white rounded-lg
-        text-sm text-gray-800 placeholder-gray-400
-        focus:outline-none focus:border-gray-400 focus:ring-1 focus:ring-gray-200
-        transition-all duration-200
-      "
-    />
-  );
-}
-
-/* --------------------- */
-/* DESKTOP COMPACT COMPONENTS */
-/* --------------------- */
-
-function CompactSelect({
-  value,
-  onChange,
-  options,
-}: {
-  value: string;
-  onChange: (v: string) => void;
-  options: { label: string; value: string }[];
-}) {
-  return (
-    <div className="relative">
-      <select
-        className="
-          pl-3 pr-8 py-2
-          border border-gray-300 bg-white rounded
-          text-xs text-gray-700
-          appearance-none cursor-pointer
-          focus:outline-none focus:border-gray-500
-          transition-all duration-150
-          hover:border-gray-400
-        "
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-      >
-        {options.map((o) => (
-          <option key={o.value} value={o.value}>
-            {o.label}
-          </option>
-        ))}
-      </select>
-      <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 w-3 h-3 text-gray-500 pointer-events-none" />
-    </div>
-  );
-}
-
-function CompactPriceInput({
-  placeholder,
-  value,
-  onChange,
-}: {
-  placeholder: string;
-  value: string;
-  onChange: (v: string) => void;
-}) {
-  return (
-    <input
-      type="number"
-      placeholder={placeholder}
-      value={value}
-      min="0"
-      step="0.01"
-      onChange={(e) => onChange(e.target.value)}
-      className="
-        w-24 px-3 py-2
-        border border-gray-300 bg-white rounded
-        text-xs text-gray-700 placeholder-gray-400
-        focus:outline-none focus:border-gray-500
-        transition-all duration-150
-        hover:border-gray-400
-      "
-    />
   );
 }

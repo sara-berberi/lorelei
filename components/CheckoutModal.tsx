@@ -20,283 +20,169 @@ interface CheckoutModalProps {
   onOrderSuccess: () => void;
 }
 
-export default function CheckoutModal({
-  isOpen,
-  onClose,
-  cartItems,
-  totalPrice,
-  postalFee,
-  onOrderSuccess,
-}: CheckoutModalProps) {
+const inputCls = "w-full border-0 border-b border-gray-200 bg-transparent px-0 py-2.5 text-sm text-gray-800 placeholder-gray-300 focus:outline-none focus:border-gray-700 transition-colors";
+const labelCls = "block text-[10px] tracking-[0.2em] uppercase text-gray-400 mb-1.5";
+
+export default function CheckoutModal({ isOpen, onClose, cartItems, totalPrice, postalFee, onOrderSuccess }: CheckoutModalProps) {
   const [fullName, setFullName] = useState("");
   const [instagramUsername, setInstagramUsername] = useState("");
   const [address, setAddress] = useState("");
   const [city, setCity] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
   const [notes, setNotes] = useState("");
-
   const [loading, setLoading] = useState(false);
-  const totalPriceWithPostalFee = totalPrice + postalFee;
+  const [error, setError] = useState("");
 
   const t = useTranslations("cart");
+  const totalWithFee = totalPrice + postalFee;
 
   if (!isOpen) return null;
 
   const handleSubmit = async () => {
+    setError("");
     if (!fullName || !instagramUsername || !address || !city || !phoneNumber) {
-      alert("Please fill in all required fields.");
+      setError("Please fill in all required fields.");
       return;
     }
 
     try {
       setLoading(true);
-
-      // Transform cart items to ensure productId is included
-      const productsForOrder = cartItems.map((item) => ({
-        productId: Number(item.productId), // Ensure it's a number
-        quantity: Number(item.quantity || 1), // Ensure it's a number with fallback
-        price: Number(item.price), // Ensure it's a number
+      const products = cartItems.map((item) => ({
+        productId: Number(item.productId),
+        quantity: Number(item.quantity || 1),
+        price: Number(item.price),
         size: item.size || "N/A",
       }));
 
-      // Log for debugging
-      console.log("Cart items received:", cartItems);
-      console.log("Products being sent:", productsForOrder);
-      console.log("Full request body:", {
-        fullName,
-        instagramUsername,
-        address,
-        city,
-        phoneNumber,
-        products: productsForOrder,
-        totalPrice: Number(totalPrice),
-        postalFee: Number(postalFee),
-        totalPriceWithPostalFee: Number(totalPriceWithPostalFee),
-        notes: notes || undefined,
-      });
-      if (productsForOrder.length === 0) {
-        alert("Your cart is empty.");
-        setLoading(false);
-        return;
-      }
+      if (products.length === 0) { setError("Your cart is empty."); return; }
 
       const res = await fetch("/api/orders", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          fullName,
-          instagramUsername,
-          address,
-          city,
-          phoneNumber,
-          products: productsForOrder,
+          fullName, instagramUsername, address, city, phoneNumber,
+          products,
           totalPrice: Number(totalPrice),
           postalFee: Number(postalFee),
-          totalPriceWithPostalFee: Number(totalPriceWithPostalFee),
+          totalPriceWithPostalFee: Number(totalWithFee),
           notes: notes || undefined,
         }),
       });
 
       const data = await res.json();
+      if (!res.ok) { setError(data.error || "Something went wrong."); return; }
 
-      if (!res.ok) {
-        console.error("Order creation failed:", data);
-        alert("❌ Failed: " + (data.error || "Unknown error"));
-        return;
-      }
-
-      alert("✅ Order created successfully!");
-
-      // Reset form
-      setFullName("");
-      setInstagramUsername("");
-      setAddress("");
-      setCity("");
-      setPhoneNumber("");
-      setNotes("");
-
+      setFullName(""); setInstagramUsername(""); setAddress(""); setCity(""); setPhoneNumber(""); setNotes("");
       onOrderSuccess();
       onClose();
-    } catch (error) {
-      console.error("Order submission error:", error);
-      alert("Something went wrong. Please try again.");
+    } catch {
+      setError("Network error. Please try again.");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 overflow-y-auto">
-      <div className="bg-white w-full max-w-lg rounded-2xl shadow-2xl relative my-8 max-h-[90vh] flex flex-col">
+    <div className="fixed inset-0 bg-black/25 backdrop-blur-sm flex items-end sm:items-center justify-center z-50 p-0 sm:p-6">
+      <div className="bg-white w-full sm:max-w-lg sm:rounded-none max-h-[95vh] flex flex-col shadow-2xl">
+
         {/* Header */}
-        <div className="px-8 pt-8 pb-6 border-b border-gray-100">
-          <button
-            onClick={onClose}
-            className="absolute right-6 top-6 w-8 h-8 flex items-center justify-center rounded-full text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-all"
-          >
-            ✕
+        <div className="flex items-center justify-between px-8 py-6 border-b border-gray-100">
+          <div>
+            <h2 className="text-base font-light tracking-wide text-gray-900">Checkout</h2>
+            <p className="text-[10px] tracking-widest uppercase text-gray-400 mt-0.5">{t("completeOrder")}</p>
+          </div>
+          <button onClick={onClose} className="text-gray-300 hover:text-gray-700 transition-colors">
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M6 18L18 6M6 6l12 12" />
+            </svg>
           </button>
-          <h2 className="text-3xl font-bold text-gray-900">Checkout</h2>
-          <p className="text-sm text-gray-500 mt-1">{t("completeOrder")}</p>
         </div>
 
-        {/* Content */}
-        <div className="px-8 py-8 overflow-y-auto flex-1">
-          {/* Order Summary */}
-          <div className="bg-gray-50 rounded-xl p-6 mb-6">
-            <h3 className="font-semibold text-gray-900 mb-4 text-lg">
-              {t("orderSummary")}
-            </h3>
+        {/* Scrollable body */}
+        <div className="flex-1 overflow-y-auto px-8 py-8 space-y-10">
 
+          {/* Order summary */}
+          <section>
+            <p className="text-[10px] tracking-[0.3em] uppercase text-gray-300 mb-5">{t("orderSummary")}</p>
             <div className="space-y-3">
               {cartItems.map((item, idx) => (
-                <div
-                  key={idx}
-                  className="flex justify-between text-sm text-gray-700"
-                >
-                  <span className="flex-1">
-                    {item.name ?? `Product #${item.productId}`} ×{" "}
-                    {item.quantity}
+                <div key={idx} className="flex justify-between items-baseline">
+                  <span className="text-sm text-gray-600 font-light flex-1 truncate pr-4">
+                    {item.name ?? `Product #${item.productId}`}
+                    <span className="text-gray-400"> × {item.quantity}</span>
                   </span>
-                  <span className="font-medium">
-                    {item.price * item.quantity} Lek
+                  <span className="text-sm text-gray-900 flex-shrink-0">
+                    {(item.price * item.quantity).toFixed(0)} Lek
                   </span>
                 </div>
               ))}
-
-              <div className="border-t border-gray-200 pt-3 mt-3 space-y-2">
-                <div className="flex justify-between text-sm text-gray-600">
-                  <span>{t("subtotal")}</span>
-                  <span>{totalPrice} Lek</span>
-                </div>
-
-                <div className="flex justify-between text-sm text-gray-600">
-                  <span>{t("shippingFee")}</span>
-                  <span>{postalFee} Lek</span>
-                </div>
-
-                <div className="flex justify-between font-bold text-lg text-gray-900 pt-2 border-t border-gray-200">
-                  <span>{t("total")}</span>
-                  <span>{totalPriceWithPostalFee} Lek</span>
-                </div>
+            </div>
+            <div className="mt-5 pt-5 border-t border-gray-100 space-y-2">
+              <div className="flex justify-between text-xs text-gray-400">
+                <span className="tracking-wide">{t("subtotal")}</span>
+                <span>{totalPrice.toFixed(0)} Lek</span>
+              </div>
+              <div className="flex justify-between text-xs text-gray-400">
+                <span className="tracking-wide">{t("shippingFee")}</span>
+                <span>{postalFee} Lek</span>
+              </div>
+              <div className="flex justify-between text-sm text-gray-900 font-light pt-2 border-t border-gray-100">
+                <span className="tracking-wide">{t("total")}</span>
+                <span>{totalWithFee.toFixed(0)} Lek</span>
               </div>
             </div>
-          </div>
+          </section>
 
-          <div className="space-y-5">
+          {/* Customer info */}
+          <section className="space-y-7">
+            <p className="text-[10px] tracking-[0.3em] uppercase text-gray-300">Your Details</p>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                {t("name")} *
-              </label>
-              <input
-                type="text"
-                className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-black focus:border-transparent transition-all outline-none"
-                value={fullName}
-                onChange={(e) => setFullName(e.target.value)}
-              />
+              <label className={labelCls}>{t("name")} *</label>
+              <input type="text" value={fullName} onChange={(e) => setFullName(e.target.value)} className={inputCls} />
             </div>
-
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Instagram Username *
-              </label>
-              <input
-                type="text"
-                className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-black focus:border-transparent transition-all outline-none"
-                placeholder="@username"
-                value={instagramUsername}
-                onChange={(e) => setInstagramUsername(e.target.value)}
-              />
+              <label className={labelCls}>Instagram *</label>
+              <input type="text" value={instagramUsername} onChange={(e) => setInstagramUsername(e.target.value)} placeholder="@username" className={inputCls} />
             </div>
-
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                {t("phoneNumber")} *
-              </label>
-              <input
-                type="tel"
-                className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-black focus:border-transparent transition-all outline-none"
-                placeholder="+355 69 123 4567"
-                value={phoneNumber}
-                onChange={(e) => setPhoneNumber(e.target.value)}
-              />
+              <label className={labelCls}>{t("phoneNumber")} *</label>
+              <input type="tel" value={phoneNumber} onChange={(e) => setPhoneNumber(e.target.value)} placeholder="+355 69 000 0000" className={inputCls} />
             </div>
+          </section>
 
-            <div className="pt-4">
-              <h3 className="text-sm font-semibold text-gray-900 mb-3 uppercase tracking-wide">
-                {t("shippingAddress")}
-              </h3>
-            </div>
-
+          {/* Shipping */}
+          <section className="space-y-7">
+            <p className="text-[10px] tracking-[0.3em] uppercase text-gray-300">{t("shippingAddress")}</p>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                {t("streetAddress")} *
-              </label>
-              <input
-                type="text"
-                className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-black focus:border-transparent transition-all outline-none"
-                value={address}
-                onChange={(e) => setAddress(e.target.value)}
-              />
+              <label className={labelCls}>{t("streetAddress")} *</label>
+              <input type="text" value={address} onChange={(e) => setAddress(e.target.value)} className={inputCls} />
             </div>
-
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                {t("city")} *
-              </label>
-              <input
-                type="text"
-                className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-black focus:border-transparent transition-all outline-none"
-                placeholder="Tirana"
-                value={city}
-                onChange={(e) => setCity(e.target.value)}
-              />
+              <label className={labelCls}>{t("city")} *</label>
+              <input type="text" value={city} onChange={(e) => setCity(e.target.value)} placeholder="Tirana" className={inputCls} />
             </div>
-
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                {t("orderNotes")}
-              </label>
-              <textarea
-                rows={3}
-                className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-black focus:border-transparent transition-all outline-none resize-none"
-                placeholder={t("orderNotes")}
-                value={notes}
-                onChange={(e) => setNotes(e.target.value)}
-              />
+              <label className={labelCls}>{t("orderNotes")}</label>
+              <textarea rows={2} value={notes} onChange={(e) => setNotes(e.target.value)} className="w-full border border-gray-100 bg-transparent px-3 py-2.5 text-sm text-gray-700 placeholder-gray-300 focus:outline-none focus:border-gray-300 transition-colors resize-none font-light" />
             </div>
-          </div>
+          </section>
         </div>
 
-        <div className="px-8 py-6 border-t border-gray-100 bg-gray-50 rounded-b-2xl">
+        {/* Footer */}
+        <div className="px-8 py-6 border-t border-gray-100 space-y-3">
+          {error && <p className="text-[11px] text-rose-500 tracking-wide">{error}</p>}
           <button
             onClick={handleSubmit}
             disabled={loading}
-            className="w-full bg-black text-white py-4 rounded-xl font-semibold hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+            className="w-full bg-[#1a0a20] text-white py-4 text-[11px] tracking-[0.25em] uppercase font-light hover:bg-black disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
           >
             {loading ? (
               <span className="flex items-center justify-center gap-2">
-                <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
-                  <circle
-                    className="opacity-25"
-                    cx="12"
-                    cy="12"
-                    r="10"
-                    stroke="currentColor"
-                    strokeWidth="4"
-                    fill="none"
-                  />
-                  <path
-                    className="opacity-75"
-                    fill="currentColor"
-                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                  />
-                </svg>
+                <div className="w-3.5 h-3.5 border border-white/30 border-t-white rounded-full animate-spin" />
                 {t("processing")}
               </span>
-            ) : (
-              t("confirmOrder")
-            )}
+            ) : t("confirmOrder")}
           </button>
         </div>
       </div>

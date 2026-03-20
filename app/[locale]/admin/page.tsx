@@ -4,8 +4,9 @@ import { useState, useEffect } from "react";
 import OrdersTable from "@/components/OrdersTable";
 import AdminProductsPanel from "@/components/AdminProductsPanel";
 import AddProductPanel from "@/components/AddProductPanel";
+import HeroPanel from "@/components/HeroPanel";
 
-type Tab = "orders" | "products" | "add";
+type Tab = "orders" | "products" | "add" | "hero";
 
 export default function AdminDashboard() {
   const [password, setPassword] = useState("");
@@ -71,7 +72,7 @@ export default function AdminDashboard() {
   // ── Login screen ───────────────────────────────────────────────────────────
   if (!isLoggedIn) {
     return (
-      <div className="min-h-screen bg-[#FAF9F7] flex items-center justify-center p-6">
+      <div className="min-h-screen bg-white flex items-center justify-center p-6">
         <div className="w-full max-w-sm">
           {/* Wordmark */}
           <p className="text-center text-[10px] tracking-[0.3em] uppercase text-gray-400 mb-10">
@@ -127,10 +128,11 @@ export default function AdminDashboard() {
     { key: "orders", label: "Orders" },
     { key: "products", label: "Products" },
     { key: "add", label: "New Product" },
+    { key: "hero", label: "Hero Image" },
   ];
 
   return (
-    <div className="min-h-screen bg-[#FAF9F7]">
+    <div className="min-h-screen bg-white">
       {/* Top bar */}
       <div className="border-b border-gray-100 bg-white">
         <div className="max-w-7xl mx-auto px-6 lg:px-10 h-14 flex items-center justify-between">
@@ -179,6 +181,7 @@ export default function AdminDashboard() {
             onProductAdded={() => setTab("products")}
           />
         )}
+        {tab === "hero" && <HeroPanel adminPassword={password} />}
       </div>
     </div>
   );

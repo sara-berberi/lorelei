@@ -8,7 +8,10 @@ export async function GET() {
   try {
     // Get all products (not deleted)
     const products = await prisma.product.findMany({
-      where: { deletedAt: null },
+      where: {
+        deletedAt: null,
+        NOT: { name: { contains: "kuti", mode: "insensitive" } },
+      },
       select: {
         category: true,
         brand: true,

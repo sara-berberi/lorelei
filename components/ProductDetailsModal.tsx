@@ -11,361 +11,237 @@ interface Product {
   price: number;
   salePrice: number | null;
   imageUrl: string;
-  sizes: string | null; // JSON string
+  sizes: string | null;
   category: string | null;
   brand: string | null;
   isSoldOut: boolean;
   isOnSale: boolean;
 }
 
-interface ProductDetailsModalProps {
-  product: Product;
-  onClose: () => void;
-}
-
-export default function ProductDetailsModal({
-  product,
-  onClose,
-}: ProductDetailsModalProps) {
+export default function ProductDetailsModal({ product, onClose }: { product: Product; onClose: () => void }) {
   const t = useTranslations("product");
   const tCart = useTranslations("cart");
-  const tCommon = useTranslations("common");
   const tCategories = useTranslations("categories");
   const { addToCart } = useCart();
 
-  const getCategoryTranslation = (category: string | null): string => {
-    if (!category) return "";
-    const categoryMap: Record<string, string> = {
-      Tops: "tops",
-      Bottoms: "bottoms",
-      Dresses: "dresses",
-      Coats: "coatsPuffers",
-      Nightwear: "nightwear",
-      Shoes: "shoes",
-      Activewear: "activewear",
-    };
-    const key = categoryMap[category] || category.toLowerCase();
-    try {
-      return tCategories(key);
-    } catch {
-      return category;
-    }
-  };
-
-  const [selectedSize, setSelectedSize] = useState<string>("");
+  const [selectedSize, setSelectedSize] = useState("");
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [touchStart, setTouchStart] = useState(0);
   const [touchEnd, setTouchEnd] = useState(0);
+  const [added, setAdded] = useState(false);
 
-  // Parse sizes from JSON string or use default
+  const getCategoryLabel = (category: string | null) => {
+    if (!category) return "";
+    const map: Record<string, string> = { Tops: "tops", Bottoms: "bottoms", Dresses: "dresses", Coats: "coatsPuffers", Nightwear: "nightwear", Shoes: "shoes", Activewear: "activewear" };
+    try { return tCategories(map[category] || category.toLowerCase()); } catch { return category; }
+  };
+
   const availableSizes = (() => {
-    if (!product.sizes) return ["S", "M", "L", "XL"];
+    if (!product.sizes) return [];
     try {
       const parsed = JSON.parse(product.sizes);
-      return Array.isArray(parsed) && parsed.length > 0
-        ? parsed
-        : ["S", "M", "L", "XL"];
-    } catch {
-      return ["S", "M", "L", "XL"];
-    }
+      return Array.isArray(parsed) ? parsed : [];
+    } catch { return []; }
   })();
 
-  // Parse images - support both single image URL and JSON array of URLs
   const images = (() => {
     try {
-      // Try to parse as JSON array first (for multiple images)
       const parsed = JSON.parse(product.imageUrl);
-      if (Array.isArray(parsed) && parsed.length > 0) {
-        return parsed as string[];
-      }
-    } catch {
-      // If parsing fails, it's a single image URL string
-    }
-    // Fallback to single image
+      if (Array.isArray(parsed) && parsed.length > 0) return parsed as string[];
+    } catch {}
     return [product.imageUrl];
   })();
 
-  const displayPrice =
-    product.isOnSale && product.salePrice ? product.salePrice : product.price;
-  const originalPrice =
-    product.isOnSale && product.salePrice ? product.price : null;
+  const displayPrice = product.isOnSale && product.salePrice ? product.salePrice : product.price;
+  const originalPrice = product.isOnSale && product.salePrice ? product.price : null;
 
   const handleAddToCart = () => {
-    if (!selectedSize) {
-      alert(t("selectSize"));
-      return;
-    }
+    if (!selectedSize) return;
     addToCart(product, selectedSize);
-    onClose();
+    setAdded(true);
+    setTimeout(() => { setAdded(false); onClose(); }, 800);
   };
 
-  // Swipe handlers for mobile
-  const handleTouchStart = (e: React.TouchEvent) => {
-    setTouchStart(e.targetTouches[0].clientX);
-  };
-
-  const handleTouchMove = (e: React.TouchEvent) => {
-    setTouchEnd(e.targetTouches[0].clientX);
-  };
-
+  const handleTouchStart = (e: React.TouchEvent) => setTouchStart(e.targetTouches[0].clientX);
+  const handleTouchMove = (e: React.TouchEvent) => setTouchEnd(e.targetTouches[0].clientX);
   const handleTouchEnd = () => {
     if (!touchStart || !touchEnd) return;
-
-    const distance = touchStart - touchEnd;
-    const isLeftSwipe = distance > 50;
-    const isRightSwipe = distance < -50;
-
-    if (isLeftSwipe && currentImageIndex < images.length - 1) {
-      setCurrentImageIndex(currentImageIndex + 1);
-    }
-    if (isRightSwipe && currentImageIndex > 0) {
-      setCurrentImageIndex(currentImageIndex - 1);
-    }
+    const d = touchStart - touchEnd;
+    if (d > 50 && currentImageIndex < images.length - 1) setCurrentImageIndex(i => i + 1);
+    if (d < -50 && currentImageIndex > 0) setCurrentImageIndex(i => i - 1);
   };
 
-  // Close on Escape key
   useEffect(() => {
-    const handleEscape = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
-    };
-    window.addEventListener("keydown", handleEscape);
-    return () => window.removeEventListener("keydown", handleEscape);
+    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
+    document.addEventListener("keydown", onKey);
+    document.body.style.overflow = "hidden";
+    return () => { document.removeEventListener("keydown", onKey); document.body.style.overflow = ""; };
   }, [onClose]);
 
   return (
-    <>
-      <div
-        className="fixed inset-0 bg-[#25092E] bg-opacity-40 backdrop-blur-sm flex items-center justify-center z-50 p-4 sm:p-6 overflow-y-auto"
-        onClick={(e) => e.target === e.currentTarget && onClose()}
-      >
-        <div className="bg-white rounded-none max-w-5xl w-full max-h-[95vh] overflow-y-auto shadow-2xl">
-          <div className="relative">
-            {/* Close button */}
-            <button
-              onClick={onClose}
-              className="absolute top-6 right-6 z-10 bg-white/90 backdrop-blur-sm rounded-full p-2.5 hover:bg-white transition-all shadow-sm"
-              aria-label="Close"
-            >
-              <svg
-                className="w-5 h-5 text-gray-800"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={1.5}
-                  d="M6 18L18 6M6 6l12 12"
-                />
-              </svg>
-            </button>
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-black/40 backdrop-blur-sm"
+      onClick={(e) => e.target === e.currentTarget && onClose()}
+    >
+      <div className="bg-white w-full max-w-4xl max-h-[94vh] overflow-y-auto shadow-2xl">
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-0">
-              {/* Image Carousel */}
-              <div className="relative aspect-[3/4] bg-gray-50 overflow-hidden">
-                {images.length > 0 ? (
-                  <>
-                    <img
-                      src={images[currentImageIndex]}
-                      alt={product.name}
-                      className="w-full h-full object-cover"
-                      onTouchStart={handleTouchStart}
-                      onTouchMove={handleTouchMove}
-                      onTouchEnd={handleTouchEnd}
-                    />
+        {/* Close */}
+        <button
+          onClick={onClose}
+          className="absolute top-5 right-5 z-10 text-gray-400 hover:text-gray-900 transition-colors"
+          aria-label="Close"
+        >
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
 
-                    {/* Carousel indicators */}
-                    {images.length > 1 && (
-                      <>
-                        <div className="absolute bottom-6 left-1/2 transform -translate-x-1/2 flex gap-2">
-                          {images.map((_, index) => (
-                            <button
-                              key={index}
-                              onClick={() => setCurrentImageIndex(index)}
-                              className={`w-1.5 h-1.5 rounded-full transition-all ${
-                                index === currentImageIndex
-                                  ? "bg-white w-6"
-                                  : "bg-white/50"
-                              }`}
-                              aria-label={`Go to image ${index + 1}`}
-                            />
-                          ))}
-                        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2">
 
-                        {/* Navigation arrows */}
-                        {currentImageIndex > 0 && (
-                          <button
-                            onClick={() =>
-                              setCurrentImageIndex(currentImageIndex - 1)
-                            }
-                            className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-white/90 backdrop-blur-sm hover:bg-white rounded-full p-2 transition-all shadow-sm"
-                            aria-label="Previous image"
-                          >
-                            <svg
-                              className="w-4 h-4 text-gray-800"
-                              fill="none"
-                              stroke="currentColor"
-                              viewBox="0 0 24 24"
-                            >
-                              <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                strokeWidth={2}
-                                d="M15 19l-7-7 7-7"
-                              />
-                            </svg>
-                          </button>
-                        )}
-
-                        {currentImageIndex < images.length - 1 && (
-                          <button
-                            onClick={() =>
-                              setCurrentImageIndex(currentImageIndex + 1)
-                            }
-                            className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-white/90 backdrop-blur-sm hover:bg-white rounded-full p-2 transition-all shadow-sm"
-                            aria-label="Next image"
-                          >
-                            <svg
-                              className="w-4 h-4 text-gray-800"
-                              fill="none"
-                              stroke="currentColor"
-                              viewBox="0 0 24 24"
-                            >
-                              <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                strokeWidth={2}
-                                d="M9 5l7 7-7 7"
-                              />
-                            </svg>
-                          </button>
-                        )}
-                      </>
-                    )}
-                  </>
-                ) : (
-                  <div className="w-full h-full flex items-center justify-center bg-gray-100">
-                    <span className="text-gray-300 text-sm tracking-wider">
-                      NO IMAGE
-                    </span>
-                  </div>
-                )}
+          {/* ── Images ── */}
+          <div
+            className="relative aspect-[3/4] bg-[#f7f6f4] overflow-hidden"
+            onTouchStart={handleTouchStart}
+            onTouchMove={handleTouchMove}
+            onTouchEnd={handleTouchEnd}
+          >
+            {images.length > 0 ? (
+              <img
+                src={images[currentImageIndex]}
+                alt={product.name}
+                className="w-full h-full object-cover"
+              />
+            ) : (
+              <div className="w-full h-full flex items-center justify-center">
+                <span className="text-[10px] tracking-widest uppercase text-gray-300">No Image</span>
               </div>
+            )}
 
-              {/* Product Details */}
-              <div className="p-8 sm:p-10 lg:p-12 flex flex-col bg-white">
-                <div className="flex-1">
-                  {/* Brand - Handwriting Style */}
-                  {product.brand && (
-                    <p className="text-lg text-gray-800 mb-1 font-['Brush_Script_MT',_cursive] tracking-wide">
-                      {product.brand}
-                    </p>
-                  )}
+            {/* Dot indicators */}
+            {images.length > 1 && (
+              <div className="absolute bottom-5 left-1/2 -translate-x-1/2 flex gap-1.5">
+                {images.map((_, i) => (
+                  <button
+                    key={i}
+                    onClick={() => setCurrentImageIndex(i)}
+                    className={`rounded-full transition-all duration-300 ${i === currentImageIndex ? "w-5 h-1.5 bg-white" : "w-1.5 h-1.5 bg-white/50"}`}
+                  />
+                ))}
+              </div>
+            )}
 
-                  {/* Title */}
-                  <h1 className="text-3xl sm:text-4xl font-light tracking-tight mb-3 text-gray-900 leading-tight">
-                    {product.name}
-                  </h1>
+            {/* Arrow navigation */}
+            {images.length > 1 && currentImageIndex > 0 && (
+              <button onClick={() => setCurrentImageIndex(i => i - 1)} className="absolute left-3 top-1/2 -translate-y-1/2 w-8 h-8 bg-white/80 hover:bg-white flex items-center justify-center transition-colors">
+                <svg className="w-4 h-4 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 19l-7-7 7-7" /></svg>
+              </button>
+            )}
+            {images.length > 1 && currentImageIndex < images.length - 1 && (
+              <button onClick={() => setCurrentImageIndex(i => i + 1)} className="absolute right-3 top-1/2 -translate-y-1/2 w-8 h-8 bg-white/80 hover:bg-white flex items-center justify-center transition-colors">
+                <svg className="w-4 h-4 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 5l7 7-7 7" /></svg>
+              </button>
+            )}
+          </div>
 
-                  {/* Category */}
-                  {product.category && (
-                    <p className="text-xs text-gray-400 uppercase tracking-widest mb-6 font-light">
-                      {getCategoryTranslation(product.category)}
-                    </p>
-                  )}
+          {/* ── Details ── */}
+          <div className="flex flex-col p-8 sm:p-10">
 
-                  {/* Badges */}
-                  <div className="flex gap-2 mb-8">
-                    {product.isSoldOut && (
-                      <span className="bg-gray-900 text-white px-4 py-1.5 text-xs font-light tracking-wider uppercase">
-                        {t("soldOut")}
-                      </span>
-                    )}
-                    {product.isOnSale && !product.isSoldOut && (
-                      <span className="bg-[#25092E] text-white px-4 py-1.5 text-xs font-light tracking-wider uppercase">
-                        {t("sale")}
-                      </span>
-                    )}
-                  </div>
+            {/* Brand + category */}
+            <div className="mb-5">
+              {product.brand && (
+                <p className="text-[10px] tracking-[0.3em] uppercase text-gray-400 mb-1">{product.brand}</p>
+              )}
+              {product.category && (
+                <p className="text-[10px] tracking-[0.2em] uppercase text-gray-300">{getCategoryLabel(product.category)}</p>
+              )}
+            </div>
 
-                  {/* Price */}
-                  <div className="flex items-baseline gap-3 mb-8 pb-6 border-b border-gray-100">
-                    <span
-                      className={`text-3xl font-light tracking-tight ${
-                        product.isOnSale ? "text-gray-900" : "text-gray-900"
+            {/* Name */}
+            <h2 className="text-2xl sm:text-3xl font-light tracking-tight text-gray-900 leading-tight mb-6">
+              {product.name}
+            </h2>
+
+            {/* Price */}
+            <div className="flex items-baseline gap-3 mb-6 pb-6 border-b border-gray-100">
+              <span className="text-2xl font-light text-gray-900">
+                ALL {displayPrice.toFixed(0)}
+              </span>
+              {originalPrice && (
+                <span className="text-base text-gray-400 line-through font-light">
+                  ALL {originalPrice.toFixed(0)}
+                </span>
+              )}
+              {product.isOnSale && !product.isSoldOut && (
+                <span className="ml-auto text-[9px] tracking-[0.2em] uppercase text-gray-500 border border-gray-200 px-2.5 py-1">
+                  Sale
+                </span>
+              )}
+              {product.isSoldOut && (
+                <span className="ml-auto text-[9px] tracking-[0.2em] uppercase text-gray-500 border border-gray-200 px-2.5 py-1">
+                  Sold Out
+                </span>
+              )}
+            </div>
+
+            {/* Description */}
+            {product.description && (
+              <p className="text-sm text-gray-500 font-light leading-relaxed mb-8">
+                {product.description}
+              </p>
+            )}
+
+            {/* Size selection */}
+            {availableSizes.length > 0 && (
+              <div className="mb-8">
+                <p className="text-[10px] tracking-[0.25em] uppercase text-gray-400 mb-3">
+                  {t("selectSize")}
+                </p>
+                <div className="flex flex-wrap gap-2">
+                  {availableSizes.map((size) => (
+                    <button
+                      key={size}
+                      onClick={() => !product.isSoldOut && setSelectedSize(size)}
+                      disabled={product.isSoldOut}
+                      className={`min-w-[44px] h-10 px-3 border text-[11px] tracking-wider uppercase transition-all duration-200 ${
+                        selectedSize === size
+                          ? "bg-gray-900 border-gray-900 text-white"
+                          : product.isSoldOut
+                          ? "border-gray-100 text-gray-300 cursor-not-allowed"
+                          : "border-gray-200 text-gray-700 hover:border-gray-700"
                       }`}
                     >
-                      ALL {displayPrice.toFixed(2)}
-                    </span>
-                    {originalPrice && (
-                      <span className="text-lg text-gray-400 line-through font-light">
-                        ALL {originalPrice.toFixed(2)}
-                      </span>
-                    )}
-                  </div>
-
-                  {/* Description */}
-                  {product.description && (
-                    <p className="text-gray-600 mb-8 text-sm leading-loose font-light">
-                      {product.description}
-                    </p>
-                  )}
-
-                  {/* Size Selection */}
-                  <div className="mb-10">
-                    <label className="block text-xs font-light mb-4 uppercase tracking-widest text-gray-700">
-                      {t("selectSize")}
-                    </label>
-                    <div className="flex flex-wrap gap-2">
-                      {availableSizes.map((size) => (
-                        <button
-                          key={size}
-                          onClick={() => setSelectedSize(size)}
-                          disabled={product.isSoldOut}
-                          className={`px-5 py-3 border transition-all text-sm font-light tracking-wide ${
-                            selectedSize === size
-                              ? "border-black bg-[#25092E] text-white"
-                              : product.isSoldOut
-                              ? "border-gray-200 text-gray-300 cursor-not-allowed"
-                              : "border-gray-300 hover:border-black text-gray-900"
-                          }`}
-                        >
-                          {size}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
+                      {size}
+                    </button>
+                  ))}
                 </div>
-
-                {/* Add to Cart Button */}
-                <button
-                  onClick={handleAddToCart}
-                  disabled={product.isSoldOut || !selectedSize}
-                  className={`w-full py-4 px-6 font-light tracking-widest uppercase text-sm transition-all ${
-                    product.isSoldOut || !selectedSize
-                      ? "bg-gray-100 text-gray-400 cursor-not-allowed"
-                      : "bg-[#25092E] text-white hover:bg-gray-800"
-                  }`}
-                >
-                  {product.isSoldOut ? t("soldOut") : tCart("addToCart")}
-                </button>
               </div>
+            )}
+
+            <div className="mt-auto space-y-3">
+              {/* Add to cart */}
+              <button
+                onClick={handleAddToCart}
+                disabled={product.isSoldOut || !selectedSize || added}
+                className={`w-full py-4 text-[11px] tracking-[0.3em] uppercase font-light transition-all duration-300 ${
+                  added
+                    ? "bg-gray-900 text-white"
+                    : product.isSoldOut
+                    ? "bg-gray-100 text-gray-300 cursor-not-allowed"
+                    : !selectedSize
+                    ? "bg-gray-100 text-gray-400 cursor-not-allowed"
+                    : "bg-gray-900 text-white hover:bg-black"
+                }`}
+              >
+                {added ? "Added ✓" : product.isSoldOut ? t("soldOut") : tCart("addToCart")}
+              </button>
+
+              {!selectedSize && !product.isSoldOut && (
+                <p className="text-center text-[10px] tracking-wider text-gray-400">Please select a size</p>
+              )}
             </div>
           </div>
         </div>
       </div>
-
-      <style jsx global>{`
-        /* Import handwriting-style font */
-        @import url("https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400;500;600&display=swap");
-
-        /* Apply to brand names for that chic, handwritten touch */
-        .font-\[\'Brush_Script_MT\'\,_cursive\] {
-          font-family: "Dancing Script", "Brush Script MT", cursive;
-          font-weight: 500;
-        }
-      `}</style>
-    </>
+    </div>
   );
 }
