@@ -3,7 +3,6 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
-import AdminAccessModal from "./AdminAccessModal";
 
 interface MobileMenuProps {
   locale: string;
@@ -14,8 +13,6 @@ export default function MobileMenu({ locale }: MobileMenuProps) {
 
   const [isOpen, setIsOpen] = useState(false);
   const [filtersOpen, setFiltersOpen] = useState(false);
-  const [open, setOpen] = useState(false);
-
   const [brands, setBrands] = useState<string[]>([]);
   const [categories, setCategories] = useState<string[]>([]);
 
@@ -192,18 +189,13 @@ export default function MobileMenu({ locale }: MobileMenuProps) {
             <Link
               href={`/${locale}/admin`}
               className="block px-4 py-3 text-base font-medium hover:bg-gray-100 rounded-md"
-              onClick={() => setOpen(true)}
+              onClick={closeMenu}
             >
               Admin Panel
             </Link>
           </li>
         </ul>
       </nav>
-      <AdminAccessModal
-        locale={locale}
-        isOpen={open}
-        onClose={() => setOpen(false)}
-      />
     </>
   );
 }

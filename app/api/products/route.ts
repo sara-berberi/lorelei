@@ -15,13 +15,18 @@ export async function GET(request: Request) {
     const maxPrice = searchParams.get("maxPrice");
     const isOnSaleParam = searchParams.get("isOnSale");
     const isSoldOutParam = searchParams.get("isSoldOut");
+    const deletedParam = searchParams.get("deleted");
 
     const isOnSale =
       isOnSaleParam === null ? undefined : isOnSaleParam === "true";
     const isSoldOut =
       isSoldOutParam === null ? undefined : isSoldOutParam === "true";
 
-    const where: any = { deletedAt: null };
+    // deleted=true returns only soft-deleted; default returns only active
+    const where: any =
+      deletedParam === "true"
+        ? { deletedAt: { not: null } }
+        : { deletedAt: null };
 
     if (category && category !== "all") where.category = category;
     if (brand && brand !== "all") where.brand = brand;
