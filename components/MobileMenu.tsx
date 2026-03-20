@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { createPortal } from "react-dom";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
 
@@ -11,6 +12,11 @@ interface MobileMenuProps {
 export default function MobileMenu({ locale }: MobileMenuProps) {
   const t = useTranslations("common");
   const [isOpen, setIsOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   useEffect(() => {
     document.body.style.overflow = isOpen ? "hidden" : "";
@@ -25,6 +31,90 @@ export default function MobileMenu({ locale }: MobileMenuProps) {
     }, 150);
   };
 
+  const menu = isOpen ? (
+    <div style={{ position: "fixed", inset: 0, zIndex: 99999 }}>
+      {/* Backdrop */}
+      <div
+        onClick={closeMenu}
+        style={{
+          position: "absolute",
+          inset: 0,
+          backgroundColor: "rgba(0,0,0,0.5)",
+          backdropFilter: "blur(4px)",
+        }}
+      />
+
+      {/* Drawer */}
+      <nav
+        style={{
+          position: "absolute",
+          top: 0,
+          left: 0,
+          height: "100%",
+          width: "288px",
+          backgroundColor: "#ffffff",
+          display: "flex",
+          flexDirection: "column",
+          boxShadow: "4px 0 24px rgba(0,0,0,0.12)",
+        }}
+      >
+        {/* Header */}
+        <div style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          padding: "0 24px",
+          height: "64px",
+          borderBottom: "1px solid #f3f4f6",
+          flexShrink: 0,
+        }}>
+          <span style={{ fontSize: "10px", letterSpacing: "0.3em", textTransform: "uppercase", color: "#9ca3af" }}>
+            Menu
+          </span>
+          <button onClick={closeMenu} style={{ color: "#9ca3af", background: "none", border: "none", cursor: "pointer", padding: "4px" }}>
+            <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+
+        {/* Links */}
+        <ul style={{ padding: "32px 24px", listStyle: "none", margin: 0 }}>
+          {[
+            { label: t("home"), href: `/${locale}`, onClick: closeMenu },
+            {
+              label: t("products"),
+              href: `/${locale}`,
+              onClick: () => { sessionStorage.removeItem("selectedBrand"); closeMenu(); scrollToProducts(); },
+            },
+            { label: t("brands"), href: `/${locale}/brands`, onClick: closeMenu },
+            { label: t("mysteryBox"), href: `/${locale}/mystery-box`, onClick: closeMenu },
+            { label: "Admin", href: `/${locale}/admin`, onClick: closeMenu },
+          ].map(({ label, href, onClick }) => (
+            <li key={label}>
+              <Link
+                href={href}
+                onClick={onClick}
+                style={{
+                  display: "block",
+                  padding: "12px 0",
+                  fontSize: "11px",
+                  letterSpacing: "0.2em",
+                  textTransform: "uppercase",
+                  color: "#4b5563",
+                  textDecoration: "none",
+                  borderBottom: "1px solid #f9fafb",
+                }}
+              >
+                {label}
+              </Link>
+            </li>
+          ))}
+        </ul>
+      </nav>
+    </div>
+  ) : null;
+
   return (
     <>
       {/* Hamburger — mobile only */}
@@ -38,59 +128,7 @@ export default function MobileMenu({ locale }: MobileMenuProps) {
         </svg>
       </button>
 
-      {/* Backdrop */}
-      {isOpen && (
-        <div
-          className="fixed inset-0 bg-black/30 backdrop-blur-sm z-[9998]"
-          onClick={closeMenu}
-        />
-      )}
-
-      {/* Drawer */}
-      <nav
-        className={`fixed top-0 left-0 h-full w-72 bg-white z-[9999] transform transition-transform duration-300 ease-in-out ${
-          isOpen ? "translate-x-0" : "-translate-x-full"
-        }`}
-      >
-        {/* Header */}
-        <div className="flex items-center justify-between px-6 h-16 border-b border-gray-100">
-          <p className="text-[10px] tracking-[0.3em] uppercase text-gray-400">Menu</p>
-          <button onClick={closeMenu} className="text-gray-400 hover:text-gray-900 transition-colors">
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M6 18L18 6M6 6l12 12" />
-            </svg>
-          </button>
-        </div>
-
-        {/* Links */}
-        <ul className="px-6 py-8 space-y-1">
-          {[
-            { label: t("home"), href: `/${locale}`, onClick: closeMenu },
-            {
-              label: t("products"),
-              href: `/${locale}`,
-              onClick: () => {
-                sessionStorage.removeItem("selectedBrand");
-                closeMenu();
-                scrollToProducts();
-              },
-            },
-            { label: t("brands"), href: `/${locale}/brands`, onClick: closeMenu },
-            { label: t("mysteryBox"), href: `/${locale}/mystery-box`, onClick: closeMenu },
-            { label: "Admin", href: `/${locale}/admin`, onClick: closeMenu },
-          ].map(({ label, href, onClick }) => (
-            <li key={label}>
-              <Link
-                href={href}
-                onClick={onClick}
-                className="block py-3 text-[11px] tracking-[0.2em] uppercase text-gray-600 hover:text-gray-900 border-b border-gray-50 transition-colors"
-              >
-                {label}
-              </Link>
-            </li>
-          ))}
-        </ul>
-      </nav>
+      {mounted && createPortal(menu, document.body)}
     </>
   );
 }

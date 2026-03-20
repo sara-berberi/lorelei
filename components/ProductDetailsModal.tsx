@@ -83,15 +83,15 @@ export default function ProductDetailsModal({ product, onClose }: { product: Pro
       className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-black/40 backdrop-blur-sm"
       onClick={(e) => e.target === e.currentTarget && onClose()}
     >
-      <div className="bg-white w-full max-w-4xl max-h-[94vh] overflow-y-auto shadow-2xl">
+      <div className="relative bg-white w-full max-w-3xl max-h-[88vh] overflow-y-auto shadow-2xl">
 
         {/* Close */}
         <button
           onClick={onClose}
-          className="absolute top-5 right-5 z-10 text-gray-400 hover:text-gray-900 transition-colors"
+          className="absolute top-6 right-6 z-10 text-gray-400 hover:text-gray-900 transition-colors"
           aria-label="Close"
         >
-          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M6 18L18 6M6 6l12 12" />
           </svg>
         </button>
@@ -144,7 +144,7 @@ export default function ProductDetailsModal({ product, onClose }: { product: Pro
           </div>
 
           {/* ── Details ── */}
-          <div className="flex flex-col p-8 sm:p-10">
+          <div className="flex flex-col p-6 sm:p-8">
 
             {/* Brand + category */}
             <div className="mb-5">
