@@ -32,6 +32,15 @@ export default function ProductFilters({ onFilterChange, initialFilters, hideSal
   const [filterOptions, setFilterOptions] = useState<FilterOptions>({ categories: [], brands: [], sizes: [], priceRange: { min: 0, max: 0 } });
   const [loading, setLoading] = useState(true);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [modalOpen, setModalOpen] = useState(false);
+
+  useEffect(() => {
+    const observer = new MutationObserver(() => {
+      setModalOpen(document.body.style.overflow === "hidden");
+    });
+    observer.observe(document.body, { attributes: true, attributeFilter: ["style"] });
+    return () => observer.disconnect();
+  }, []);
 
   const [selectedCategory, setSelectedCategory] = useState(initialFilters?.category || "all");
   const [selectedBrand, setSelectedBrand] = useState(initialFilters?.brand || "all");
@@ -152,11 +161,11 @@ export default function ProductFilters({ onFilterChange, initialFilters, hideSal
       {/* Mobile filter button */}
       <button
         onClick={() => setMobileOpen(true)}
-        className="lg:hidden fixed bottom-6 right-6 z-[9999] bg-[#1a0a20] text-white px-5 py-2.5 shadow-lg flex items-center gap-2 text-[10px] tracking-[0.2em] uppercase"
+        className={`lg:hidden fixed top-1/2 -translate-y-1/2 right-0 z-[9999] bg-white/95 backdrop-blur-sm border-l border-t border-b border-[#1a0a20]/20 text-[#1a0a20] px-3 py-2 shadow-[0_4px_24px_rgba(26,10,32,0.18)] flex items-center gap-1.5 text-[9px] tracking-[0.2em] uppercase transition-opacity duration-200 ${modalOpen ? "opacity-0 pointer-events-none" : "opacity-100"}`}
       >
-        <SlidersHorizontal className="w-3.5 h-3.5" />
+        <SlidersHorizontal className="w-3 h-3" />
         {t("title")}
-        {hasActiveFilters && <span className="w-1.5 h-1.5 rounded-full bg-white/60" />}
+        {hasActiveFilters && <span className="w-1 h-1 rounded-full bg-gray-400" />}
       </button>
 
       {/* Mobile drawer */}
