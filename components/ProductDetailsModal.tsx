@@ -175,7 +175,7 @@ export default function ProductDetailsModal({ product, onClose }: { product: Pro
 
             {/* Price */}
             <div className="flex items-baseline gap-3 mb-6 pb-6 border-b border-gray-100">
-              <span className="text-2xl font-light text-gray-900">
+              <span className={`text-2xl font-light ${product.isOnSale ? "text-rose-500" : "text-gray-900"}`}>
                 ALL {displayPrice.toFixed(0)}
               </span>
               {originalPrice && (

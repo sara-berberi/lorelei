@@ -10,21 +10,40 @@ export default async function SpecialPricesPage() {
   return (
     <div className="min-h-screen bg-white text-gray-800">
 
-      {/* ── Header banner ─────────────────────────────────────────────── */}
-      <div className="border-b border-gray-100">
-        <div className="max-w-5xl mx-auto px-6 lg:px-10 py-16 sm:py-20 flex flex-col sm:flex-row sm:items-end gap-6 sm:gap-10">
-          <div>
-            <div className="inline-flex items-center gap-2 mb-5">
-              <span className="w-1.5 h-1.5 rounded-full bg-rose-400" />
-              <span className="text-[9px] tracking-[0.35em] uppercase text-rose-400">{t("onSaleBadge")}</span>
-            </div>
-            <h1 className="text-3xl sm:text-4xl font-light tracking-tight text-gray-900">
-              {t("specialPrices")}
-            </h1>
+      {/* ── Top urgency bar ───────────────────────────────────────────── */}
+      <div className="bg-rose-500 text-white text-center py-2.5 px-4">
+        <p className="text-[10px] tracking-[0.3em] uppercase font-light">
+          {t("specialPricesUrgency")}
+        </p>
+      </div>
+
+      {/* ── Header ───────────────────────────────────────────────────── */}
+      <div className="border-b border-rose-100 bg-[#fff8f8]">
+        <div className="max-w-5xl mx-auto px-6 lg:px-10 py-14 sm:py-18">
+
+          {/* Badge row */}
+          <div className="flex items-center gap-3 mb-6">
+            <span className="inline-flex items-center gap-1.5 bg-rose-500 text-white text-[9px] tracking-[0.3em] uppercase px-3 py-1.5">
+              <span className="w-1 h-1 rounded-full bg-white/80 animate-pulse" />
+              {t("onSaleBadge")}
+            </span>
+            <span className="text-[10px] tracking-widest uppercase text-rose-300">— {t("specialPricesPricesReduced")}</span>
           </div>
-          <p className="text-sm text-gray-400 font-light sm:mb-1 max-w-xs leading-relaxed">
-            {t("specialPricesSubtitle")}
-          </p>
+
+          <div className="flex flex-col sm:flex-row sm:items-end gap-6 sm:gap-12">
+            <div>
+              <h1 className="text-4xl sm:text-5xl font-light tracking-tight text-gray-900 mb-2">
+                {t("specialPrices")}
+              </h1>
+              <div className="flex items-center gap-2 mt-3">
+                <div className="h-px w-8 bg-rose-400" />
+                <p className="text-[10px] tracking-[0.2em] uppercase text-rose-400">{t("specialPricesExclusiveDeals")}</p>
+              </div>
+            </div>
+            <p className="text-sm text-gray-400 font-light sm:mb-1 max-w-xs leading-relaxed">
+              {t("specialPricesSubtitle")}
+            </p>
+          </div>
         </div>
       </div>
 

@@ -60,7 +60,7 @@ export default function ProductCard({ product }: { product: Product }) {
             </span>
           )}
           {product.isOnSale && !product.isSoldOut && (
-            <span className="absolute top-3 left-3 text-[9px] tracking-[0.2em] uppercase text-white/90 bg-[#1a0a20]/70 backdrop-blur-sm px-2.5 py-1">
+            <span className="absolute top-3 left-3 text-[9px] tracking-[0.2em] uppercase text-white bg-rose-500 px-2.5 py-1">
               Sale
             </span>
           )}
@@ -85,7 +85,7 @@ export default function ProductCard({ product }: { product: Product }) {
           <h3 className="text-sm font-light text-gray-900 leading-snug mb-2 line-clamp-2">{product.name}</h3>
 
           <div className="flex items-baseline gap-2">
-            <span className="text-sm font-light text-gray-900">
+            <span className={`text-sm font-light ${product.isOnSale ? "text-rose-500" : "text-gray-900"}`}>
               ALL {displayPrice.toFixed(0)}
             </span>
             {originalPrice && (
