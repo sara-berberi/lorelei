@@ -129,7 +129,12 @@
   "product": {
     "soldOut": "Shitur",
     "sale": "Ulje",
-    "selectSize": "Zgjidhni Madhësinë"
+    "selectSize": "Zgjidhni Madhësinë",
+    "sizes": "Masat",
+    "piecesAvailable": "produkte në dispozicion",
+    "pieceAvailable": "produkt në dispozicion",
+    "piecesOnSale": "produkte me ulje",
+    "pieceOnSale": "produkt me ulje"
   },
   "cart": {
     "cart": "Shporta",

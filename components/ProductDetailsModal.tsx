@@ -164,7 +164,7 @@ export default function ProductDetailsModal({ product, onClose }: { product: Pro
             {/* Available sizes — mobile only, shown right under title for screenshot */}
             {availableSizes.length > 0 && (
               <div className="flex sm:hidden items-center gap-2 mb-5 flex-wrap">
-                <span className="text-[9px] tracking-[0.25em] uppercase text-gray-300">Sizes</span>
+                <span className="text-[9px] tracking-[0.25em] uppercase text-gray-300">{t("sizes")}</span>
                 {availableSizes.map((size) => (
                   <span key={size} className="text-[10px] tracking-wider text-gray-500 border border-gray-200 px-2 py-0.5">
                     {size}

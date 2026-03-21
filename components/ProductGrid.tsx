@@ -31,6 +31,7 @@ interface FilterState {
 
 export default function ProductGrid() {
   const t = useTranslations("filters");
+  const tProduct = useTranslations("product");
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
@@ -172,7 +173,7 @@ export default function ProductGrid() {
               <span className="font-medium text-gray-900">
                 {products.length}
               </span>{" "}
-              {products.length === 1 ? "piece" : "pieces"} available
+              {products.length === 1 ? tProduct("pieceAvailable") : tProduct("piecesAvailable")}
             </p>
             <div className="h-px w-20 bg-gradient-to-r from-transparent via-gray-200 to-transparent"></div>
           </div>

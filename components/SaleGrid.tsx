@@ -31,6 +31,7 @@ interface FilterState {
 
 export default function SaleGrid() {
   const t = useTranslations("filters");
+  const tProduct = useTranslations("product");
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
@@ -110,7 +111,7 @@ export default function SaleGrid() {
           <div className="mb-8 flex items-center justify-between border-b border-gray-100 pb-6">
             <p className="text-sm text-gray-500 font-light">
               <span className="font-medium text-gray-900">{products.length}</span>{" "}
-              {products.length === 1 ? "piece" : "pieces"} on sale
+              {products.length === 1 ? tProduct("pieceOnSale") : tProduct("piecesOnSale")}
             </p>
           </div>
         )}

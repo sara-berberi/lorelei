@@ -129,7 +129,12 @@
   "product": {
     "soldOut": "Sold Out",
     "sale": "Sale",
-    "selectSize": "Select Size"
+    "selectSize": "Select Size",
+    "sizes": "Sizes",
+    "piecesAvailable": "pieces available",
+    "pieceAvailable": "piece available",
+    "piecesOnSale": "pieces on sale",
+    "pieceOnSale": "piece on sale"
   },
   "cart": {
     "cart": "Cart",
