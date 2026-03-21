@@ -152,7 +152,7 @@ export default function ProductFilters({ onFilterChange, initialFilters, hideSal
       {/* Mobile filter button */}
       <button
         onClick={() => setMobileOpen(true)}
-        className="lg:hidden fixed bottom-6 right-6 z-40 bg-[#1a0a20] text-white px-5 py-2.5 shadow-lg flex items-center gap-2 text-[10px] tracking-[0.2em] uppercase"
+        className="lg:hidden fixed bottom-6 right-6 z-[9999] bg-[#1a0a20] text-white px-5 py-2.5 shadow-lg flex items-center gap-2 text-[10px] tracking-[0.2em] uppercase"
       >
         <SlidersHorizontal className="w-3.5 h-3.5" />
         {t("title")}
@@ -162,8 +162,8 @@ export default function ProductFilters({ onFilterChange, initialFilters, hideSal
       {/* Mobile drawer */}
       {mobileOpen && (
         <>
-          <div className="lg:hidden fixed inset-0 bg-black/20 backdrop-blur-sm z-40" onClick={() => setMobileOpen(false)} />
-          <div className="lg:hidden fixed inset-y-0 right-0 w-full max-w-xs bg-white z-50 overflow-y-auto">
+          <div className="lg:hidden fixed inset-0 bg-black/20 backdrop-blur-sm z-[10000]" onClick={() => setMobileOpen(false)} />
+          <div className="lg:hidden fixed inset-y-0 right-0 w-full max-w-xs bg-white z-[10001] overflow-y-auto">
             <div className="p-8 relative">
               <button onClick={() => setMobileOpen(false)} className="absolute top-6 right-6 text-gray-400 hover:text-gray-900 transition-colors">
                 <X className="w-4 h-4" />
