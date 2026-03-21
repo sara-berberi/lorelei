@@ -1,6 +1,7 @@
 import { getTranslations } from "next-intl/server";
 import ProductGrid from "@/components/ProductGrid";
 import Hero from "@/components/Hero";
+import RecentlyViewed from "@/components/RecentlyViewed";
 
 
 export const dynamic = "force-dynamic";
@@ -25,6 +26,8 @@ export default async function Home({ params }: { params: Promise<{ locale: strin
       <section id="products" className="bg-white">
         <ProductGrid />
       </section>
+
+      <RecentlyViewed />
 
       {/* ── Trust pillars ────────────────────────────────────────────── */}
       <section className="py-20 sm:py-28 bg-[#0f0612] text-white">

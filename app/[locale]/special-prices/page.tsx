@@ -1,5 +1,6 @@
 import { getTranslations } from "next-intl/server";
 import SaleGrid from "@/components/SaleGrid";
+import RecentlyViewed from "@/components/RecentlyViewed";
 
 export const dynamic = "force-dynamic";
 export const fetchCache = "force-no-store";
@@ -51,6 +52,8 @@ export default async function SpecialPricesPage() {
       <section className="bg-white">
         <SaleGrid />
       </section>
+
+      <RecentlyViewed />
 
     </div>
   );

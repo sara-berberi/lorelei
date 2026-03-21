@@ -126,6 +126,11 @@
     "button": "Subscribe",
     "privacy": "We respect your privacy. Unsubscribe at any time."
   },
+  "whatsapp": {
+    "orderButton": "Order via WhatsApp",
+    "relatedProducts": "Similar products",
+    "recentlyViewed": "Recently viewed"
+  },
   "product": {
     "soldOut": "Sold Out",
     "sale": "Sale",

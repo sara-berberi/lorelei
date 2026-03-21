@@ -73,6 +73,7 @@ export default function AddProductPanel({
   const [isSoldOut, setIsSoldOut] = useState(false);
   const [category, setCategory] = useState("");
   const [brand, setBrand] = useState("");
+  const [stock, setStock] = useState("");
   const [sizes, setSizes] = useState<string[]>([]);
   const [images, setImages] = useState<ImageEntry[]>([]);
   const [newUrlInput, setNewUrlInput] = useState("");
@@ -164,6 +165,7 @@ export default function AddProductPanel({
           brand: brand.trim() || null,
           sizes: JSON.stringify(sizes),
           imageUrl,
+          stock: stock || null,
         }),
       });
 
@@ -173,7 +175,7 @@ export default function AddProductPanel({
         return;
       }
 
-      setName(""); setDescription(""); setPrice(""); setSalePrice("");
+      setName(""); setDescription(""); setPrice(""); setSalePrice(""); setStock("");
       setIsOnSale(false); setIsSoldOut(false); setCategory(""); setBrand("");
       setSizes([]); setImages([]); setNewUrlInput("");
       setSuccess(true);
@@ -263,6 +265,16 @@ export default function AddProductPanel({
                 className={inputCls}
               />
             </div>
+          </div>
+          <div>
+            <label className={labelCls}>Stock (pieces left)</label>
+            <input
+              type="number" min="0" step="1"
+              value={stock}
+              onChange={(e) => setStock(e.target.value)}
+              placeholder="Leave empty if unlimited"
+              className={inputCls}
+            />
           </div>
 
           {/* Toggles */}

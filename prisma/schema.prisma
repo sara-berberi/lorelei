@@ -22,6 +22,7 @@ model Product {
   brand       String?     @db.VarChar(100) // Brand name
   isSoldOut   Boolean     @default(false)
   isOnSale    Boolean     @default(false)
+  stock       Int?
   updatedAt   DateTime    @updatedAt
   deletedAt   DateTime?
   createdAt   DateTime    @default(now())

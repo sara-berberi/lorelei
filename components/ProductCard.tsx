@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import ProductDetailsModal from "./ProductDetailsModal";
+import { trackView } from "./RecentlyViewed";
 
 interface Product {
   id: number;
@@ -15,6 +16,7 @@ interface Product {
   brand: string | null;
   isSoldOut: boolean;
   isOnSale: boolean;
+  stock?: number | null;
 }
 
 export default function ProductCard({ product }: { product: Product }) {
@@ -35,7 +37,7 @@ export default function ProductCard({ product }: { product: Product }) {
 
   return (
     <>
-      <div className="group cursor-pointer" onClick={() => setIsModalOpen(true)}>
+      <div className="group cursor-pointer" data-product-id={product.id} onClick={() => { trackView(product); setIsModalOpen(true); }}>
 
         {/* Image */}
         <div className="relative aspect-[3/4] overflow-hidden bg-[#f7f6f4]">
@@ -63,6 +65,16 @@ export default function ProductCard({ product }: { product: Product }) {
             <span className="absolute top-3 left-3 text-[9px] tracking-[0.2em] uppercase text-white bg-rose-500 px-2.5 py-1">
               Sale
             </span>
+          )}
+
+          {/* Low stock warning */}
+          {!product.isSoldOut && product.stock != null && product.stock <= 3 && product.stock > 0 && (
+            <div className="absolute bottom-0 left-0 right-0 bg-rose-500/90 backdrop-blur-sm px-3 py-1.5 flex items-center gap-1.5">
+              <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse flex-shrink-0" />
+              <span className="text-[9px] tracking-[0.2em] uppercase text-white font-light">
+                Vetëm {product.stock} {product.stock === 1 ? "produkt" : "produkte"} mbetur
+              </span>
+            </div>
           )}
 
           {/* Quick-add — appears on hover */}

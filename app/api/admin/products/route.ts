@@ -20,6 +20,7 @@ export async function POST(request: Request) {
     brand,
     sizes,
     imageUrl,
+    stock,
   } = fields;
 
   if (!name || !price || !imageUrl) {
@@ -41,6 +42,7 @@ export async function POST(request: Request) {
       brand: brand || null,
       sizes: sizes ?? "[]",
       imageUrl,
+      stock: stock ? parseInt(stock) : null,
     },
   });
 

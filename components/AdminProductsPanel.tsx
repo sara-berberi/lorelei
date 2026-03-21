@@ -14,6 +14,7 @@ interface Product {
   brand: string | null;
   isSoldOut: boolean;
   isOnSale: boolean;
+  stock: number | null;
   deletedAt: string | null;
 }
 
@@ -27,6 +28,7 @@ interface EditState {
   description: string;
   sizes: string[];
   images: string[];
+  stock: string;
 }
 
 function parseImages(imageUrl: string): string[] {
@@ -114,6 +116,7 @@ export default function AdminProductsPanel({
       description: product.description ?? "",
       sizes: parseSizes(product.sizes),
       images: parseImages(product.imageUrl),
+      stock: product.stock?.toString() ?? "",
     });
     setSaveError("");
     setNewImageUrl("");
@@ -166,6 +169,7 @@ export default function AdminProductsPanel({
           description: editState.description || null,
           sizes: JSON.stringify(editState.sizes),
           imageUrl,
+          stock: editState.stock ? parseInt(editState.stock) : null,
         }),
       });
 
@@ -385,6 +389,18 @@ export default function AdminProductsPanel({
                         className={inputCls}
                       />
                     </div>
+                  </div>
+
+                  {/* Stock */}
+                  <div>
+                    <label className={labelCls}>Stock (pieces left)</label>
+                    <input
+                      type="number" min="0" step="1"
+                      value={editState.stock}
+                      onChange={(e) => setEditState((p) => p ? { ...p, stock: e.target.value } : p)}
+                      placeholder="Leave empty if unlimited"
+                      className={inputCls}
+                    />
                   </div>
 
                   {/* Description */}

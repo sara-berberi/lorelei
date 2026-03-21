@@ -8,6 +8,7 @@ import CartDrawer from "@/components/CartDrawer";
 import { CartProvider } from "@/contexts/CartContext";
 import Link from "next/link";
 import MobileMenu from "@/components/MobileMenu";
+import WhatsAppButton from "@/components/WhatsAppButton";
 
 export default async function LocaleLayout({
   children,
@@ -87,6 +88,7 @@ export default async function LocaleLayout({
 
           <main>{children}</main>
           <CartDrawer />
+          <WhatsAppButton floating />
         </div>
       </CartProvider>
     </NextIntlClientProvider>

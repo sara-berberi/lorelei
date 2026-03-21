@@ -126,6 +126,11 @@
     "button": "Regjistrohu",
     "privacy": "Respektojmë privatësinë tuaj. Çregjistrohu në çdo kohë."
   },
+  "whatsapp": {
+    "orderButton": "Porosit përmes WhatsApp",
+    "relatedProducts": "Produkte të ngjashme",
+    "recentlyViewed": "Shikuar së fundmi"
+  },
   "product": {
     "soldOut": "Shitur",
     "sale": "Ulje",

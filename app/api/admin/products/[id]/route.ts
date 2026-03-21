@@ -75,6 +75,7 @@ export async function PATCH(
     "sizes",
     "imageUrl",
     "name",
+    "stock",
   ];
 
   const data: Record<string, any> = {};

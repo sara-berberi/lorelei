@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useTranslations } from "next-intl";
 import { useCart } from "@/contexts/CartContext";
+import WhatsAppButton from "./WhatsAppButton";
 
 interface Product {
   id: number;
@@ -16,12 +17,14 @@ interface Product {
   brand: string | null;
   isSoldOut: boolean;
   isOnSale: boolean;
+  stock?: number | null;
 }
 
 export default function ProductDetailsModal({ product, onClose }: { product: Product; onClose: () => void }) {
   const t = useTranslations("product");
   const tCart = useTranslations("cart");
   const tCategories = useTranslations("categories");
+  const tWhatsapp = useTranslations("whatsapp");
   const { addToCart } = useCart();
 
   const [selectedSize, setSelectedSize] = useState("");
@@ -29,6 +32,7 @@ export default function ProductDetailsModal({ product, onClose }: { product: Pro
   const [touchStart, setTouchStart] = useState(0);
   const [touchEnd, setTouchEnd] = useState(0);
   const [added, setAdded] = useState(false);
+  const [related, setRelated] = useState<Product[]>([]);
 
   const getCategoryLabel = (category: string | null) => {
     if (!category) return "";
@@ -77,6 +81,19 @@ export default function ProductDetailsModal({ product, onClose }: { product: Pro
     document.body.style.overflow = "hidden";
     return () => { document.removeEventListener("keydown", onKey); document.body.style.overflow = ""; };
   }, [onClose]);
+
+  useEffect(() => {
+    if (!product.category) return;
+    const params = new URLSearchParams({ category: product.category, excludeCategory: "mysteryBox" });
+    fetch(`/api/products?${params}`)
+      .then((r) => r.ok ? r.json() : [])
+      .then((data: Product[]) => {
+        if (Array.isArray(data)) {
+          setRelated(data.filter((p) => p.id !== product.id).slice(0, 4));
+        }
+      })
+      .catch(() => {});
+  }, [product.id, product.category]);
 
   return (
     <div
@@ -229,6 +246,16 @@ export default function ProductDetailsModal({ product, onClose }: { product: Pro
               </div>
             )}
 
+            {/* Low stock warning */}
+            {!product.isSoldOut && product.stock != null && product.stock <= 3 && product.stock > 0 && (
+              <div className="flex items-center gap-2 py-2.5 px-3 bg-rose-50 border border-rose-100 mb-4">
+                <span className="w-1.5 h-1.5 rounded-full bg-rose-400 animate-pulse flex-shrink-0" />
+                <span className="text-[10px] tracking-[0.15em] uppercase text-rose-500 font-light">
+                  Vetëm {product.stock} {product.stock === 1 ? "produkt" : "produkte"} mbetur — porosit tani
+                </span>
+              </div>
+            )}
+
             <div className="mt-auto space-y-3">
               {/* Add to cart */}
               <button
@@ -250,9 +277,37 @@ export default function ProductDetailsModal({ product, onClose }: { product: Pro
               {!selectedSize && !product.isSoldOut && (
                 <p className="text-center text-[10px] tracking-wider text-gray-400">Please select a size</p>
               )}
+
+              <WhatsAppButton productName={product.name} size={selectedSize} />
             </div>
           </div>
         </div>
+
+        {/* ── Related products ── */}
+        {related.length > 0 && (
+          <div className="border-t border-gray-100 p-6 sm:p-8">
+            <p className="text-[10px] tracking-[0.3em] uppercase text-gray-400 mb-5">{tWhatsapp("relatedProducts")}</p>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+              {related.map((p) => {
+                const img = (() => { try { const a = JSON.parse(p.imageUrl); return Array.isArray(a) ? a[0] : p.imageUrl; } catch { return p.imageUrl; } })();
+                const price = p.isOnSale && p.salePrice ? p.salePrice : p.price;
+                return (
+                  <button
+                    key={p.id}
+                    onClick={() => { onClose(); setTimeout(() => { const el = document.querySelector(`[data-product-id="${p.id}"]`) as HTMLElement; el?.click(); }, 100); }}
+                    className="text-left group"
+                  >
+                    <div className="aspect-[3/4] overflow-hidden bg-[#f7f6f4] mb-2">
+                      <img src={img} alt={p.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                    </div>
+                    <p className="text-[10px] text-gray-500 font-light line-clamp-2 leading-snug mb-0.5">{p.name}</p>
+                    <p className={`text-[11px] font-light ${p.isOnSale ? "text-rose-500" : "text-gray-900"}`}>ALL {price.toFixed(0)}</p>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
