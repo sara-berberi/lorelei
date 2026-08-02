@@ -26,7 +26,12 @@ async function getReviews(): Promise<Review[] | null> {
   }
 }
 
-export default async function ReviewsSection() {
+export default async function ReviewsSection({
+  /** The dedicated reviews page renders its own title, so it hides this one. */
+  hideHeading = false,
+}: {
+  hideHeading?: boolean;
+} = {}) {
   const t = await getTranslations("reviews");
   const reviews = await getReviews();
 
@@ -34,16 +39,22 @@ export default async function ReviewsSection() {
   if (reviews === null) return null;
 
   return (
-    <section className="py-24 bg-[#FAF9F7] border-t border-gray-100">
+    <section
+      className={`py-24 ${
+        hideHeading ? "bg-white" : "bg-[#FAF9F7] border-t border-gray-100"
+      }`}
+    >
       <div className="max-w-5xl mx-auto px-6 lg:px-10">
-        <div className="text-center mb-14">
-          <p className="text-[10px] tracking-[0.35em] uppercase text-gray-400 mb-4">
-            {t("title")}
-          </p>
-          <h3 className="text-2xl sm:text-3xl font-light tracking-tight text-gray-900">
-            {t("subtitle")}
-          </h3>
-        </div>
+        {!hideHeading && (
+          <div className="text-center mb-14">
+            <p className="text-[10px] tracking-[0.35em] uppercase text-gray-400 mb-4">
+              {t("title")}
+            </p>
+            <h3 className="text-2xl sm:text-3xl font-light tracking-tight text-gray-900">
+              {t("subtitle")}
+            </h3>
+          </div>
+        )}
 
         {reviews.length === 0 && (
           <p className="text-center text-sm text-gray-400 font-light">

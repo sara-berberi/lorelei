@@ -40,7 +40,7 @@ export default function SaleGrid() {
   const [filters, setFilters] = useState<FilterState>({
     category: "all",
     brand: "all",
-    size: "all",
+    size: "",
     minPrice: "",
     maxPrice: "",
   });
@@ -57,7 +57,8 @@ export default function SaleGrid() {
 
       if (f.category !== "all") params.append("category", f.category);
       if (f.brand !== "all") params.append("brand", f.brand);
-      if (f.size !== "all") params.append("size", f.size);
+      // size is a comma-separated list; empty means no size filter
+      if (f.size && f.size !== "all") params.append("size", f.size);
       if (f.minPrice) params.append("minPrice", f.minPrice);
       if (f.maxPrice) params.append("maxPrice", f.maxPrice);
       if (f.isSoldOut !== undefined) params.append("isSoldOut", String(f.isSoldOut));

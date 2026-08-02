@@ -54,7 +54,7 @@ export default function ProductGrid() {
   const [initialFilters] = useState<FilterState>(() => ({
     category: "all",
     brand: getInitialBrand(),
-    size: "all",
+    size: "",
     minPrice: "",
     maxPrice: "",
     isOnSale: undefined,
@@ -76,7 +76,9 @@ export default function ProductGrid() {
         params.append("category", filterState.category);
       if (filterState.brand !== "all")
         params.append("brand", filterState.brand);
-      if (filterState.size !== "all") params.append("size", filterState.size);
+      // size is a comma-separated list; empty means no size filter
+      if (filterState.size && filterState.size !== "all")
+        params.append("size", filterState.size);
       if (filterState.minPrice) params.append("minPrice", filterState.minPrice);
       if (filterState.maxPrice) params.append("maxPrice", filterState.maxPrice);
 

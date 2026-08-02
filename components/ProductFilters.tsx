@@ -123,7 +123,19 @@ export default function ProductFilters({
   // caller-provided value) is reflected in the controls on every breakpoint.
   const [selectedCategory, setSelectedCategory] = useState(initialFilters?.category ?? "all");
   const [selectedBrand, setSelectedBrand] = useState(initialFilters?.brand ?? "all");
-  const [selectedSize, setSelectedSize] = useState(initialFilters?.size ?? "all");
+  // Sizes are multi-select; stored as an array and serialised to a
+  // comma-separated string for the API ("" means no size filter).
+  const [selectedSizes, setSelectedSizes] = useState<string[]>(() =>
+    (initialFilters?.size ?? "")
+      .split(",")
+      .map((s) => s.trim())
+      .filter((s) => s && s !== "all")
+  );
+
+  const toggleSize = (size: string) =>
+    setSelectedSizes((prev) =>
+      prev.includes(size) ? prev.filter((s) => s !== size) : [...prev, size]
+    );
   const [minPrice, setMinPrice] = useState(initialFilters?.minPrice ?? "");
   const [maxPrice, setMaxPrice] = useState(initialFilters?.maxPrice ?? "");
   const [isOnSale, setIsOnSale] = useState<boolean | undefined>(initialFilters?.isOnSale);
@@ -185,13 +197,13 @@ export default function ProductFilters({
     onFilterChangeRef.current({
       category: selectedCategory,
       brand: selectedBrand,
-      size: selectedSize,
+      size: selectedSizes.join(","),
       minPrice: debouncedMin,
       maxPrice: debouncedMax,
       isOnSale,
       isSoldOut,
     });
-  }, [selectedCategory, selectedBrand, selectedSize, debouncedMin, debouncedMax, isOnSale, isSoldOut]);
+  }, [selectedCategory, selectedBrand, selectedSizes, debouncedMin, debouncedMax, isOnSale, isSoldOut]);
 
   const getCategoryLabel = useCallback(
     (c: string) => {
@@ -223,7 +235,7 @@ export default function ProductFilters({
   const handleClearAll = () => {
     setSelectedCategory("all");
     setSelectedBrand("all");
-    setSelectedSize("all");
+    setSelectedSizes([]);
     setMinPrice("");
     setMaxPrice("");
     setIsOnSale(undefined);
@@ -234,12 +246,12 @@ export default function ProductFilters({
     let n = 0;
     if (selectedCategory !== "all") n++;
     if (selectedBrand !== "all") n++;
-    if (selectedSize !== "all") n++;
+    if (selectedSizes.length > 0) n++;
     if (minPrice !== "" || maxPrice !== "") n++;
     if (isOnSale !== undefined) n++;
     if (isSoldOut !== undefined) n++;
     return n;
-  }, [selectedCategory, selectedBrand, selectedSize, minPrice, maxPrice, isOnSale, isSoldOut]);
+  }, [selectedCategory, selectedBrand, selectedSizes, minPrice, maxPrice, isOnSale, isSoldOut]);
 
   const hasActiveFilters = activeCount > 0;
 
@@ -280,24 +292,40 @@ export default function ProductFilters({
     [isOnSale, isSoldOut, t]
   );
 
-  // Size chips, shared between the drawer and the desktop bar.
+  // Size chips — multi-select. "All" clears the selection; any other chip
+  // toggles on/off, and a product matches if it has ANY selected size.
   const sizeChips = (
     <div className="flex flex-wrap gap-1.5">
-      {["all", ...filterOptions.sizes].map((s) => (
-        <button
-          key={s}
-          type="button"
-          onClick={() => setSelectedSize(s)}
-          aria-pressed={selectedSize === s}
-          className={`min-w-[2.5rem] px-3 py-1.5 text-[10px] tracking-widest uppercase transition-all border ${
-            selectedSize === s
-              ? "bg-gray-900 text-white border-gray-900"
-              : "text-gray-500 border-gray-200 hover:border-gray-900 hover:text-gray-900"
-          }`}
-        >
-          {s === "all" ? t("allSizes") : s}
-        </button>
-      ))}
+      <button
+        type="button"
+        onClick={() => setSelectedSizes([])}
+        aria-pressed={selectedSizes.length === 0}
+        className={`min-w-[2.5rem] px-3 py-1.5 text-[10px] tracking-widest uppercase transition-all border ${
+          selectedSizes.length === 0
+            ? "bg-gray-900 text-white border-gray-900"
+            : "text-gray-500 border-gray-200 hover:border-gray-900 hover:text-gray-900"
+        }`}
+      >
+        {t("allSizes")}
+      </button>
+      {filterOptions.sizes.map((s) => {
+        const active = selectedSizes.includes(s);
+        return (
+          <button
+            key={s}
+            type="button"
+            onClick={() => toggleSize(s)}
+            aria-pressed={active}
+            className={`min-w-[2.5rem] px-3 py-1.5 text-[10px] tracking-widest uppercase transition-all border ${
+              active
+                ? "bg-gray-900 text-white border-gray-900"
+                : "text-gray-500 border-gray-200 hover:border-gray-900 hover:text-gray-900"
+            }`}
+          >
+            {s}
+          </button>
+        );
+      })}
     </div>
   );
 
@@ -366,9 +394,9 @@ export default function ProductFilters({
           {selectedBrand !== "all" && (
             <Chip label={selectedBrand} onClear={() => setSelectedBrand("all")} />
           )}
-          {selectedSize !== "all" && (
-            <Chip label={selectedSize} onClear={() => setSelectedSize("all")} />
-          )}
+          {selectedSizes.map((s) => (
+            <Chip key={s} label={s} onClear={() => toggleSize(s)} />
+          ))}
           {(minPrice !== "" || maxPrice !== "") && (
             <Chip
               label={`${minPrice || "0"}–${maxPrice || "∞"}`}

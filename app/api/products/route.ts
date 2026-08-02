@@ -72,23 +72,27 @@ export async function GET(request: Request) {
       orderBy: { createdAt: "desc" },
     });
 
+    // `size` accepts one value or a comma-separated list. A product matches
+    // if it stocks ANY of the requested sizes.
+    const wantedSizes = (size ?? "")
+      .split(",")
+      .map((s) => s.trim().toLowerCase())
+      .filter((s) => s && s !== "all");
+
     let filteredProducts = products;
-    if (size && size !== "all") {
-      const wanted = size.trim().toLowerCase();
+    if (wantedSizes.length > 0) {
       filteredProducts = products.filter((product) => {
         if (!product.sizes) return false;
+        let available: string[];
         try {
-          const sizes = JSON.parse(product.sizes);
-          return (
-            Array.isArray(sizes) &&
-            sizes.some((s) => String(s).trim().toLowerCase() === wanted)
-          );
+          const parsed = JSON.parse(product.sizes);
+          available = Array.isArray(parsed) ? parsed.map(String) : [];
         } catch {
           // Legacy rows may store a plain comma-separated string.
-          return product.sizes
-            .split(",")
-            .some((s) => s.trim().toLowerCase() === wanted);
+          available = product.sizes.split(",");
         }
+        const normalised = available.map((s) => s.trim().toLowerCase());
+        return wantedSizes.some((w) => normalised.includes(w));
       });
     }
 
