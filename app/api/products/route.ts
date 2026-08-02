@@ -9,7 +9,6 @@ export async function GET(request: Request) {
     const { searchParams } = new URL(request.url);
 
     const category = searchParams.get("category");
-    const excludeCategory = searchParams.get("excludeCategory");
     const brand = searchParams.get("brand");
     const size = searchParams.get("size");
     const minPrice = searchParams.get("minPrice");
@@ -23,24 +22,24 @@ export async function GET(request: Request) {
     const isSoldOut =
       isSoldOutParam === null ? undefined : isSoldOutParam === "true";
 
-    // deleted=true returns only soft-deleted; default returns only active
+    // deleted=true returns only soft-deleted; default returns only active.
+    // AND is used as a collector so independent filters can never overwrite
+    // each other (each pushes its own clause instead of assigning where.OR).
+    const and: any[] = [];
     const where: any =
       deletedParam === "true"
-        ? { deletedAt: { not: null } }
-        : { deletedAt: null };
+        ? { deletedAt: { not: null }, AND: and }
+        : { deletedAt: null, AND: and };
 
-    // Mystery box products: name contains "kuti" (case-insensitive), matching SQL LIKE '%Kuti%'
-    const isMysteryBox = { name: { contains: "kuti", mode: "insensitive" as const } };
-
-    if (category === "mysteryBox") {
-      Object.assign(where, isMysteryBox);
-    } else if (excludeCategory === "mysteryBox") {
-      where.NOT = isMysteryBox;
-    } else if (category && category !== "all") {
-      where.category = category;
+    // Category is stored inconsistently (e.g. "Dresses" from older rows vs
+    // "dresses" from the admin panel), so match case-insensitively.
+    if (category && category !== "all") {
+      and.push({ category: { equals: category, mode: "insensitive" } });
     }
 
-    if (brand && brand !== "all") where.brand = brand;
+    if (brand && brand !== "all") {
+      and.push({ brand: { equals: brand, mode: "insensitive" } });
+    }
 
     if (isOnSale !== undefined) where.isOnSale = isOnSale;
     if (isSoldOut !== undefined) where.isSoldOut = isSoldOut;
@@ -48,40 +47,47 @@ export async function GET(request: Request) {
     if (minPrice || maxPrice) {
       const min = minPrice ? parseFloat(minPrice) : undefined;
       const max = maxPrice ? parseFloat(maxPrice) : undefined;
+      const range = {
+        ...(min !== undefined && !isNaN(min) && { gte: min }),
+        ...(max !== undefined && !isNaN(max) && { lte: max }),
+      };
 
-      where.OR = [
-        {
-          isOnSale: true,
-          salePrice: {
-            ...(min !== undefined && { gte: min }),
-            ...(max !== undefined && { lte: max }),
-          },
-        },
-        {
-          isOnSale: false,
-          price: {
-            ...(min !== undefined && { gte: min }),
-            ...(max !== undefined && { lte: max }),
-          },
-        },
-      ];
+      if (Object.keys(range).length) {
+        // Compare against the price the customer actually pays: salePrice when
+        // the item is on sale and has one, base price otherwise.
+        and.push({
+          OR: [
+            { isOnSale: true, salePrice: { not: null, ...range } },
+            { isOnSale: true, salePrice: null, price: range },
+            { isOnSale: false, price: range },
+          ],
+        });
+      }
     }
 
+    // Sizes are a JSON string column, so they can't be filtered in SQL.
+    // Fetch the matching rows, then narrow by parsed size.
     const products = await prisma.product.findMany({
       where,
       orderBy: { createdAt: "desc" },
     });
 
-    // Size filter (JSON)
     let filteredProducts = products;
     if (size && size !== "all") {
+      const wanted = size.trim().toLowerCase();
       filteredProducts = products.filter((product) => {
         if (!product.sizes) return false;
         try {
           const sizes = JSON.parse(product.sizes);
-          return Array.isArray(sizes) && sizes.includes(size);
+          return (
+            Array.isArray(sizes) &&
+            sizes.some((s) => String(s).trim().toLowerCase() === wanted)
+          );
         } catch {
-          return false;
+          // Legacy rows may store a plain comma-separated string.
+          return product.sizes
+            .split(",")
+            .some((s) => s.trim().toLowerCase() === wanted);
         }
       });
     }

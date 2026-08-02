@@ -106,6 +106,8 @@ export default function BrandsList({ locale }: BrandsListProps) {
                 <img
                   src={brandLogos[brand]}
                   alt={brand}
+                  loading="lazy"
+                  decoding="async"
                   className="w-full h-full object-contain filter grayscale group-hover:grayscale-0 transition-all duration-300"
                 />
               ) : (

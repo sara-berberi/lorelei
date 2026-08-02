@@ -3,7 +3,6 @@
     "home": "Home",
     "products": "Products",
     "brands": "Brands",
-    "mysteryBox": "Mystery Box",
     "specialPrices": "Special Prices",
     "onSaleBadge": "On Sale",
     "specialPricesSubtitle": "Carefully selected pieces at exceptional prices — quality never compromised.",
@@ -20,7 +19,7 @@
     "filters": "Filters",
     "price": "Price",
     "applyFilters": "Apply Filters",
-    "announcement-text": "ORDER NOW PAY ON DELIVERY | FREE SHIPPING OVER 4000ALL 🎉"
+    "announcement-text": "ORDER NOW PAY ON DELIVERY | FREE SHIPPING OVER 6000ALL 🎉"
   },
   "categories": {
     "tops": "Tops",
@@ -50,7 +49,11 @@
     "onSale": "On Sale",
     "inStock": "In Stock",
     "soldOut": "Sold Out",
-    "loading": "Loading..."
+    "loading": "Loading...",
+    "apply": "Show results",
+    "filtersActive": "active",
+    "results": "results",
+    "adjustFilters": "Try adjusting your filters"
   },
   "checkout": {
     "title": "Checkout",
@@ -84,47 +87,13 @@
     "title": "Curated Fashion, Timeless Style",
     "description": "Discover premium pieces carefully selected for the modern woman who values quality, elegance, and individuality."
   },
-  "affordableFashion": {
-    "title": "Affordable Pieces",
-    "description": "Chic styles that don't break the bank. Chic doesn't have to mean expensive."
-  },
-  "fastShipping": {
-    "title": "Fast Shipping",
-    "description": "Orders ship within 1–2 days via trusted carriers."
-  },
-  "returnsAllowed": {
-    "title": "Returns Allowed",
-    "description": "Shop with confidence, easy returns if it's not the perfect fit."
-  },
-  "trustSection": {
-    "title": "The Lorelei Promise",
-    "subtitle": "Excellence in every detail, from selection to delivery"
-  },
-  "testimonials": {
-    "title": "What Our Customers Say",
-    "subtitle": "Join our loyal girlies",
-    "testimonial1": {
-      "text": "Shumë të kënaqur me blerjet! Materialet janë shumë të mira dhe erdhi super shpejt.",
-      "name": "Ana M.",
-      "label": "Blerëse e Verifikuar"
-    },
-    "testimonial2": {
-      "text": "Produktet janë të bukura dhe çmimet e mira. Shërbimi është shumë i sjellshëm!",
-      "name": "Elisa K.",
-      "label": "Blerëse e Verifikuar"
-    },
-    "testimonial3": {
-      "text": "Më pëlqen që ky butik ka gjithmonë gjëra të bukura dhe cilësore. Çdo gjë që kam marrë ka qenë super!",
-      "name": "Maria S.",
-      "label": "Blerëse e Verifikuar"
-    }
-  },
-  "newsletter": {
-    "title": "Join Our Style Community",
-    "subtitle": "Be the first to discover new arrivals, exclusive offers, and style inspiration delivered to your inbox",
-    "placeholder": "Enter your email",
-    "button": "Subscribe",
-    "privacy": "We respect your privacy. Unsubscribe at any time."
+  "reviews": {
+    "title": "Client Reviews",
+    "subtitle": "Real messages from our girlies",
+    "anonymous": "Anonymous",
+    "reviewFrom": "Review from",
+    "anonymousReview": "Anonymous client review",
+    "empty": "No reviews yet — check back soon."
   },
   "whatsapp": {
     "orderButton": "Order via WhatsApp",
@@ -195,15 +164,5 @@
     "description": "Get ready to shine at every celebration — from office Christmas parties to glamorous New Year's Eve nights. Dazzling dresses, glittering details, and elegant fits… everything you need to look unforgettable.",
     "tagline": "Find the perfect look for the work party (and every party).",
     "button": "Coming Soon ⏰"
-  },
-  "mysteryBox": {
-    "title": "The Mystery Box",
-    "subtitle": "You don’t choose what’s inside. You choose how bold you want the surprise to be.",
-    "description": "Each Mystery Box is carefully curated with exclusive pieces you won’t find anywhere else. Every size holds a different level of excitement — and maybe your new favorite item.",
-    "sizesTitle": "Choose Your Surprise Size",
-    "small": "Small Box",
-    "medium": "Medium Box",
-    "big": "Big Box",
-    "cta": "Reveal the Surprise"
   }
 }

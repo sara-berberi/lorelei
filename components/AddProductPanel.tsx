@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 
 const CATEGORIES = [
   { value: "", label: "No category" },
@@ -22,6 +22,22 @@ interface ImageEntry {
   file?: File;
   uploading?: boolean;
   error?: string;
+}
+
+/** A saved set of field values the admin can re-apply to the form. */
+interface ProductTemplate {
+  id: number;
+  name: string;
+  productName: string | null;
+  description: string | null;
+  price: number | null;
+  salePrice: number | null;
+  category: string | null;
+  brand: string | null;
+  sizes: string | null;
+  stock: number | null;
+  isOnSale: boolean;
+  isSoldOut: boolean;
 }
 
 const CLOUD_NAME = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME ?? "";
@@ -80,6 +96,119 @@ export default function AddProductPanel({
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState("");
   const [success, setSuccess] = useState(false);
+
+  // ── Templates ───────────────────────────────────────────────────────────
+  const [templates, setTemplates] = useState<ProductTemplate[]>([]);
+  const [templatesLoading, setTemplatesLoading] = useState(true);
+  const [appliedTemplateId, setAppliedTemplateId] = useState<number | null>(null);
+  const [savingTemplate, setSavingTemplate] = useState(false);
+  const [templateNameInput, setTemplateNameInput] = useState("");
+  const [showSaveTemplate, setShowSaveTemplate] = useState(false);
+  const [templateNotice, setTemplateNotice] = useState("");
+
+  const loadTemplates = useCallback(async () => {
+    try {
+      const res = await fetch(
+        `/api/admin/templates?password=${encodeURIComponent(adminPassword)}`
+      );
+      if (res.ok) setTemplates(await res.json());
+    } catch {
+      // Templates are a convenience; failing to load them must not block
+      // creating a product.
+    } finally {
+      setTemplatesLoading(false);
+    }
+  }, [adminPassword]);
+
+  useEffect(() => {
+    loadTemplates();
+  }, [loadTemplates]);
+
+  const flashTemplateNotice = (msg: string) => {
+    setTemplateNotice(msg);
+    setTimeout(() => setTemplateNotice(""), 3000);
+  };
+
+  /** Fill the form from a template. Photos are never templated. */
+  const applyTemplate = (tpl: ProductTemplate) => {
+    setName(tpl.productName ?? "");
+    setDescription(tpl.description ?? "");
+    setPrice(tpl.price != null ? String(tpl.price) : "");
+    setSalePrice(tpl.salePrice != null ? String(tpl.salePrice) : "");
+    setCategory(tpl.category ?? "");
+    setBrand(tpl.brand ?? "");
+    setStock(tpl.stock != null ? String(tpl.stock) : "");
+    setIsOnSale(tpl.isOnSale);
+    setIsSoldOut(tpl.isSoldOut);
+    try {
+      const parsed = JSON.parse(tpl.sizes ?? "[]");
+      setSizes(Array.isArray(parsed) ? parsed.map(String) : []);
+    } catch {
+      setSizes([]);
+    }
+    setAppliedTemplateId(tpl.id);
+    setSubmitError("");
+    flashTemplateNotice(`Template “${tpl.name}” applied.`);
+  };
+
+  /** Save the current form values (minus photos) as a reusable template. */
+  const saveTemplate = async () => {
+    const templateName = templateNameInput.trim();
+    if (!templateName) return;
+
+    setSavingTemplate(true);
+    try {
+      const res = await fetch("/api/admin/templates", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          password: adminPassword,
+          name: templateName,
+          productName: name.trim() || null,
+          description: description.trim() || null,
+          price,
+          salePrice,
+          category,
+          brand,
+          sizes: JSON.stringify(sizes),
+          stock,
+          isOnSale,
+          isSoldOut,
+        }),
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        flashTemplateNotice(err.error ?? "Could not save template.");
+        return;
+      }
+      setTemplateNameInput("");
+      setShowSaveTemplate(false);
+      await loadTemplates();
+      flashTemplateNotice(`Template “${templateName}” saved.`);
+    } catch {
+      flashTemplateNotice("Network error saving template.");
+    } finally {
+      setSavingTemplate(false);
+    }
+  };
+
+  const deleteTemplate = async (tpl: ProductTemplate) => {
+    if (!confirm(`Delete template “${tpl.name}”?`)) return;
+    try {
+      const res = await fetch("/api/admin/templates", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ password: adminPassword, id: tpl.id }),
+      });
+      if (res.ok) {
+        if (appliedTemplateId === tpl.id) setAppliedTemplateId(null);
+        await loadTemplates();
+        flashTemplateNotice("Template deleted.");
+      }
+    } catch {
+      flashTemplateNotice("Network error deleting template.");
+    }
+  };
 
   const toggleSize = (size: string) =>
     setSizes((prev) =>
@@ -178,6 +307,7 @@ export default function AddProductPanel({
       setName(""); setDescription(""); setPrice(""); setSalePrice(""); setStock("");
       setIsOnSale(false); setIsSoldOut(false); setCategory(""); setBrand("");
       setSizes([]); setImages([]); setNewUrlInput("");
+      setAppliedTemplateId(null);
       setSuccess(true);
       setTimeout(() => setSuccess(false), 4000);
       onProductAdded?.();
@@ -191,6 +321,99 @@ export default function AddProductPanel({
   return (
     <div className="max-w-xl">
       <div className="space-y-10">
+
+        {/* ── Templates ────────────────────────────────────────────────── */}
+        <section className="space-y-4">
+          <div className="flex items-center justify-between">
+            <p className="text-[10px] tracking-[0.3em] uppercase text-gray-300">Templates</p>
+            <button
+              type="button"
+              onClick={() => setShowSaveTemplate((v) => !v)}
+              className="text-[10px] tracking-[0.2em] uppercase text-gray-500 hover:text-gray-900 transition-colors"
+            >
+              {showSaveTemplate ? "Cancel" : "Save current as template"}
+            </button>
+          </div>
+
+          {showSaveTemplate && (
+            <div className="flex gap-3 items-end">
+              <input
+                type="text"
+                value={templateNameInput}
+                onChange={(e) => setTemplateNameInput(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    e.preventDefault();
+                    saveTemplate();
+                  }
+                }}
+                placeholder="Template name — e.g. Zara Dress Default"
+                className={inputCls}
+                autoFocus
+              />
+              <button
+                type="button"
+                onClick={saveTemplate}
+                disabled={!templateNameInput.trim() || savingTemplate}
+                className="text-[10px] tracking-[0.2em] uppercase text-gray-900 hover:text-black disabled:text-gray-300 transition-colors pb-2 whitespace-nowrap"
+              >
+                {savingTemplate ? "Saving…" : "Save"}
+              </button>
+            </div>
+          )}
+
+          {templatesLoading ? (
+            <p className="text-[10px] tracking-widest uppercase text-gray-300">Loading…</p>
+          ) : templates.length === 0 ? (
+            <p className="text-[11px] text-gray-400 font-light leading-relaxed">
+              No templates yet. Fill in the fields below, then save them as a
+              template to reuse for similar products.
+            </p>
+          ) : (
+            <div className="flex flex-wrap gap-2">
+              {templates.map((tpl) => {
+                const active = appliedTemplateId === tpl.id;
+                return (
+                  <span
+                    key={tpl.id}
+                    className={`group inline-flex items-center border transition-all ${
+                      active
+                        ? "bg-gray-900 border-gray-900 text-white"
+                        : "bg-white border-gray-200 text-gray-600 hover:border-gray-900 hover:text-gray-900"
+                    }`}
+                  >
+                    <button
+                      type="button"
+                      onClick={() => applyTemplate(tpl)}
+                      title="Click to autofill the form from this template"
+                      className="px-3.5 py-1.5 text-[11px] tracking-widest uppercase"
+                    >
+                      {tpl.name}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => deleteTemplate(tpl)}
+                      aria-label={`Delete template ${tpl.name}`}
+                      className={`pr-2.5 pl-0.5 py-1.5 opacity-0 group-hover:opacity-100 transition-opacity ${
+                        active ? "text-white/70 hover:text-white" : "text-gray-300 hover:text-rose-500"
+                      }`}
+                    >
+                      <svg className="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                      </svg>
+                    </button>
+                  </span>
+                );
+              })}
+            </div>
+          )}
+
+          {templateNotice && (
+            <p className="text-[11px] text-gray-500 tracking-wide">{templateNotice}</p>
+          )}
+        </section>
+
+        <div className="h-px bg-gray-100" />
 
         {/* ── Identity ─────────────────────────────────────────────────── */}
         <section className="space-y-7">

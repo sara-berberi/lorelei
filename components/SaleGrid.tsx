@@ -52,9 +52,8 @@ export default function SaleGrid() {
       const timeoutId = setTimeout(() => controller.abort(), 10000);
 
       const params = new URLSearchParams();
-      // Always locked to on-sale, never mystery box
+      // Always locked to on-sale
       params.append("isOnSale", "true");
-      params.append("excludeCategory", "mysteryBox");
 
       if (f.category !== "all") params.append("category", f.category);
       if (f.brand !== "all") params.append("brand", f.brand);
@@ -130,8 +129,8 @@ export default function SaleGrid() {
           <>
             <div className="product-grid" style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "32px" }}>
               {currentProducts.map((product, index) => (
-                <div key={product.id} className="animate-fadeIn" style={{ animationDelay: `${index * 50}ms`, animationFillMode: "backwards" }}>
-                  <ProductCard product={product} />
+                <div key={product.id} className="animate-fadeIn" style={{ animationDelay: `${Math.min(index, 4) * 40}ms`, animationFillMode: "backwards" }}>
+                  <ProductCard product={product} priority={index < 4} />
                 </div>
               ))}
             </div>

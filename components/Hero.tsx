@@ -1,5 +1,6 @@
 import { getTranslations } from "next-intl/server";
 import { prisma } from "@/lib/prisma";
+import { cloudinaryUrl, buildSrcSet } from "@/lib/images";
 
 const FALLBACK_IMAGE =
   "https://res.cloudinary.com/dj6ono36y/image/upload/v1/lorelei_hero/default";
@@ -21,13 +22,18 @@ export default async function Hero() {
 
   return (
     <section className="relative h-[85vh] min-h-[560px] flex items-end overflow-hidden">
-      {/* Background photo */}
+      {/* Background photo — the LCP element, so it is served at the
+          smallest sufficient width in a modern format and never lazy-loaded. */}
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
-        src={heroImageUrl}
+        src={cloudinaryUrl(heroImageUrl, { width: 1200 })}
+        srcSet={buildSrcSet(heroImageUrl, [640, 828, 1200, 1920, 2400])}
+        sizes="100vw"
         alt=""
         className="absolute inset-0 w-full h-full object-cover"
         fetchPriority="high"
+        loading="eager"
+        decoding="sync"
       />
 
       {/* Gradient overlay */}

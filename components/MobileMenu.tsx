@@ -88,7 +88,6 @@ export default function MobileMenu({ locale }: MobileMenuProps) {
               onClick: () => { sessionStorage.removeItem("selectedBrand"); closeMenu(); scrollToProducts(); },
             },
             { label: t("brands"), href: `/${locale}/brands`, onClick: closeMenu },
-            { label: t("mysteryBox"), href: `/${locale}/mystery-box`, onClick: closeMenu },
             { label: t("specialPrices"), href: `/${locale}/special-prices`, onClick: closeMenu, red: true },
             { label: "Admin", href: `/${locale}/admin`, onClick: closeMenu },
           ].map(({ label, href, onClick, red }: { label: string; href: string; onClick: () => void; red?: boolean }) => (

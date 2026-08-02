@@ -3,7 +3,6 @@
     "home": "Kryefaqja",
     "products": "Produktet",
     "brands": "Markat",
-    "mysteryBox": "Kutia Mister",
     "specialPrices": "Ulje",
     "onSaleBadge": "Ulje",
     "specialPricesSubtitle": "Veshje të zgjedhura me kujdes me çmime të jashtëzakonshme — cilësia nuk kompromentohet kurrë.",
@@ -20,7 +19,7 @@
     "filters": "Filtrat",
     "price": "Çmimi",
     "applyFilters": "Apliko Filtrat",
-    "announcement-text": "POROSIT TANI, PAGUAJ NË DORËZIM | TRANSPORT FALAS MBI 4000ALL 🎉"
+    "announcement-text": "POROSIT TANI, PAGUAJ NË DORËZIM | TRANSPORT FALAS MBI 6000ALL 🎉"
   },
   "categories": {
     "tops": "Bluza & Kemisha",
@@ -50,7 +49,11 @@
     "onSale": "Në Ulje",
     "inStock": "Në Stok",
     "soldOut": "Shitur",
-    "loading": "Duke Ngarkuar..."
+    "loading": "Duke Ngarkuar...",
+    "apply": "Shfaq rezultatet",
+    "filtersActive": "aktive",
+    "results": "rezultate",
+    "adjustFilters": "Provoni të ndryshoni filtrat"
   },
   "checkout": {
     "title": "Porosia",
@@ -84,47 +87,13 @@
     "title": "Modë e Përzgjedhur, Stil i Përjetshëm",
     "description": "Zbuloni copëza premium të përzgjedhura me kujdes për gruan moderne që vlerëson cilësinë, elegancën dhe individualitetin."
   },
-  "affordableFashion": {
-    "title": "Veshje të Përballueshme",
-    "description": "Copëza elegante që nuk u shkatërrojnë buxhetin. Eleganca nuk do të thotë gjithmonë e shtrenjtë."
-  },
-  "fastShipping": {
-    "title": "Dërgesë e Shpejtë",
-    "description": "Porositë dërgohen brenda 1–2 ditësh në Shqipëri."
-  },
-  "returnsAllowed": {
-    "title": "Kthime të Lejuara",
-    "description": "Blini me besim, nese nuk ju përshtatet, kthimet janë të lejuara."
-  },
-  "trustSection": {
-    "title": "Premtimi i Lorelei",
-    "subtitle": "Përsosmëri në çdo detaj, nga përzgjedhja deri në dorëzim"
-  },
-  "testimonials": {
-    "title": "Çfarë thonë klientët tanë",
-    "subtitle": "Bashkohuni me vajzat e kënaqura",
-    "testimonial1": {
-      "text": "Shumë të kënaqur me blerjet! Materialet janë shumë të mira dhe erdhi super shpejt.",
-      "name": "Ana M.",
-      "label": "Blerëse e Verifikuar"
-    },
-    "testimonial2": {
-      "text": "Produktet janë të bukura dhe çmimet e mira. Shërbimi është shumë i sjellshëm!",
-      "name": "Elisa K.",
-      "label": "Blerëse e Verifikuar"
-    },
-    "testimonial3": {
-      "text": "Më pëlqen që ky butik ka gjithmonë gjëra të bukura dhe cilësore. Çdo gjë që kam marrë ka qenë super!",
-      "name": "Maria S.",
-      "label": "Blerëse e Verifikuar"
-    }
-  },
-  "newsletter": {
-    "title": "Bashkohu me Komunitetin Tonë të Stilit",
-    "subtitle": "Jini të parët që zbuloni koleksionet e reja, ofertat ekskluzive dhe frymëzim stili drejtpërdrejt në email-in tuaj",
-    "placeholder": "Vendosni email-in tuaj",
-    "button": "Regjistrohu",
-    "privacy": "Respektojmë privatësinë tuaj. Çregjistrohu në çdo kohë."
+  "reviews": {
+    "title": "Vlerësimet e Klientëve",
+    "subtitle": "Mesazhe të vërteta nga vajzat tona",
+    "anonymous": "Anonim",
+    "reviewFrom": "Vlerësim nga",
+    "anonymousReview": "Vlerësim anonim i klientit",
+    "empty": "Ende nuk ka vlerësime — kthehuni së shpejti."
   },
   "whatsapp": {
     "orderButton": "Porosit përmes WhatsApp",
@@ -195,15 +164,5 @@
     "description": "Përgatitu të shkëlqesh në çdo festë — nga festat e zyrës për Krishtlindje tek netët glamuroze të Vitit të Ri. Fustane mahnitëse, detaje shkëlqyese dhe prerje elegante… gjithçka që të duhet për të dukur të paharrueshme.",
     "tagline": "Gjej pamjen perfekte për festën e punës (dhe çdo festë tjetër).",
     "button": "Se shpejti ⏰"
-  },
-  "mysteryBox": {
-    "title": "Kutia Mister",
-    "subtitle": "Nuk zgjedh çfarë ka brenda… zgjedh sa e madhe do jetë surpriza!",
-    "description": "Çdo Kuti Mister përgatitet me kujdes dhe pak magji. Brenda mund të gjesh copën tënde të re të preferuar… ose diçka që s’e prisje fare (në sensin e mirë 😌).",
-    "sizesTitle": "Zgjidh Nivelin e Guximit",
-    "small": "Kuti e Vogël për të kujdesshmet",
-    "medium": "Kuti Mesatare, pak rrezik s’bën dëm",
-    "big": "Kuti e Madhe, jeton vetëm një herë",
-    "cta": "Hap Surprizën"
   }
 }

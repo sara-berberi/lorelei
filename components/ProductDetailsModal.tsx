@@ -4,6 +4,8 @@ import { useState, useEffect } from "react";
 import { useTranslations } from "next-intl";
 import { useCart } from "@/contexts/CartContext";
 import WhatsAppButton from "./WhatsAppButton";
+import ProductImage from "./ProductImage";
+import { cloudinaryUrl, firstImageUrl } from "@/lib/images";
 
 interface Product {
   id: number;
@@ -84,7 +86,7 @@ export default function ProductDetailsModal({ product, onClose }: { product: Pro
 
   useEffect(() => {
     if (!product.category) return;
-    const params = new URLSearchParams({ category: product.category, excludeCategory: "mysteryBox" });
+    const params = new URLSearchParams({ category: product.category });
     fetch(`/api/products?${params}`)
       .then((r) => r.ok ? r.json() : [])
       .then((data: Product[]) => {
@@ -123,11 +125,28 @@ export default function ProductDetailsModal({ product, onClose }: { product: Pro
             onTouchEnd={handleTouchEnd}
           >
             {images.length > 0 ? (
-              <img
-                src={images[currentImageIndex]}
-                alt={product.name}
-                className="w-full h-full object-cover"
-              />
+              <>
+                <ProductImage
+                  key={images[currentImageIndex]}
+                  src={images[currentImageIndex]}
+                  alt={product.name}
+                  width={800}
+                  priority
+                  sizes="(max-width: 1024px) 100vw, 50vw"
+                  className="w-full h-full object-cover"
+                />
+                {/* Warm the next slide so swiping feels instant. */}
+                {images.length > 1 && (
+                  <link
+                    rel="preload"
+                    as="image"
+                    href={cloudinaryUrl(
+                      images[(currentImageIndex + 1) % images.length],
+                      { width: 800 }
+                    )}
+                  />
+                )}
+              </>
             ) : (
               <div className="w-full h-full flex items-center justify-center">
                 <span className="text-[10px] tracking-widest uppercase text-gray-300">No Image</span>
@@ -289,7 +308,7 @@ export default function ProductDetailsModal({ product, onClose }: { product: Pro
             <p className="text-[10px] tracking-[0.3em] uppercase text-gray-400 mb-5">{tWhatsapp("relatedProducts")}</p>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
               {related.map((p) => {
-                const img = (() => { try { const a = JSON.parse(p.imageUrl); return Array.isArray(a) ? a[0] : p.imageUrl; } catch { return p.imageUrl; } })();
+                const img = firstImageUrl(p.imageUrl);
                 const price = p.isOnSale && p.salePrice ? p.salePrice : p.price;
                 return (
                   <button
@@ -298,7 +317,13 @@ export default function ProductDetailsModal({ product, onClose }: { product: Pro
                     className="text-left group"
                   >
                     <div className="aspect-[3/4] overflow-hidden bg-[#f7f6f4] mb-2">
-                      <img src={img} alt={p.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                      <img
+                        src={cloudinaryUrl(img, { width: 300 })}
+                        alt={p.name}
+                        loading="lazy"
+                        decoding="async"
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                      />
                     </div>
                     <p className="text-[10px] text-gray-500 font-light line-clamp-2 leading-snug mb-0.5">{p.name}</p>
                     <p className={`text-[11px] font-light ${p.isOnSale ? "text-rose-500" : "text-gray-900"}`}>ALL {price.toFixed(0)}</p>

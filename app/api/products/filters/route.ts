@@ -8,10 +8,7 @@ export async function GET() {
   try {
     // Get all products (not deleted)
     const products = await prisma.product.findMany({
-      where: {
-        deletedAt: null,
-        NOT: { name: { contains: "kuti", mode: "insensitive" } },
-      },
+      where: { deletedAt: null },
       select: {
         category: true,
         brand: true,
@@ -22,29 +19,46 @@ export async function GET() {
       },
     });
 
-    // Extract unique categories
-    const categories = Array.from(
-      new Set(products.map((p) => p.category).filter((c): c is string => !!c))
-    ).sort();
+    // Collapse values that differ only by case/whitespace (e.g. "Dresses" and
+    // "dresses") to a single option, keeping the first spelling seen.
+    const uniqueByCase = (values: (string | null)[]) => {
+      const seen = new Map<string, string>();
+      values.forEach((v) => {
+        const trimmed = v?.trim();
+        if (!trimmed) return;
+        const key = trimmed.toLowerCase();
+        if (!seen.has(key)) seen.set(key, trimmed);
+      });
+      return Array.from(seen.values()).sort((a, b) => a.localeCompare(b));
+    };
 
-    // Extract unique brands
-    const brands = Array.from(
-      new Set(products.map((p) => p.brand).filter((b): b is string => !!b))
-    ).sort();
+    const categories = uniqueByCase(products.map((p) => p.category));
+    const brands = uniqueByCase(products.map((p) => p.brand));
 
     // Extract unique sizes from all products
-    const allSizes = new Set<string>();
+    const rawSizes: string[] = [];
     products.forEach((product) => {
-      if (product.sizes) {
-        try {
-          const sizes = JSON.parse(product.sizes);
-          if (Array.isArray(sizes)) sizes.forEach((size) => allSizes.add(size));
-        } catch {
-          // Ignore JSON errors
-        }
+      if (!product.sizes) return;
+      try {
+        const parsed = JSON.parse(product.sizes);
+        if (Array.isArray(parsed)) rawSizes.push(...parsed.map(String));
+      } catch {
+        // Legacy rows may store a plain comma-separated string.
+        rawSizes.push(...product.sizes.split(","));
       }
     });
-    const sizes = Array.from(allSizes).sort();
+
+    // Sort in garment order (XS→XXL, then numeric), not alphabetically.
+    const SIZE_ORDER = ["XS", "S", "M", "L", "XL", "XXL", "XXXL", "ONE SIZE"];
+    const sizeRank = (s: string) => {
+      const i = SIZE_ORDER.indexOf(s.toUpperCase());
+      if (i !== -1) return i;
+      const n = parseFloat(s);
+      return isNaN(n) ? 1000 : 100 + n;
+    };
+    const sizes = uniqueByCase(rawSizes).sort(
+      (a, b) => sizeRank(a) - sizeRank(b) || a.localeCompare(b)
+    );
 
     // Calculate price range
     const prices = products.map((p) =>

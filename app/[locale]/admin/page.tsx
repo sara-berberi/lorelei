@@ -5,8 +5,9 @@ import OrdersTable from "@/components/OrdersTable";
 import AdminProductsPanel from "@/components/AdminProductsPanel";
 import AddProductPanel from "@/components/AddProductPanel";
 import HeroPanel from "@/components/HeroPanel";
+import ReviewsPanel from "@/components/ReviewsPanel";
 
-type Tab = "orders" | "products" | "add" | "hero";
+type Tab = "orders" | "products" | "add" | "hero" | "reviews";
 
 export default function AdminDashboard() {
   const [password, setPassword] = useState("");
@@ -129,6 +130,7 @@ export default function AdminDashboard() {
     { key: "products", label: "Products" },
     { key: "add", label: "New Product" },
     { key: "hero", label: "Hero Image" },
+    { key: "reviews", label: "Reviews" },
   ];
 
   return (
@@ -182,6 +184,7 @@ export default function AdminDashboard() {
           />
         )}
         {tab === "hero" && <HeroPanel adminPassword={password} />}
+        {tab === "reviews" && <ReviewsPanel adminPassword={password} />}
       </div>
     </div>
   );

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
+import { cloudinaryUrl } from "@/lib/images";
 
 interface Product {
   id: number;
@@ -71,6 +72,56 @@ export default function AdminProductsPanel({
   const [deletingId, setDeletingId] = useState<number | null>(null);
   const [restoringId, setRestoringId] = useState<number | null>(null);
   const [showDeleted, setShowDeleted] = useState(false);
+
+  // ── Bulk selection ──────────────────────────────────────────────────────
+  const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set());
+  const [bulkOpen, setBulkOpen] = useState(false);
+  const [bulkBusy, setBulkBusy] = useState(false);
+  const [bulkError, setBulkError] = useState("");
+  const [bulkNotice, setBulkNotice] = useState("");
+  const [bulk, setBulk] = useState({
+    price: "",
+    salePrice: "",
+    discountPercent: "",
+    stock: "",
+    category: "",
+    brand: "",
+    // undefined = leave unchanged
+    isOnSale: undefined as boolean | undefined,
+    isSoldOut: undefined as boolean | undefined,
+  });
+
+  const resetBulk = () => {
+    setBulk({
+      price: "",
+      salePrice: "",
+      discountPercent: "",
+      stock: "",
+      category: "",
+      brand: "",
+      isOnSale: undefined,
+      isSoldOut: undefined,
+    });
+    setBulkError("");
+  };
+
+  const toggleSelect = (id: number) =>
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      next.has(id) ? next.delete(id) : next.add(id);
+      return next;
+    });
+
+  const clearSelection = () => {
+    setSelectedIds(new Set());
+    setBulkOpen(false);
+    resetBulk();
+  };
+
+  const flashBulkNotice = (msg: string) => {
+    setBulkNotice(msg);
+    setTimeout(() => setBulkNotice(""), 3500);
+  };
 
   const fetchProducts = useCallback(async () => {
     setLoading(true);
@@ -228,6 +279,89 @@ export default function AdminProductsPanel({
     }
   };
 
+  /** Apply the filled-in bulk fields to every selected product. */
+  const handleBulkSave = async () => {
+    const ids = Array.from(selectedIds);
+    if (ids.length === 0) return;
+
+    // Only send fields the admin actually filled in — everything else is
+    // left untouched on each product.
+    const changes: Record<string, any> = {};
+    if (bulk.price !== "") changes.price = bulk.price;
+    if (bulk.salePrice !== "") changes.salePrice = bulk.salePrice;
+    if (bulk.discountPercent !== "") changes.discountPercent = bulk.discountPercent;
+    if (bulk.stock !== "") changes.stock = bulk.stock;
+    if (bulk.category !== "") changes.category = bulk.category;
+    if (bulk.brand.trim() !== "") changes.brand = bulk.brand;
+    if (bulk.isOnSale !== undefined) changes.isOnSale = bulk.isOnSale;
+    if (bulk.isSoldOut !== undefined) changes.isSoldOut = bulk.isSoldOut;
+
+    if (Object.keys(changes).length === 0) {
+      setBulkError("Fill in at least one field to apply.");
+      return;
+    }
+    if (changes.salePrice !== undefined && changes.discountPercent !== undefined) {
+      setBulkError("Use either a sale price or a discount %, not both.");
+      return;
+    }
+
+    setBulkBusy(true);
+    setBulkError("");
+    try {
+      const res = await fetch("/api/admin/products/bulk", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ password: adminPassword, ids, changes }),
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        setBulkError(err.error ?? "Failed to apply changes.");
+        return;
+      }
+      const { count } = await res.json();
+      await fetchProducts();
+      clearSelection();
+      flashBulkNotice(`${count} ${count === 1 ? "product" : "products"} updated.`);
+    } catch {
+      setBulkError("Network error. Please try again.");
+    } finally {
+      setBulkBusy(false);
+    }
+  };
+
+  const handleBulkDelete = async () => {
+    const ids = Array.from(selectedIds);
+    if (ids.length === 0) return;
+    if (
+      !confirm(
+        `Move ${ids.length} ${ids.length === 1 ? "product" : "products"} to the deleted archive?`
+      )
+    )
+      return;
+
+    setBulkBusy(true);
+    try {
+      const res = await fetch("/api/admin/products/bulk", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ password: adminPassword, ids }),
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        setBulkError(err.error ?? "Failed to archive products.");
+        return;
+      }
+      const { count } = await res.json();
+      await fetchProducts();
+      clearSelection();
+      flashBulkNotice(`${count} ${count === 1 ? "product" : "products"} archived.`);
+    } catch {
+      setBulkError("Network error. Please try again.");
+    } finally {
+      setBulkBusy(false);
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex justify-center py-24">
@@ -235,6 +369,20 @@ export default function AdminProductsPanel({
       </div>
     );
   }
+
+  // Selection is scoped to the products currently visible after search.
+  const visibleIds = filtered.map((p) => p.id);
+  const selectedVisible = visibleIds.filter((id) => selectedIds.has(id));
+  const allVisibleSelected =
+    visibleIds.length > 0 && selectedVisible.length === visibleIds.length;
+
+  const toggleSelectAll = () =>
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (allVisibleSelected) visibleIds.forEach((id) => next.delete(id));
+      else visibleIds.forEach((id) => next.add(id));
+      return next;
+    });
 
   return (
     <div>
@@ -254,6 +402,196 @@ export default function AdminProductsPanel({
         </p>
       </div>
 
+      {/* ── Select all + bulk actions ───────────────────────────────────── */}
+      {filtered.length > 0 && (
+        <div className="mb-4">
+          <div className="flex items-center gap-4 flex-wrap">
+            <button
+              onClick={toggleSelectAll}
+              className="flex items-center gap-2.5 group"
+            >
+              <span
+                className={`w-4 h-4 border flex items-center justify-center transition-colors flex-shrink-0 ${
+                  allVisibleSelected
+                    ? "bg-gray-900 border-gray-900"
+                    : "border-gray-300 group-hover:border-gray-500"
+                }`}
+              >
+                {allVisibleSelected && (
+                  <svg className="w-2.5 h-2.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                  </svg>
+                )}
+              </span>
+              <span className="text-[10px] tracking-[0.2em] uppercase text-gray-500 group-hover:text-gray-900 transition-colors">
+                {allVisibleSelected ? "Deselect all" : "Select all"}
+              </span>
+            </button>
+
+            {selectedVisible.length > 0 && (
+              <>
+                <div className="w-px h-3 bg-gray-200" />
+                <span className="text-[10px] tracking-[0.2em] uppercase text-gray-900">
+                  {selectedVisible.length} selected
+                </span>
+                <button
+                  onClick={() => setBulkOpen((v) => !v)}
+                  className="text-[10px] tracking-[0.2em] uppercase text-gray-700 hover:text-black transition-colors"
+                >
+                  {bulkOpen ? "Close bulk edit" : "Bulk edit"}
+                </button>
+                <button
+                  onClick={handleBulkDelete}
+                  disabled={bulkBusy}
+                  className="text-[10px] tracking-[0.2em] uppercase text-rose-400 hover:text-rose-600 disabled:opacity-40 transition-colors"
+                >
+                  Delete selected
+                </button>
+                <button
+                  onClick={clearSelection}
+                  className="text-[10px] tracking-[0.2em] uppercase text-gray-400 hover:text-gray-900 transition-colors"
+                >
+                  Clear
+                </button>
+              </>
+            )}
+
+            {bulkNotice && (
+              <span className="text-[11px] text-emerald-600 tracking-wide">{bulkNotice}</span>
+            )}
+          </div>
+
+          {/* Bulk edit form */}
+          {bulkOpen && selectedVisible.length > 0 && (
+            <div className="mt-4 border border-gray-200 bg-[#FAFAF9] px-5 py-6 space-y-7">
+              <p className="text-[10px] tracking-[0.25em] uppercase text-gray-400">
+                Applying to {selectedVisible.length}{" "}
+                {selectedVisible.length === 1 ? "product" : "products"} — empty fields stay unchanged
+              </p>
+
+              <div className="grid grid-cols-2 lg:grid-cols-3 gap-6">
+                <div>
+                  <label className={labelCls}>Price (ALL)</label>
+                  <input
+                    type="number" min="0" step="0.01"
+                    value={bulk.price}
+                    onChange={(e) => setBulk((b) => ({ ...b, price: e.target.value }))}
+                    placeholder="Unchanged"
+                    className={inputCls}
+                  />
+                </div>
+                <div>
+                  <label className={labelCls}>Sale Price (ALL)</label>
+                  <input
+                    type="number" min="0" step="0.01"
+                    value={bulk.salePrice}
+                    onChange={(e) => setBulk((b) => ({ ...b, salePrice: e.target.value }))}
+                    placeholder="Unchanged"
+                    disabled={bulk.discountPercent !== ""}
+                    className={`${inputCls} disabled:text-gray-300`}
+                  />
+                </div>
+                <div>
+                  <label className={labelCls}>Or discount %</label>
+                  <input
+                    type="number" min="1" max="99" step="1"
+                    value={bulk.discountPercent}
+                    onChange={(e) => setBulk((b) => ({ ...b, discountPercent: e.target.value }))}
+                    placeholder="e.g. 30"
+                    disabled={bulk.salePrice !== ""}
+                    className={`${inputCls} disabled:text-gray-300`}
+                  />
+                </div>
+                <div>
+                  <label className={labelCls}>Stock</label>
+                  <input
+                    type="number" min="0" step="1"
+                    value={bulk.stock}
+                    onChange={(e) => setBulk((b) => ({ ...b, stock: e.target.value }))}
+                    placeholder="Unchanged"
+                    className={inputCls}
+                  />
+                </div>
+                <div>
+                  <label className={labelCls}>Category</label>
+                  <select
+                    value={bulk.category}
+                    onChange={(e) => setBulk((b) => ({ ...b, category: e.target.value }))}
+                    className={`${inputCls} cursor-pointer`}
+                  >
+                    <option value="">Unchanged</option>
+                    {["activewear", "sets", "dresses", "coatsPuffers", "nightwear", "tops", "bottoms", "shoes"].map((c) => (
+                      <option key={c} value={c}>{c}</option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className={labelCls}>Brand</label>
+                  <input
+                    type="text"
+                    value={bulk.brand}
+                    onChange={(e) => setBulk((b) => ({ ...b, brand: e.target.value }))}
+                    placeholder="Unchanged"
+                    className={inputCls}
+                  />
+                </div>
+              </div>
+
+              {/* Tri-state toggles: unchanged / on / off */}
+              <div className="flex flex-wrap gap-8">
+                {[
+                  { label: "On Sale", key: "isOnSale" as const },
+                  { label: "Sold Out", key: "isSoldOut" as const },
+                ].map(({ label, key }) => (
+                  <div key={key}>
+                    <p className={labelCls}>{label}</p>
+                    <div className="flex gap-1.5">
+                      {[
+                        { text: "Unchanged", val: undefined },
+                        { text: "Yes", val: true },
+                        { text: "No", val: false },
+                      ].map(({ text, val }) => (
+                        <button
+                          key={text}
+                          onClick={() => setBulk((b) => ({ ...b, [key]: val }))}
+                          className={`px-3 py-1.5 text-[10px] tracking-widest uppercase border transition-all ${
+                            bulk[key] === val
+                              ? "bg-gray-900 text-white border-gray-900"
+                              : "bg-white text-gray-500 border-gray-200 hover:border-gray-500"
+                          }`}
+                        >
+                          {text}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {bulkError && (
+                <p className="text-[11px] text-rose-500 tracking-wide">{bulkError}</p>
+              )}
+
+              <div className="flex items-center gap-5">
+                <button
+                  onClick={handleBulkSave}
+                  disabled={bulkBusy}
+                  className="px-8 py-2.5 bg-gray-900 text-white text-[10px] tracking-[0.2em] uppercase hover:bg-black disabled:bg-gray-200 disabled:text-gray-400 transition-colors"
+                >
+                  {bulkBusy ? "Applying…" : "Apply to selected"}
+                </button>
+                <button
+                  onClick={() => { setBulkOpen(false); resetBulk(); }}
+                  className="text-[10px] tracking-[0.2em] uppercase text-gray-400 hover:text-gray-900 transition-colors"
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
       {/* ── Active products ─────────────────────────────────────────────── */}
       <div className="space-y-px">
         {filtered.map((product) => {
@@ -262,14 +600,43 @@ export default function AdminProductsPanel({
           const sizes = parseSizes(product.sizes);
 
           return (
-            <div key={product.id} className="bg-white border border-gray-100">
+            <div
+              key={product.id}
+              className={`bg-white border transition-colors ${
+                selectedIds.has(product.id) ? "border-gray-900" : "border-gray-100"
+              }`}
+            >
               {/* Row */}
               <div className="flex items-center gap-5 px-5 py-4">
+                {/* Select */}
+                <button
+                  onClick={() => toggleSelect(product.id)}
+                  aria-label={`Select ${product.name}`}
+                  aria-pressed={selectedIds.has(product.id)}
+                  className="flex-shrink-0 group"
+                >
+                  <span
+                    className={`w-4 h-4 border flex items-center justify-center transition-colors ${
+                      selectedIds.has(product.id)
+                        ? "bg-gray-900 border-gray-900"
+                        : "border-gray-300 group-hover:border-gray-500"
+                    }`}
+                  >
+                    {selectedIds.has(product.id) && (
+                      <svg className="w-2.5 h-2.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                      </svg>
+                    )}
+                  </span>
+                </button>
+
                 {/* Thumbnail */}
                 <div className="w-14 h-14 flex-shrink-0 overflow-hidden bg-gray-50">
                   <img
-                    src={images[0]}
+                    src={cloudinaryUrl(images[0], { width: 120 })}
                     alt={product.name}
+                    loading="lazy"
+                    decoding="async"
                     className="w-full h-full object-cover"
                     onError={(e) => { (e.target as HTMLImageElement).style.opacity = "0"; }}
                   />

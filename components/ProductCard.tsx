@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 import ProductDetailsModal from "./ProductDetailsModal";
+import ProductImage from "./ProductImage";
+import { firstImageUrl } from "@/lib/images";
 import { trackView } from "./RecentlyViewed";
 
 interface Product {
@@ -19,19 +21,17 @@ interface Product {
   stock?: number | null;
 }
 
-export default function ProductCard({ product }: { product: Product }) {
+export default function ProductCard({
+  product,
+  priority = false,
+}: {
+  product: Product;
+  /** Set for the first visible row so those images load immediately. */
+  priority?: boolean;
+}) {
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [imageError, setImageError] = useState(false);
 
-  const getFirstImage = (imageUrl: string): string => {
-    try {
-      const parsed = JSON.parse(imageUrl);
-      if (Array.isArray(parsed) && parsed.length > 0) return parsed[0];
-    } catch {}
-    return imageUrl;
-  };
-
-  const displayImage = getFirstImage(product.imageUrl);
+  const displayImage = firstImageUrl(product.imageUrl);
   const displayPrice = product.isOnSale && product.salePrice ? product.salePrice : product.price;
   const originalPrice = product.isOnSale && product.salePrice ? product.price : null;
 
@@ -41,19 +41,14 @@ export default function ProductCard({ product }: { product: Product }) {
 
         {/* Image */}
         <div className="relative aspect-[3/4] overflow-hidden bg-[#f7f6f4]">
-          {!imageError ? (
-            <img
-              src={displayImage}
-              alt={product.name}
-              className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.04]"
-              onError={() => setImageError(true)}
-              loading="lazy"
-            />
-          ) : (
-            <div className="w-full h-full flex items-center justify-center">
-              <span className="text-[10px] tracking-widest uppercase text-gray-300">No Image</span>
-            </div>
-          )}
+          <ProductImage
+            src={displayImage}
+            alt={product.name}
+            width={600}
+            priority={priority}
+            sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
+            className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.04]"
+          />
 
           {/* Status badges — understated */}
           {product.isSoldOut && (

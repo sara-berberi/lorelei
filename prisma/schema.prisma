@@ -57,6 +57,44 @@ model OrderItem {
   @@map("order_items")
 }
 
+/// A saved set of "new product" field values the admin can re-apply with one
+/// click. Fields mirror Product, but every one is optional — a template only
+/// prefills whatever the admin chose to store.
+model ProductTemplate {
+  id          Int      @id @default(autoincrement())
+  name        String   @db.VarChar(120)
+  description String?  @db.Text
+  price       Float?
+  salePrice   Float?
+  category    String?  @db.VarChar(100)
+  brand       String?  @db.VarChar(100)
+  sizes       String?  @db.Text // JSON array of sizes
+  stock       Int?
+  isOnSale    Boolean  @default(false)
+  isSoldOut   Boolean  @default(false)
+  productName String?  @db.VarChar(255) // prefill for the product's own name
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("product_templates")
+}
+
+/// A client review curated by the admin — either a text message (rendered as
+/// a chat bubble) or a photo/screenshot. `clientName` is optional; when empty
+/// the review displays as anonymous.
+model Review {
+  id         Int      @id @default(autoincrement())
+  clientName String?  @db.VarChar(120)
+  message    String?  @db.Text
+  imageUrl   String?  @db.Text
+  isVisible  Boolean  @default(true)
+  sortOrder  Int      @default(0)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@map("reviews")
+}
+
 model SiteSettings {
   id           Int      @id @default(1)
   heroImageUrl String?  @db.Text

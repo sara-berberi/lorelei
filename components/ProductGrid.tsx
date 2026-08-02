@@ -49,7 +49,9 @@ export default function ProductGrid() {
     return "all";
   };
 
-  const [filters, setFilters] = useState<FilterState>({
+  // Read the brand handoff from sessionStorage exactly once, and keep the
+  // object identity stable so ProductFilters isn't re-seeded on every render.
+  const [initialFilters] = useState<FilterState>(() => ({
     category: "all",
     brand: getInitialBrand(),
     size: "all",
@@ -57,7 +59,9 @@ export default function ProductGrid() {
     maxPrice: "",
     isOnSale: undefined,
     isSoldOut: undefined,
-  });
+  }));
+
+  const [filters, setFilters] = useState<FilterState>(initialFilters);
 
   const fetchProducts = useCallback(async (filterState: FilterState) => {
     try {
@@ -83,9 +87,6 @@ export default function ProductGrid() {
       if (filterState.isSoldOut !== undefined) {
         params.append("isSoldOut", String(filterState.isSoldOut));
       }
-
-      // Never show mystery box products on the main grid
-      params.append("excludeCategory", "mysteryBox");
 
       const url = `/api/products${
         params.toString() ? `?${params.toString()}` : ""
@@ -154,15 +155,8 @@ export default function ProductGrid() {
         <div className="mb-10 sm:mb-14 lg:mb-16">
           <ProductFilters
             onFilterChange={handleFilterChange}
-            initialFilters={{
-              category: filters.category,
-              brand: filters.brand,
-              size: filters.size,
-              minPrice: filters.minPrice,
-              maxPrice: filters.maxPrice,
-              isOnSale: filters.isOnSale,
-              isSoldOut: filters.isSoldOut,
-            }}
+            initialFilters={initialFilters}
+            resultCount={products.length}
           />
         </div>
 
@@ -188,7 +182,7 @@ export default function ProductGrid() {
         ) : products.length === 0 ? (
           <div className="flex flex-col justify-center items-center py-40 text-center">
             <p className="text-sm font-light text-gray-400 mb-2">{t("noResults")}</p>
-            <p className="text-xs text-gray-300 tracking-wide">Try adjusting your filters</p>
+            <p className="text-xs text-gray-300 tracking-wide">{t("adjustFilters")}</p>
           </div>
         ) : (
           <>
@@ -205,11 +199,13 @@ export default function ProductGrid() {
                   key={product.id}
                   className="group animate-fadeIn"
                   style={{
-                    animationDelay: `${index * 50}ms`,
+                    // Only stagger the first row; later cards appear instantly
+                    // so scrolling never waits on an animation queue.
+                    animationDelay: `${Math.min(index, 4) * 40}ms`,
                     animationFillMode: "backwards",
                   }}
                 >
-                  <ProductCard product={product} />
+                  <ProductCard product={product} priority={index < 4} />
                 </div>
               ))}
             </div>

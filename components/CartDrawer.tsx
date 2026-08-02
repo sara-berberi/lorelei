@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { useCart } from "@/contexts/CartContext";
 import CheckoutModal from "./CheckoutModal";
+import { firstImageUrl, cloudinaryUrl } from "@/lib/images";
 
 export default function CartDrawer() {
   const t = useTranslations("cart");
@@ -17,13 +18,9 @@ export default function CartDrawer() {
     try { return tCategories(map[category] || category.toLowerCase()); } catch { return category; }
   };
 
-  const getFirstImage = (imageUrl: string): string => {
-    try {
-      const parsed = JSON.parse(imageUrl);
-      if (Array.isArray(parsed) && parsed.length > 0) return parsed[0];
-    } catch {}
-    return imageUrl;
-  };
+  // Cart thumbnails render small — request a matching size, not the original.
+  const getFirstImage = (imageUrl: string): string =>
+    cloudinaryUrl(firstImageUrl(imageUrl), { width: 200 });
 
   const checkoutItems = items.map((item) => ({
     productId: item.productId,
