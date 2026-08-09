@@ -21,7 +21,7 @@ interface CheckoutModalProps {
   onOrderSuccess: () => void;
 }
 
-const inputCls = "w-full border-0 border-b border-gray-200 bg-transparent px-0 py-2.5 text-sm text-gray-800 placeholder-gray-300 focus:outline-none focus:border-gray-700 transition-colors";
+const inputCls = "no-zoom w-full border-0 border-b border-gray-200 bg-transparent px-0 py-2.5 text-sm text-gray-800 placeholder-gray-300 focus:outline-none focus:border-gray-700 transition-colors";
 const labelCls = "block text-[10px] tracking-[0.2em] uppercase text-gray-400 mb-1.5";
 
 export default function CheckoutModal({ isOpen, onClose, cartItems, totalPrice, postalFee, onOrderSuccess }: CheckoutModalProps) {
@@ -213,7 +213,7 @@ export default function CheckoutModal({ isOpen, onClose, cartItems, totalPrice, 
             <p className="text-[10px] tracking-[0.3em] uppercase text-gray-300">Your Details</p>
             <div>
               <label className={labelCls}>{t("name")} *</label>
-              <input type="text" value={fullName} onChange={(e) => setFullName(e.target.value)} className={inputCls} />
+              <input type="text" value={fullName} onChange={(e) => setFullName(e.target.value)} autoComplete="name" className={inputCls} />
             </div>
             <div>
               <label className={labelCls}>Instagram *</label>
@@ -221,7 +221,7 @@ export default function CheckoutModal({ isOpen, onClose, cartItems, totalPrice, 
             </div>
             <div>
               <label className={labelCls}>{t("phoneNumber")} *</label>
-              <input type="tel" value={phoneNumber} onChange={(e) => setPhoneNumber(e.target.value)} placeholder="+355 69 000 0000" className={inputCls} />
+              <input type="tel" inputMode="tel" autoComplete="tel" value={phoneNumber} onChange={(e) => setPhoneNumber(e.target.value)} placeholder="+355 69 000 0000" className={inputCls} />
             </div>
           </section>
 
@@ -230,11 +230,11 @@ export default function CheckoutModal({ isOpen, onClose, cartItems, totalPrice, 
             <p className="text-[10px] tracking-[0.3em] uppercase text-gray-300">{t("shippingAddress")}</p>
             <div>
               <label className={labelCls}>{t("streetAddress")} *</label>
-              <input type="text" value={address} onChange={(e) => setAddress(e.target.value)} className={inputCls} />
+              <input type="text" value={address} onChange={(e) => setAddress(e.target.value)} autoComplete="street-address" className={inputCls} />
             </div>
             <div>
               <label className={labelCls}>{t("city")} *</label>
-              <input type="text" value={city} onChange={(e) => setCity(e.target.value)} placeholder="Tirana" className={inputCls} />
+              <input type="text" value={city} onChange={(e) => setCity(e.target.value)} autoComplete="address-level2" placeholder="Tirana" className={inputCls} />
             </div>
             <div>
               <label className={labelCls}>{t("orderNotes")}</label>

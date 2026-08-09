@@ -32,6 +32,31 @@ body {
   border-radius: 1px;
 }
 
+/* Mobile touch polish */
+@media (hover: none) {
+  /* Removes the blue flash Android shows on every tap. */
+  * {
+    -webkit-tap-highlight-color: transparent;
+  }
+  /* Gives buttons a quick pressed state instead of a hover that never fires. */
+  button:active,
+  a:active {
+    opacity: 0.6;
+    transition: opacity 0.1s;
+  }
+}
+
+/* iOS Safari zooms the page whenever a focused field is under 16px. Applied
+   via an opt-in class so the small filter inputs keep their type scale. */
+@media (max-width: 640px) {
+  .no-zoom,
+  input[type="email"],
+  input[type="tel"],
+  textarea {
+    font-size: 16px;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,

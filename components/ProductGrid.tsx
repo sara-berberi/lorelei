@@ -39,13 +39,14 @@ export default function ProductGrid() {
   const [currentPage, setCurrentPage] = useState(1);
   const productsPerPage = 12;
 
-  // Check for brand filter from sessionStorage (when navigating from brands page)
-  const getInitialBrand = () => {
+  // Filters handed off via sessionStorage when navigating from the brands
+  // page or the mobile menu's category submenu.
+  const takeStored = (key: string) => {
     if (typeof window !== "undefined") {
-      const storedBrand = sessionStorage.getItem("selectedBrand");
-      if (storedBrand) {
-        sessionStorage.removeItem("selectedBrand");
-        return storedBrand;
+      const stored = sessionStorage.getItem(key);
+      if (stored) {
+        sessionStorage.removeItem(key);
+        return stored;
       }
     }
     return "all";
@@ -54,8 +55,8 @@ export default function ProductGrid() {
   // Read the brand handoff from sessionStorage exactly once, and keep the
   // object identity stable so ProductFilters isn't re-seeded on every render.
   const [initialFilters] = useState<FilterState>(() => ({
-    category: "all",
-    brand: getInitialBrand(),
+    category: takeStored("selectedCategory"),
+    brand: takeStored("selectedBrand"),
     size: "",
     minPrice: "",
     maxPrice: "",
