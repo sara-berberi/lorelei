@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 import ProductDetailsModal from "./ProductDetailsModal";
 import ProductImage from "./ProductImage";
 import { firstImageUrl } from "@/lib/images";
@@ -29,6 +30,7 @@ export default function ProductCard({
   /** Set for the first visible row so those images load immediately. */
   priority?: boolean;
 }) {
+  const tProduct = useTranslations("product");
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const displayImage = firstImageUrl(product.imageUrl);
@@ -47,15 +49,24 @@ export default function ProductCard({
             width={600}
             priority={priority}
             sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
-            className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.04]"
+            className={`w-full h-full object-cover transition-transform duration-700 ease-out ${
+              // Sold-out pieces read as unavailable at a glance: desaturated
+              // and dimmed, with the label centred over the image. No hover
+              // zoom either, since there's nothing to buy.
+              product.isSoldOut
+                ? "opacity-45 grayscale"
+                : "group-hover:scale-[1.04]"
+            }`}
           />
 
-          {/* Status badges — understated */}
           {product.isSoldOut && (
-            <span className="absolute top-3 left-3 text-[9px] tracking-[0.2em] uppercase text-white/90 bg-gray-900/70 backdrop-blur-sm px-2.5 py-1">
-              Sold Out
-            </span>
+            <div className="absolute inset-0 flex items-center justify-center bg-white/25">
+              <span className="text-[10px] tracking-[0.3em] uppercase text-gray-900 bg-white/90 backdrop-blur-sm px-4 py-2">
+                {tProduct("soldOut")}
+              </span>
+            </div>
           )}
+
           {product.isOnSale && !product.isSoldOut && (
             <span className="absolute top-3 left-3 text-[9px] tracking-[0.2em] uppercase text-white bg-rose-500 px-2.5 py-1">
               Sale
@@ -85,7 +96,7 @@ export default function ProductCard({
         </div>
 
         {/* Info */}
-        <div className="mt-3 px-0.5">
+        <div className={`mt-3 px-0.5 ${product.isSoldOut ? "opacity-50" : ""}`}>
           {product.brand && (
             <p className="text-[10px] tracking-[0.2em] uppercase text-gray-400 mb-1">{product.brand}</p>
           )}
