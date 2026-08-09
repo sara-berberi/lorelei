@@ -50,17 +50,16 @@ export default function ProductCard({
             priority={priority}
             sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
             className={`w-full h-full object-cover transition-transform duration-700 ease-out ${
-              // Sold-out pieces read as unavailable at a glance: desaturated
-              // and dimmed, with the label centred over the image. No hover
-              // zoom either, since there's nothing to buy.
-              product.isSoldOut
-                ? "opacity-45 grayscale"
-                : "group-hover:scale-[1.04]"
+              // Sold-out pieces read as unavailable at a glance: dimmed, with
+              // the label centred over the image. No hover zoom either, since
+              // there's nothing to buy. Colour is kept — the clothes should
+              // still look like the clothes.
+              product.isSoldOut ? "opacity-60" : "group-hover:scale-[1.04]"
             }`}
           />
 
           {product.isSoldOut && (
-            <div className="absolute inset-0 flex items-center justify-center bg-white/25">
+            <div className="absolute inset-0 flex items-center justify-center">
               <span className="text-[10px] tracking-[0.3em] uppercase text-gray-900 bg-white/90 backdrop-blur-sm px-4 py-2">
                 {tProduct("soldOut")}
               </span>
