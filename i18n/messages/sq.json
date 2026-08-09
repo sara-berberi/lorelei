@@ -111,7 +111,21 @@
     "anonymous": "Anonim",
     "reviewFrom": "Vlerësim nga",
     "anonymousReview": "Vlerësim anonim i klientit",
-    "empty": "Ende nuk ka vlerësime — kthehuni së shpejti."
+    "empty": "Ende nuk ka vlerësime — bëhu e para që lë një.",
+    "writeReview": "Shkruaj një vlerësim",
+    "yourName": "Emri juaj",
+    "namePlaceholder": "Lëreni bosh për të mbetur anonime",
+    "yourReview": "Vlerësimi juaj",
+    "messagePlaceholder": "Na tregoni për përvojën tuaj…",
+    "submitReview": "Dërgo vlerësimin",
+    "sending": "Duke dërguar…",
+    "cancel": "Anulo",
+    "moderationNote": "Vlerësimet kontrollohen para se të shfaqen në faqe.",
+    "thanksTitle": "Faleminderit!",
+    "thanksPending": "Vlerësimi juaj u pranua dhe do të shfaqet pasi ta lexojmë.",
+    "errorShort": "Ju lutemi shkruani një mesazh pak më të gjatë.",
+    "errorGeneric": "Vlerësimi nuk u dërgua. Ju lutemi provoni përsëri.",
+    "errorNetwork": "Gabim rrjeti. Ju lutemi provoni përsëri."
   },
   "whatsapp": {
     "orderButton": "Porosit përmes WhatsApp",

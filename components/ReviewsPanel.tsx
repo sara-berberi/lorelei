@@ -9,6 +9,7 @@ interface Review {
   message: string | null;
   imageUrl: string | null;
   isVisible: boolean;
+  isApproved: boolean;
   sortOrder: number;
 }
 
@@ -129,20 +130,24 @@ export default function ReviewsPanel({ adminPassword }: { adminPassword: string 
     }
   };
 
-  const toggleVisible = async (review: Review) => {
+  const patchReview = async (review: Review, changes: Partial<Review>) => {
     const res = await fetch("/api/admin/reviews", {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        password: adminPassword,
-        id: review.id,
-        isVisible: !review.isVisible,
-      }),
+      body: JSON.stringify({ password: adminPassword, id: review.id, ...changes }),
     });
     if (res.ok) {
       const updated = await res.json();
       setReviews((prev) => prev.map((r) => (r.id === updated.id ? updated : r)));
     }
+  };
+
+  const toggleVisible = (review: Review) =>
+    patchReview(review, { isVisible: !review.isVisible });
+
+  const approve = async (review: Review) => {
+    await patchReview(review, { isApproved: true });
+    flash("Review approved — it's now live.");
   };
 
   const handleDelete = async (review: Review) => {
@@ -157,6 +162,8 @@ export default function ReviewsPanel({ adminPassword }: { adminPassword: string 
       flash("Review deleted.");
     }
   };
+
+  const pendingCount = reviews.filter((r) => !r.isApproved).length;
 
   if (loading) {
     return (
@@ -269,9 +276,16 @@ export default function ReviewsPanel({ adminPassword }: { adminPassword: string 
 
       {/* ── Existing reviews ────────────────────────────────────────────── */}
       <section className="space-y-4">
-        <p className="text-[10px] tracking-[0.3em] uppercase text-gray-300">
-          {reviews.length} {reviews.length === 1 ? "review" : "reviews"}
-        </p>
+        <div className="flex items-center gap-3">
+          <p className="text-[10px] tracking-[0.3em] uppercase text-gray-300">
+            {reviews.length} {reviews.length === 1 ? "review" : "reviews"}
+          </p>
+          {pendingCount > 0 && (
+            <span className="text-[9px] tracking-[0.15em] uppercase text-amber-700 bg-amber-50 border border-amber-200 px-2 py-0.5">
+              {pendingCount} awaiting approval
+            </span>
+          )}
+        </div>
 
         {reviews.length === 0 ? (
           <p className="text-[11px] text-gray-400 font-light">
@@ -282,8 +296,12 @@ export default function ReviewsPanel({ adminPassword }: { adminPassword: string 
             {reviews.map((review) => (
               <div
                 key={review.id}
-                className={`flex items-start gap-4 border border-gray-100 bg-white px-4 py-3 ${
-                  review.isVisible ? "" : "opacity-50"
+                className={`flex items-start gap-4 border bg-white px-4 py-3 ${
+                  !review.isApproved
+                    ? "border-amber-200 bg-amber-50/30"
+                    : review.isVisible
+                    ? "border-gray-100"
+                    : "border-gray-100 opacity-50"
                 }`}
               >
                 {review.imageUrl ? (
@@ -299,21 +317,37 @@ export default function ReviewsPanel({ adminPassword }: { adminPassword: string 
                 )}
 
                 <div className="flex-1 min-w-0">
-                  <p className="text-xs text-gray-800 font-light line-clamp-2">
+                  <p className="text-xs text-gray-800 font-light line-clamp-3">
                     {review.message || <span className="text-gray-400">Photo review</span>}
                   </p>
-                  <p className="text-[10px] text-gray-400 mt-1 tracking-wide">
-                    {review.clientName || "Anonymous"}
-                  </p>
+                  <div className="flex items-center gap-2 mt-1">
+                    <p className="text-[10px] text-gray-400 tracking-wide">
+                      {review.clientName || "Anonymous"}
+                    </p>
+                    {!review.isApproved && (
+                      <span className="text-[9px] tracking-[0.15em] uppercase text-amber-700 bg-amber-50 border border-amber-200 px-1.5 py-0.5">
+                        Pending
+                      </span>
+                    )}
+                  </div>
                 </div>
 
                 <div className="flex items-center gap-3 flex-shrink-0">
-                  <button
-                    onClick={() => toggleVisible(review)}
-                    className="text-[10px] tracking-[0.18em] uppercase text-gray-500 hover:text-gray-900 transition-colors"
-                  >
-                    {review.isVisible ? "Hide" : "Show"}
-                  </button>
+                  {!review.isApproved ? (
+                    <button
+                      onClick={() => approve(review)}
+                      className="text-[10px] tracking-[0.18em] uppercase text-emerald-700 hover:text-emerald-900 transition-colors"
+                    >
+                      Approve
+                    </button>
+                  ) : (
+                    <button
+                      onClick={() => toggleVisible(review)}
+                      className="text-[10px] tracking-[0.18em] uppercase text-gray-500 hover:text-gray-900 transition-colors"
+                    >
+                      {review.isVisible ? "Hide" : "Show"}
+                    </button>
+                  )}
                   <div className="w-px h-3 bg-gray-200" />
                   <button
                     onClick={() => handleDelete(review)}

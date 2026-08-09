@@ -111,7 +111,21 @@
     "anonymous": "Anonymous",
     "reviewFrom": "Review from",
     "anonymousReview": "Anonymous client review",
-    "empty": "No reviews yet — check back soon."
+    "empty": "No reviews yet — be the first to leave one.",
+    "writeReview": "Write a review",
+    "yourName": "Your name",
+    "namePlaceholder": "Leave empty to stay anonymous",
+    "yourReview": "Your review",
+    "messagePlaceholder": "Tell us about your experience…",
+    "submitReview": "Submit review",
+    "sending": "Sending…",
+    "cancel": "Cancel",
+    "moderationNote": "Reviews are checked before appearing on the site.",
+    "thanksTitle": "Thank you!",
+    "thanksPending": "Your review has been received and will appear once we've had a chance to read it.",
+    "errorShort": "Please write a slightly longer message.",
+    "errorGeneric": "Could not submit your review. Please try again.",
+    "errorNetwork": "Network error. Please try again."
   },
   "whatsapp": {
     "orderButton": "Order via WhatsApp",

@@ -89,6 +89,11 @@ model Review {
   imageUrl   String?  @db.Text
   isVisible  Boolean  @default(true)
   sortOrder  Int      @default(0)
+  /// Public submissions land as false and only go live once the admin
+  /// approves them. Reviews the admin creates are approved on creation.
+  isApproved Boolean  @default(false)
+  /// Set for publicly submitted reviews; used for basic rate limiting.
+  submitterIp String? @db.VarChar(64)
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
 

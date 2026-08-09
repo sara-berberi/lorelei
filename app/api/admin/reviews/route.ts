@@ -16,8 +16,9 @@ export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   if (!isAuthorized(searchParams.get("password"))) return unauthorized();
 
+  // Pending submissions first so they're impossible to miss.
   const reviews = await prisma.review.findMany({
-    orderBy: [{ sortOrder: "asc" }, { createdAt: "desc" }],
+    orderBy: [{ isApproved: "asc" }, { sortOrder: "asc" }, { createdAt: "desc" }],
   });
   return NextResponse.json(reviews);
 }
@@ -44,6 +45,8 @@ export async function POST(request: Request) {
       message: text || null,
       imageUrl: image || null,
       sortOrder: Number.isFinite(Number(sortOrder)) ? Number(sortOrder) : 0,
+      // Admin-created reviews don't need moderating.
+      isApproved: true,
     },
   });
   return NextResponse.json(review, { status: 201 });
@@ -64,6 +67,7 @@ export async function PATCH(request: Request) {
   if (typeof fields.imageUrl === "string")
     data.imageUrl = fields.imageUrl.trim() || null;
   if (typeof fields.isVisible === "boolean") data.isVisible = fields.isVisible;
+  if (typeof fields.isApproved === "boolean") data.isApproved = fields.isApproved;
   if (fields.sortOrder !== undefined && Number.isFinite(Number(fields.sortOrder)))
     data.sortOrder = Number(fields.sortOrder);
 

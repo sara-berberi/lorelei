@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import { getTranslations } from "next-intl/server";
 import { cloudinaryUrl, buildSrcSet } from "@/lib/images";
+import ReviewForm from "./ReviewForm";
 
 interface Review {
   id: number;
@@ -17,7 +18,7 @@ interface Review {
 async function getReviews(): Promise<Review[] | null> {
   try {
     return await prisma.review.findMany({
-      where: { isVisible: true },
+      where: { isVisible: true, isApproved: true },
       orderBy: [{ sortOrder: "asc" }, { createdAt: "desc" }],
       select: { id: true, clientName: true, message: true, imageUrl: true },
     });
@@ -112,6 +113,11 @@ export default async function ReviewsSection({
               )}
             </div>
           ))}
+        </div>
+
+        {/* Anyone can submit; it's held for approval before appearing above. */}
+        <div className={reviews.length > 0 ? "mt-16" : "mt-4"}>
+          <ReviewForm />
         </div>
       </div>
     </section>
