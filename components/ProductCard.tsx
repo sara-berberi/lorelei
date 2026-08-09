@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl";
 import ProductDetailsModal from "./ProductDetailsModal";
 import ProductImage from "./ProductImage";
 import { firstImageUrl } from "@/lib/images";
+import { formatPrice } from "@/lib/format";
 import { trackView } from "./RecentlyViewed";
 
 interface Product {
@@ -77,7 +78,7 @@ export default function ProductCard({
             <div className="absolute bottom-0 left-0 right-0 bg-rose-500/90 backdrop-blur-sm px-3 py-1.5 flex items-center gap-1.5">
               <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse flex-shrink-0" />
               <span className="text-[9px] tracking-[0.2em] uppercase text-white font-light">
-                Vetëm {product.stock} {product.stock === 1 ? "produkt" : "produkte"} mbetur
+                {tProduct("onlyLeft", { count: product.stock })}
               </span>
             </div>
           )}
@@ -103,11 +104,11 @@ export default function ProductCard({
 
           <div className="flex items-baseline gap-2">
             <span className={`text-sm font-light ${product.isOnSale ? "text-rose-500" : "text-gray-900"}`}>
-              ALL {displayPrice.toFixed(0)}
+              {formatPrice(displayPrice)}
             </span>
             {originalPrice && (
               <span className="text-xs text-gray-400 line-through font-light">
-                ALL {originalPrice.toFixed(0)}
+                {formatPrice(originalPrice)}
               </span>
             )}
           </div>

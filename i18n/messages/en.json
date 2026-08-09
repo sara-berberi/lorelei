@@ -54,7 +54,11 @@
     "apply": "Show results",
     "filtersActive": "active",
     "results": "results",
-    "adjustFilters": "Try adjusting your filters"
+    "adjustFilters": "Try adjusting your filters",
+    "previous": "Previous",
+    "next": "Next",
+    "page": "Page",
+    "of": "of"
   },
   "checkout": {
     "title": "Checkout",
@@ -95,6 +99,12 @@
     "title": "Curated Fashion, Timeless Style",
     "description": "Discover premium pieces carefully selected for the modern woman who values quality, elegance, and individuality."
   },
+  "notFound": {
+    "label": "Page not found",
+    "message": "The page you're looking for doesn't exist or has been moved.",
+    "home": "Back home",
+    "shop": "Shop the collection"
+  },
   "reviews": {
     "title": "Client Reviews",
     "subtitle": "Real messages from our girlies",
@@ -116,7 +126,8 @@
     "piecesAvailable": "pieces available",
     "pieceAvailable": "piece available",
     "piecesOnSale": "pieces on sale",
-    "pieceOnSale": "piece on sale"
+    "pieceOnSale": "piece on sale",
+    "onlyLeft": "Only {count} left"
   },
   "cart": {
     "cart": "Cart",

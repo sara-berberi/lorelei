@@ -6,6 +6,7 @@ import { useCart } from "@/contexts/CartContext";
 import WhatsAppButton from "./WhatsAppButton";
 import ProductImage from "./ProductImage";
 import { cloudinaryUrl, firstImageUrl } from "@/lib/images";
+import { formatPrice } from "@/lib/format";
 
 interface Product {
   id: number;
@@ -212,11 +213,11 @@ export default function ProductDetailsModal({ product, onClose }: { product: Pro
             {/* Price */}
             <div className="flex items-baseline gap-3 mb-6 pb-6 border-b border-gray-100">
               <span className={`text-2xl font-light ${product.isOnSale ? "text-rose-500" : "text-gray-900"}`}>
-                ALL {displayPrice.toFixed(0)}
+                {formatPrice(displayPrice)}
               </span>
               {originalPrice && (
                 <span className="text-base text-gray-400 line-through font-light">
-                  ALL {originalPrice.toFixed(0)}
+                  {formatPrice(originalPrice)}
                 </span>
               )}
               {product.isOnSale && !product.isSoldOut && (
@@ -326,7 +327,7 @@ export default function ProductDetailsModal({ product, onClose }: { product: Pro
                       />
                     </div>
                     <p className="text-[10px] text-gray-500 font-light line-clamp-2 leading-snug mb-0.5">{p.name}</p>
-                    <p className={`text-[11px] font-light ${p.isOnSale ? "text-rose-500" : "text-gray-900"}`}>ALL {price.toFixed(0)}</p>
+                    <p className={`text-[11px] font-light ${p.isOnSale ? "text-rose-500" : "text-gray-900"}`}>{formatPrice(price)}</p>
                   </button>
                 );
               })}

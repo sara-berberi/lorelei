@@ -3,16 +3,44 @@
 @tailwind utilities;
 
 :root {
-  --background: #fff8bb;
-  --foreground: #000000;
+  --background: #ffffff;
+  --foreground: #1a1a1a;
+  /* Brand aubergine, used by the announcement bar and primary buttons. */
+  --brand: #1a0a20;
+}
+
+html {
+  /* Prevents the iOS overscroll area from showing a different colour. */
+  background: var(--background);
+  -webkit-text-size-adjust: 100%;
 }
 
 body {
   color: var(--foreground);
   background: var(--background);
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
+  font-family: var(--font-inter), -apple-system, BlinkMacSystemFont, 'Segoe UI',
+    'Roboto', 'Helvetica Neue', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Consistent, visible keyboard focus everywhere — only for keyboard users,
+   so mouse clicks don't leave rings behind. */
+:focus-visible {
+  outline: 2px solid var(--brand);
+  outline-offset: 2px;
+  border-radius: 1px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }
 
 @layer utilities {
@@ -20,4 +48,3 @@ body {
     text-wrap: balance;
   }
 }
-

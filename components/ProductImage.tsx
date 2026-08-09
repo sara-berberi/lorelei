@@ -32,7 +32,7 @@ export default function ProductImage({
   if (!src || errored) {
     return (
       <div className="w-full h-full flex items-center justify-center bg-[#f7f6f4]">
-        <span className="text-[10px] tracking-widest uppercase text-gray-300">No Image</span>
+        <span className="text-[10px] tracking-widest uppercase text-gray-300">&nbsp;</span>
       </div>
     );
   }

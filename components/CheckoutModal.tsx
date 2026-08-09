@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useTranslations } from "next-intl";
+import { formatPrice } from "@/lib/format";
 
 interface ProductItem {
   productId: number;
@@ -186,7 +187,7 @@ export default function CheckoutModal({ isOpen, onClose, cartItems, totalPrice, 
                     <span className="text-gray-400"> × {item.quantity}</span>
                   </span>
                   <span className="text-sm text-gray-900 flex-shrink-0">
-                    {(item.price * item.quantity).toFixed(0)} Lek
+                    {formatPrice(item.price * item.quantity)}
                   </span>
                 </div>
               ))}
@@ -194,15 +195,15 @@ export default function CheckoutModal({ isOpen, onClose, cartItems, totalPrice, 
             <div className="mt-5 pt-5 border-t border-gray-100 space-y-2">
               <div className="flex justify-between text-xs text-gray-400">
                 <span className="tracking-wide">{t("subtotal")}</span>
-                <span>{totalPrice.toFixed(0)} Lek</span>
+                <span>{formatPrice(totalPrice)}</span>
               </div>
               <div className="flex justify-between text-xs text-gray-400">
                 <span className="tracking-wide">{t("shippingFee")}</span>
-                <span>{postalFee} Lek</span>
+                <span>{formatPrice(postalFee)}</span>
               </div>
               <div className="flex justify-between text-sm text-gray-900 font-light pt-2 border-t border-gray-100">
                 <span className="tracking-wide">{t("total")}</span>
-                <span>{totalWithFee.toFixed(0)} Lek</span>
+                <span>{formatPrice(totalWithFee)}</span>
               </div>
             </div>
           </section>

@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl";
 import { useCart } from "@/contexts/CartContext";
 import CheckoutModal from "./CheckoutModal";
 import { firstImageUrl, cloudinaryUrl } from "@/lib/images";
+import { formatPrice } from "@/lib/format";
 
 export default function CartDrawer() {
   const t = useTranslations("cart");
@@ -100,9 +101,9 @@ export default function CartDrawer() {
 
                             {/* Price */}
                             <div className="text-right">
-                              <p className="text-sm text-gray-900">ALL {(price * item.quantity).toFixed(0)}</p>
+                              <p className="text-sm text-gray-900">{formatPrice(price * item.quantity)}</p>
                               {item.isOnSale && (
-                                <p className="text-[10px] text-gray-400 line-through">ALL {(item.price * item.quantity).toFixed(0)}</p>
+                                <p className="text-[10px] text-gray-400 line-through">{formatPrice(item.price * item.quantity)}</p>
                               )}
                             </div>
                           </div>
@@ -123,7 +124,7 @@ export default function CartDrawer() {
               <div className="px-6 py-6 border-t border-gray-100 space-y-4">
                 <div className="flex items-baseline justify-between">
                   <span className="text-[10px] tracking-[0.2em] uppercase text-gray-400">{t("total")}</span>
-                  <span className="text-lg font-light text-gray-900">ALL {getTotalPrice().toFixed(0)}</span>
+                  <span className="text-lg font-light text-gray-900">{formatPrice(getTotalPrice())}</span>
                 </div>
                 <button
                   onClick={() => { setIsOpen(false); setTimeout(() => setShowCheckout(true), 100); }}

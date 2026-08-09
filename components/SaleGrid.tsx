@@ -1,9 +1,11 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useState, useCallback } from "react";
 import { useTranslations } from "next-intl";
 import ProductCard from "./ProductCard";
 import ProductFilters from "./ProductFilters";
+import Pagination from "./Pagination";
+import ProductGridSkeleton from "./ProductGridSkeleton";
 
 interface Product {
   id: number;
@@ -117,10 +119,7 @@ export default function SaleGrid() {
         )}
 
         {loading ? (
-          <div className="flex flex-col items-center py-40">
-            <div className="w-5 h-5 border border-gray-300 border-t-gray-700 rounded-full animate-spin mb-6" />
-            <p className="text-[10px] tracking-[0.3em] uppercase text-gray-300">Loading</p>
-          </div>
+          <ProductGridSkeleton count={productsPerPage} />
         ) : products.length === 0 ? (
           <div className="flex flex-col items-center py-40 text-center">
             <p className="text-sm font-light text-gray-400 mb-2">{t("noResults")}</p>
@@ -136,24 +135,12 @@ export default function SaleGrid() {
               ))}
             </div>
 
-            {totalPages > 1 && (
-              <div className="mt-16 mb-12 pt-12 border-t border-gray-100 flex justify-center items-center gap-2">
-                <button onClick={() => handlePageChange(currentPage - 1)} disabled={currentPage === 1} className={`px-6 py-3 rounded-full text-sm transition-all ${currentPage === 1 ? "text-gray-300 cursor-not-allowed" : "text-gray-700 hover:bg-gray-900 hover:text-white bg-white border border-gray-200 shadow-sm"}`}>
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
-                </button>
-                {Array.from({ length: totalPages }, (_, i) => i + 1).map((n) => {
-                  if (n !== 1 && n !== totalPages && (n < currentPage - 1 || n > currentPage + 1)) return null;
-                  return (
-                    <button key={n} onClick={() => handlePageChange(n)} className={`min-w-[44px] h-[44px] rounded-full text-sm transition-all ${currentPage === n ? "bg-gray-900 text-white shadow-lg" : "text-gray-600 bg-white border border-gray-200 hover:bg-gray-100"}`}>
-                      {n}
-                    </button>
-                  );
-                })}
-                <button onClick={() => handlePageChange(currentPage + 1)} disabled={currentPage === totalPages} className={`px-6 py-3 rounded-full text-sm transition-all ${currentPage === totalPages ? "text-gray-300 cursor-not-allowed" : "text-gray-700 hover:bg-gray-900 hover:text-white bg-white border border-gray-200 shadow-sm"}`}>
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
-                </button>
-              </div>
-            )}
+            <Pagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              onPageChange={handlePageChange}
+              labels={{ previous: t("previous"), next: t("next"), page: t("page"), of: t("of") }}
+            />
           </>
         )}
       </div>
@@ -164,6 +151,8 @@ export default function SaleGrid() {
           to { opacity: 1; transform: translateY(0); }
         }
         .animate-fadeIn { animation: fadeIn 0.5s ease forwards; }
+        @keyframes shimmer { 0%, 100% { opacity: 1; } 50% { opacity: 0.55; } }
+        .animate-shimmer { animation: shimmer 1.5s ease-in-out infinite; }
         @media (max-width: 640px) { .product-grid { grid-template-columns: repeat(2, 1fr) !important; gap: 16px !important; } }
         @media (min-width: 641px) and (max-width: 1024px) { .product-grid { grid-template-columns: repeat(3, 1fr) !important; gap: 24px !important; } }
       `}</style>

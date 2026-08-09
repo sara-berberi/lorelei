@@ -54,7 +54,11 @@
     "apply": "Shfaq rezultatet",
     "filtersActive": "aktive",
     "results": "rezultate",
-    "adjustFilters": "Provoni të ndryshoni filtrat"
+    "adjustFilters": "Provoni të ndryshoni filtrat",
+    "previous": "Para",
+    "next": "Tjetër",
+    "page": "Faqja",
+    "of": "nga"
   },
   "checkout": {
     "title": "Porosia",
@@ -95,6 +99,12 @@
     "title": "Modë e Përzgjedhur, Stil i Përjetshëm",
     "description": "Zbuloni copëza premium të përzgjedhura me kujdes për gruan moderne që vlerëson cilësinë, elegancën dhe individualitetin."
   },
+  "notFound": {
+    "label": "Faqja nuk u gjet",
+    "message": "Faqja që kërkoni nuk ekziston ose është zhvendosur.",
+    "home": "Kthehu në kryefaqe",
+    "shop": "Shiko koleksionin"
+  },
   "reviews": {
     "title": "Vlerësimet e Klientëve",
     "subtitle": "Mesazhe të vërteta nga vajzat tona",
@@ -116,7 +126,8 @@
     "piecesAvailable": "produkte në dispozicion",
     "pieceAvailable": "produkt në dispozicion",
     "piecesOnSale": "produkte me ulje",
-    "pieceOnSale": "produkt me ulje"
+    "pieceOnSale": "produkt me ulje",
+    "onlyLeft": "Vetëm {count} mbetur"
   },
   "cart": {
     "cart": "Shporta",

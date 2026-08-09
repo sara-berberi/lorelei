@@ -28,6 +28,13 @@ export default async function LocaleLayout({
 
   return (
     <NextIntlClientProvider messages={messages}>
+      {/* Root layout can't know the locale, so correct <html lang> here for
+          screen readers, hyphenation and SEO. */}
+      <script
+        dangerouslySetInnerHTML={{
+          __html: `document.documentElement.lang=${JSON.stringify(locale)}`,
+        }}
+      />
       <CartProvider>
         <div className="min-h-screen bg-white">
           {/* Announcement bar */}
