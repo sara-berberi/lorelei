@@ -32,8 +32,12 @@ export default function CheckoutModal({ isOpen, onClose, cartItems, totalPrice, 
   const [notes, setNotes] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  // Order number of the confirmed order; non-null switches the modal to the
+  // success screen instead of closing silently.
+  const [confirmedOrderId, setConfirmedOrderId] = useState<number | null>(null);
 
   const t = useTranslations("cart");
+  const tOrder = useTranslations("order");
   const totalWithFee = totalPrice + postalFee;
 
   if (!isOpen) return null;
@@ -73,14 +77,83 @@ export default function CheckoutModal({ isOpen, onClose, cartItems, totalPrice, 
       if (!res.ok) { setError(data.error || "Something went wrong."); return; }
 
       setFullName(""); setInstagramUsername(""); setAddress(""); setCity(""); setPhoneNumber(""); setNotes("");
+      // Show the confirmation instead of closing — the customer needs to see
+      // that the order actually went through. Clearing the cart is safe here
+      // because the modal stays open on the success screen.
+      setConfirmedOrderId(typeof data?.id === "number" ? data.id : 0);
       onOrderSuccess();
-      onClose();
     } catch {
       setError("Network error. Please try again.");
     } finally {
       setLoading(false);
     }
   };
+
+  // ── Confirmation ────────────────────────────────────────────────────────
+  if (confirmedOrderId !== null) {
+    return (
+      <div className="fixed inset-0 bg-black/25 backdrop-blur-sm flex items-end sm:items-center justify-center z-50 p-0 sm:p-6">
+        <div className="bg-white w-full sm:max-w-lg max-h-[95vh] overflow-y-auto shadow-2xl">
+          <div className="px-8 py-14 text-center">
+            {/* Check mark */}
+            <div className="w-14 h-14 rounded-full bg-emerald-50 flex items-center justify-center mx-auto mb-7">
+              <svg className="w-6 h-6 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M5 13l4 4L19 7" />
+              </svg>
+            </div>
+
+            <h2 className="text-xl font-light tracking-tight text-gray-900 mb-3">
+              {tOrder("confirmedTitle")}
+            </h2>
+
+            {confirmedOrderId > 0 && (
+              <p className="text-[10px] tracking-[0.25em] uppercase text-gray-400 mb-5">
+                {tOrder("orderNumber")} #{confirmedOrderId}
+              </p>
+            )}
+
+            <p className="text-sm text-gray-500 font-light leading-relaxed max-w-sm mx-auto mb-8">
+              {tOrder("success")}
+            </p>
+
+            {/* What happens next */}
+            <div className="border-t border-gray-100 pt-7 mb-8 text-left max-w-sm mx-auto space-y-3">
+              <p className="text-[10px] tracking-[0.25em] uppercase text-gray-400 mb-4 text-center">
+                {tOrder("whatNext")}
+              </p>
+              {[tOrder("step1"), tOrder("step2"), tOrder("step3")].map((step, i) => (
+                <div key={i} className="flex gap-3 items-start">
+                  <span className="text-[10px] text-gray-300 mt-0.5 flex-shrink-0 w-3">
+                    {i + 1}
+                  </span>
+                  <span className="text-xs text-gray-500 font-light leading-relaxed">
+                    {step}
+                  </span>
+                </div>
+              ))}
+            </div>
+
+            <div className="flex flex-col gap-3 max-w-sm mx-auto">
+              <button
+                onClick={onClose}
+                className="w-full bg-[#1a0a20] text-white py-3.5 text-[11px] tracking-[0.25em] uppercase font-light hover:bg-black transition-colors"
+              >
+                {tOrder("continueShopping")}
+              </button>
+              <a
+                href="https://www.instagram.com/lorelei_boutique/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-full border border-gray-200 py-3.5 text-[11px] tracking-[0.25em] uppercase font-light text-gray-600 hover:border-gray-900 hover:text-gray-900 transition-colors"
+              >
+                @lorelei_boutique
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="fixed inset-0 bg-black/25 backdrop-blur-sm flex items-end sm:items-center justify-center z-50 p-0 sm:p-6">
@@ -92,7 +165,7 @@ export default function CheckoutModal({ isOpen, onClose, cartItems, totalPrice, 
             <h2 className="text-base font-light tracking-wide text-gray-900">Checkout</h2>
             <p className="text-[10px] tracking-widest uppercase text-gray-400 mt-0.5">{t("completeOrder")}</p>
           </div>
-          <button onClick={onClose} className="text-gray-300 hover:text-gray-700 transition-colors">
+          <button onClick={onClose} disabled={loading} className="text-gray-300 hover:text-gray-700 transition-colors disabled:opacity-40 disabled:cursor-not-allowed">
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M6 18L18 6M6 6l12 12" />
             </svg>

@@ -72,7 +72,14 @@
     "orderSummary": "Përmbledhje e Porosisë"
   },
   "order": {
-    "success": "Faleminderit për porosinë tuaj, @lorelei_boutique do t'ju kontaktojë për ta konfirmuar."
+    "success": "Faleminderit për porosinë tuaj, @lorelei_boutique do t'ju kontaktojë për ta konfirmuar.",
+    "confirmedTitle": "Porosia u pranua",
+    "orderNumber": "Porosia",
+    "whatNext": "Çfarë ndodh më pas",
+    "step1": "Do t'ju shkruajmë në Instagram për të konfirmuar porosinë dhe adresën.",
+    "step2": "Pakoja niset brenda 1–2 ditësh pune.",
+    "step3": "Paguani në dorëzim kur t'ju arrijë.",
+    "continueShopping": "Vazhdo blerjet"
   },
   "hero": {
     "title": "Mirësevini në Lorelei Boutique",

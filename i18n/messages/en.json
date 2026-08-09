@@ -72,7 +72,14 @@
     "orderSummary": "Order Summary"
   },
   "order": {
-    "success": "Thank you for your order, @lorelei_boutique will contact you to confirm your order."
+    "success": "Thank you for your order, @lorelei_boutique will contact you to confirm your order.",
+    "confirmedTitle": "Order received",
+    "orderNumber": "Order",
+    "whatNext": "What happens next",
+    "step1": "We'll message you on Instagram to confirm your order and address.",
+    "step2": "Your package ships within 1–2 business days.",
+    "step3": "You pay cash on delivery when it arrives.",
+    "continueShopping": "Continue shopping"
   },
   "hero": {
     "title": "Welcome to Lorelei Boutique",

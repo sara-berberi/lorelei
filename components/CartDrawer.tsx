@@ -144,7 +144,9 @@ export default function CartDrawer() {
           totalPrice={getTotalPrice()}
           postalFee={200}
           onClose={() => setShowCheckout(false)}
-          onOrderSuccess={() => { clearCart(); setShowCheckout(false); }}
+          // Empty the cart and close the drawer behind the modal, but leave
+          // the modal itself open so it can show the confirmation screen.
+          onOrderSuccess={() => { clearCart(); setIsOpen(false); }}
         />
       )}
     </>
