@@ -66,6 +66,37 @@ export default function ProductGrid() {
 
   const [filters, setFilters] = useState<FilterState>(initialFilters);
 
+  // Bumped to force ProductFilters to re-seed from `pendingFilters` when a
+  // category is chosen while the grid is already mounted (e.g. the mobile
+  // menu on the homepage, where no navigation happens).
+  const [filterKey, setFilterKey] = useState(0);
+  const [pendingFilters, setPendingFilters] = useState<FilterState>(initialFilters);
+
+  useEffect(() => {
+    const applyCategory = (category: string) => {
+      const next: FilterState = {
+        category,
+        brand: "all",
+        size: "",
+        minPrice: "",
+        maxPrice: "",
+        isOnSale: undefined,
+        isSoldOut: undefined,
+      };
+      setPendingFilters(next);
+      setFilters(next);
+      setFilterKey((k) => k + 1);
+    };
+
+    const onSelect = (e: Event) => {
+      const category = (e as CustomEvent<string>).detail;
+      if (typeof category === "string") applyCategory(category);
+    };
+
+    window.addEventListener("lorelei:selectCategory", onSelect);
+    return () => window.removeEventListener("lorelei:selectCategory", onSelect);
+  }, []);
+
   const fetchProducts = useCallback(async (filterState: FilterState) => {
     try {
       setLoading(true);
@@ -159,8 +190,11 @@ export default function ProductGrid() {
         {/* Filters Section */}
         <div className="mb-10 sm:mb-14 lg:mb-16">
           <ProductFilters
+            // Remounts when a category arrives from the mobile menu so the
+            // controls show the new selection.
+            key={filterKey}
             onFilterChange={handleFilterChange}
-            initialFilters={initialFilters}
+            initialFilters={pendingFilters}
             resultCount={products.length}
           />
         </div>

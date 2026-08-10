@@ -64,11 +64,23 @@ export default function MobileMenu({ locale }: MobileMenuProps) {
     }, 260);
   };
 
-  /** Hand the chosen category to ProductGrid, then jump to the grid. */
+  /**
+   * Hand the chosen category to ProductGrid, then jump to the grid.
+   *
+   * sessionStorage covers the case where we're navigating from another page
+   * (the grid mounts fresh and reads it). The event covers the case where the
+   * grid is already mounted on this page, which sessionStorage alone can't
+   * reach because the grid only reads it once on mount.
+   */
   const goToCategory = (value: string) => {
-    sessionStorage.setItem("selectedCategory", value);
+    // "all" means no filter, so clear the handoff rather than storing it.
+    if (value === "all") sessionStorage.removeItem("selectedCategory");
+    else sessionStorage.setItem("selectedCategory", value);
     sessionStorage.removeItem("selectedBrand");
     closeMenu();
+    window.dispatchEvent(
+      new CustomEvent("lorelei:selectCategory", { detail: value })
+    );
     scrollToProducts();
   };
 
@@ -138,12 +150,7 @@ export default function MobileMenu({ locale }: MobileMenuProps) {
               >
                 <div className="pl-3 border-l border-gray-100 ml-1 my-1">
                   <button
-                    onClick={() => {
-                      sessionStorage.removeItem("selectedCategory");
-                      sessionStorage.removeItem("selectedBrand");
-                      closeMenu();
-                      scrollToProducts();
-                    }}
+                    onClick={() => goToCategory("all")}
                     className="block w-full text-left py-2.5 text-[11px] tracking-[0.15em] uppercase text-gray-400 hover:text-gray-900 transition-colors"
                   >
                     {t("allProducts")}
