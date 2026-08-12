@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useCallback } from "react";
 import { cloudinaryUrl } from "@/lib/images";
-import { downloadBadgedImage, isDownloadable } from "@/lib/badgeImage";
+import { downloadBadgedImage, downloadBadgedZip, isDownloadable } from "@/lib/badgeImage";
 
 interface Product {
   id: number;
@@ -302,8 +302,8 @@ export default function AdminProductsPanel({
   };
 
   /**
-   * Download a badged image for every product that's still sellable —
-   * sold-out, zero-stock and archived pieces are skipped.
+   * Bundle a badged image for every product that's still sellable into one
+   * zip — sold-out, zero-stock and archived pieces are skipped.
    */
   const handleDownloadAll = async () => {
     const targets = filtered.filter(isDownloadable);
@@ -311,36 +311,33 @@ export default function AdminProductsPanel({
       setDownloadNotice("Nothing in stock to download.");
       return;
     }
-    if (
-      !confirm(
-        `Download ${targets.length} ${targets.length === 1 ? "image" : "images"}? ` +
-          `Your browser may ask permission to save multiple files.`
-      )
-    )
-      return;
 
     setDownloadNotice("");
     setBulkDownload({ done: 0, total: targets.length });
 
-    let failed = 0;
-    for (let i = 0; i < targets.length; i++) {
-      try {
-        await downloadBadgedImage(targets[i]);
-      } catch {
-        failed++;
-      }
-      setBulkDownload({ done: i + 1, total: targets.length });
-      // Browsers throttle (or silently drop) downloads fired back-to-back, so
-      // space them out a little.
-      await new Promise((r) => setTimeout(r, 400));
-    }
+    try {
+      const stamp = new Date().toISOString().slice(0, 10);
+      const { succeeded, failed } = await downloadBadgedZip(targets, {
+        fileName: `lorelei-products-${stamp}.zip`,
+        onProgress: (done, total) => setBulkDownload({ done, total }),
+      });
 
-    setBulkDownload(null);
-    setDownloadNotice(
-      failed === 0
-        ? `Downloaded ${targets.length} ${targets.length === 1 ? "image" : "images"}.`
-        : `Downloaded ${targets.length - failed} of ${targets.length}; ${failed} failed.`
-    );
+      if (succeeded === 0) {
+        setDownloadNotice("None of the images could be rendered.");
+      } else if (failed.length > 0) {
+        setDownloadNotice(
+          `Zipped ${succeeded} of ${targets.length}; ${failed.length} could not be rendered.`
+        );
+      } else {
+        setDownloadNotice(
+          `Zipped ${succeeded} ${succeeded === 1 ? "image" : "images"}.`
+        );
+      }
+    } catch {
+      setDownloadNotice("Could not build the zip. Please try again.");
+    } finally {
+      setBulkDownload(null);
+    }
   };
 
   /** Apply the filled-in bulk fields to every selected product. */
@@ -468,11 +465,13 @@ export default function AdminProductsPanel({
           <button
             onClick={handleDownloadAll}
             disabled={bulkDownload !== null}
-            title="Download every in-stock product image with badges"
+            title="Download every in-stock product image with badges, as a zip"
             className="text-[10px] tracking-[0.2em] uppercase text-gray-700 hover:text-black disabled:text-gray-300 transition-colors"
           >
             {bulkDownload
-              ? `Downloading ${bulkDownload.done}/${bulkDownload.total}…`
+              ? bulkDownload.done < bulkDownload.total
+                ? `Rendering ${bulkDownload.done}/${bulkDownload.total}…`
+                : "Building zip…"
               : "Download all"}
           </button>
           <div className="w-px h-3 bg-gray-200" />

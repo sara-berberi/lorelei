@@ -25,11 +25,18 @@ export interface BadgeProduct {
   stock?: number | null;
 }
 
-/** Width we render at — big enough for social, small enough to stay quick. */
+/**
+ * Instagram's feed post size: 1080×1350, a 4:5 portrait. Rendering straight
+ * into this frame means the badges sit exactly where they'll appear in the
+ * feed — anything else gets re-cropped by Instagram, which would eat the
+ * corners the badges live in.
+ */
 const CANVAS_WIDTH = 1080;
+const CANVAS_HEIGHT = 1350;
 
-/** Fallback aspect ratio when the source image fails to report its own. */
-const FALLBACK_RATIO = 4 / 3;
+/** The boutique logo, stamped bottom-right so reposts stay attributed. */
+const LOGO_URL =
+  "https://res.cloudinary.com/dj6ono36y/image/upload/v1763922421/_979F0DC6-3FB1-4148-AF21-52C979B86FD4_-removebg-preview_bpaz6n.png";
 
 function parseSizes(sizes: string | null): string[] {
   if (!sizes) return [];
@@ -134,16 +141,18 @@ export async function renderBadgedImage(product: BadgeProduct): Promise<Blob> {
   const source = firstImageUrl(product.imageUrl);
   if (!source) throw new Error("Product has no image");
 
-  // Request a generous width so the badges sit on a sharp photo.
-  const img = await loadImage(cloudinaryUrl(source, { width: CANVAS_WIDTH * 1.5 }));
-
-  const ratio =
-    img.naturalWidth > 0 && img.naturalHeight > 0
-      ? img.naturalHeight / img.naturalWidth
-      : FALLBACK_RATIO;
+  // Request a generous width so the badges sit on a sharp photo. `c_limit`
+  // keeps the original proportions — the 4:5 crop happens on our canvas, so
+  // Cloudinary must not crop it first.
+  // The logo is fetched in parallel, and is optional: if it fails to load the
+  // badged image is still worth having, just unbranded.
+  const [img, logo] = await Promise.all([
+    loadImage(cloudinaryUrl(source, { width: CANVAS_WIDTH * 1.5, crop: "limit" })),
+    loadImage(cloudinaryUrl(LOGO_URL, { width: 240, crop: "limit" })).catch(() => null),
+  ]);
 
   const width = CANVAS_WIDTH;
-  const height = Math.round(width * ratio);
+  const height = CANVAS_HEIGHT;
 
   const canvas = document.createElement("canvas");
   canvas.width = width;
@@ -151,7 +160,20 @@ export async function renderBadgedImage(product: BadgeProduct): Promise<Blob> {
   const ctx = canvas.getContext("2d");
   if (!ctx) throw new Error("Canvas is unavailable");
 
-  ctx.drawImage(img, 0, 0, width, height);
+  // Fill the 4:5 frame by cropping rather than stretching — garments must not
+  // be distorted. Whichever axis overflows is trimmed evenly from both sides,
+  // which keeps a centred subject centred.
+  const srcW = img.naturalWidth || width;
+  const srcH = img.naturalHeight || height;
+  const scale = Math.max(width / srcW, height / srcH);
+  const drawW = srcW * scale;
+  const drawH = srcH * scale;
+
+  // A neutral ground behind the photo, matching the storefront's image
+  // placeholder, in case the source has transparency.
+  ctx.fillStyle = "#f7f6f4";
+  ctx.fillRect(0, 0, width, height);
+  ctx.drawImage(img, (width - drawW) / 2, (height - drawH) / 2, drawW, drawH);
 
   // Everything below scales off the canvas width so the badges look the same
   // regardless of the photo's aspect ratio.
@@ -180,8 +202,12 @@ export async function renderBadgedImage(product: BadgeProduct): Promise<Blob> {
   const sizeChipHeight = 46 * unit;
   const gap = 18 * unit;
 
-  const panelContentHeight =
-    priceFontSize + (sizes.length > 0 ? gap + sizeChipHeight : 0);
+  const panelContentHeight = Math.max(
+    priceFontSize + (sizes.length > 0 ? gap + sizeChipHeight : 0),
+    // The logo shares this band, so the scrim has to be tall enough to sit
+    // behind it too.
+    logo ? 150 * unit : 0
+  );
   const panelHeight = panelContentHeight + margin * 2;
   const panelTop = height - panelHeight;
 
@@ -192,7 +218,33 @@ export async function renderBadgedImage(product: BadgeProduct): Promise<Blob> {
   ctx.fillStyle = scrim;
   ctx.fillRect(0, panelTop - 60 * unit, width, panelHeight + 60 * unit);
 
-  let cursorY = panelTop + margin;
+  // ── Logo, bottom-right ─────────────────────────────────────────────────
+  // Drawn before the text so its footprint is known: the sizes and price are
+  // then kept clear of it rather than sliding underneath.
+  let logoLeft = width - margin;
+  if (logo && logo.naturalWidth > 0) {
+    const logoBox = 150 * unit;
+    const logoScale = Math.min(
+      logoBox / logo.naturalWidth,
+      logoBox / logo.naturalHeight
+    );
+    const logoW = logo.naturalWidth * logoScale;
+    const logoH = logo.naturalHeight * logoScale;
+    const logoX = width - margin - logoW;
+    const logoY = height - margin - logoH;
+
+    ctx.drawImage(logo, logoX, logoY, logoW, logoH);
+    logoLeft = logoX;
+  }
+
+  /** Right-hand limit for text, leaving a gutter before the logo. */
+  const textRight = logoLeft - 24 * unit;
+
+  // Anchor the text block to the bottom of the band so it stays aligned with
+  // the logo even when the logo makes the panel taller than the text needs.
+  const textBlockHeight =
+    priceFontSize + (sizes.length > 0 ? gap + sizeChipHeight : 0);
+  let cursorY = height - margin - textBlockHeight;
 
   // ── Sizes row ──────────────────────────────────────────────────────────
   if (sizes.length > 0) {
@@ -207,8 +259,8 @@ export async function renderBadgedImage(product: BadgeProduct): Promise<Blob> {
         letterSpacing: 2 * unit,
       });
       x += chipWidth + 10 * unit;
-      // Stop before chips would run off the edge rather than clipping them.
-      if (x > width - margin - 60 * unit) break;
+      // Stop before chips would collide with the logo rather than clipping.
+      if (x > textRight - 60 * unit) break;
     }
     cursorY += sizeChipHeight + gap;
   }
@@ -226,19 +278,24 @@ export async function renderBadgedImage(product: BadgeProduct): Promise<Blob> {
     const wasFontSize = 34 * unit;
     const wasText = formatPrice(wasPrice);
     const wasX = margin + ctx.measureText(priceText).width + 18 * unit;
+    const wasY = priceY + 4 * unit;
 
     ctx.font = `300 ${wasFontSize}px Helvetica, Arial, sans-serif`;
-    ctx.fillStyle = "rgba(255,255,255,0.7)";
-    ctx.fillText(wasText, wasX, priceY + 4 * unit);
-
-    // Strike-through on the original price.
     const wasWidth = ctx.measureText(wasText).width;
-    ctx.strokeStyle = "rgba(255,255,255,0.7)";
-    ctx.lineWidth = 2 * unit;
-    ctx.beginPath();
-    ctx.moveTo(wasX, priceY + 4 * unit);
-    ctx.lineTo(wasX + wasWidth, priceY + 4 * unit);
-    ctx.stroke();
+
+    // Skip the struck-through original rather than let it slide under the
+    // logo. The sale price and the SALE flag still carry the message.
+    if (wasX + wasWidth <= textRight) {
+      ctx.fillStyle = "rgba(255,255,255,0.7)";
+      ctx.fillText(wasText, wasX, wasY);
+
+      ctx.strokeStyle = "rgba(255,255,255,0.7)";
+      ctx.lineWidth = 2 * unit;
+      ctx.beginPath();
+      ctx.moveTo(wasX, wasY);
+      ctx.lineTo(wasX + wasWidth, wasY);
+      ctx.stroke();
+    }
   }
 
   return new Promise<Blob>((resolve, reject) => {
@@ -278,6 +335,67 @@ export function triggerDownload(blob: Blob, fileName: string) {
 export async function downloadBadgedImage(product: BadgeProduct): Promise<void> {
   const blob = await renderBadgedImage(product);
   triggerDownload(blob, badgedFileName(product));
+}
+
+/**
+ * Render every product into a single zip and hand it over as one download.
+ *
+ * Products that fail to render are collected and reported rather than
+ * aborting the batch — one broken image URL shouldn't cost the admin the
+ * whole export. `onProgress` fires after each product so callers can show
+ * a counter.
+ */
+export async function downloadBadgedZip(
+  products: BadgeProduct[],
+  {
+    fileName = "products.zip",
+    onProgress,
+  }: {
+    fileName?: string;
+    onProgress?: (done: number, total: number) => void;
+  } = {}
+): Promise<{ succeeded: number; failed: BadgeProduct[] }> {
+  // Imported lazily so the zip machinery only loads when an export actually
+  // runs, rather than in every page bundle that renders a product.
+  const JSZip = (await import("jszip")).default;
+  const zip = new JSZip();
+
+  const failed: BadgeProduct[] = [];
+  const used = new Set<string>();
+  let succeeded = 0;
+
+  for (let i = 0; i < products.length; i++) {
+    const product = products[i];
+    try {
+      const blob = await renderBadgedImage(product);
+
+      // Names are derived from the product name, so two similarly named
+      // pieces can collide — de-duplicate rather than letting one win.
+      let name = badgedFileName(product);
+      if (used.has(name)) {
+        const dot = name.lastIndexOf(".");
+        name = `${name.slice(0, dot)}-${i + 1}${name.slice(dot)}`;
+      }
+      used.add(name);
+
+      zip.file(name, blob);
+      succeeded++;
+    } catch {
+      failed.push(product);
+    }
+    onProgress?.(i + 1, products.length);
+  }
+
+  if (succeeded === 0) {
+    return { succeeded, failed };
+  }
+
+  // Images are already JPEG-compressed, so re-compressing them in the zip
+  // costs time for no meaningful size win.
+  const archive = await zip.generateAsync({ type: "blob", compression: "STORE" });
+  triggerDownload(archive, fileName);
+
+  return { succeeded, failed };
 }
 
 /**
