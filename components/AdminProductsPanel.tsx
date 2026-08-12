@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useCallback } from "react";
 import { cloudinaryUrl } from "@/lib/images";
+import { downloadBadgedImage, isDownloadable } from "@/lib/badgeImage";
 
 interface Product {
   id: number;
@@ -90,6 +91,14 @@ export default function AdminProductsPanel({
     isOnSale: undefined as boolean | undefined,
     isSoldOut: undefined as boolean | undefined,
   });
+
+  // ── Badged image downloads ──────────────────────────────────────────────
+  const [downloadingId, setDownloadingId] = useState<number | null>(null);
+  const [bulkDownload, setBulkDownload] = useState<{
+    done: number;
+    total: number;
+  } | null>(null);
+  const [downloadNotice, setDownloadNotice] = useState("");
 
   const resetBulk = () => {
     setBulk({
@@ -279,6 +288,61 @@ export default function AdminProductsPanel({
     }
   };
 
+  /** Download one product's photo with its badges drawn on. */
+  const handleDownload = async (product: Product) => {
+    setDownloadingId(product.id);
+    setDownloadNotice("");
+    try {
+      await downloadBadgedImage(product);
+    } catch {
+      setDownloadNotice(`Could not render the image for "${product.name}".`);
+    } finally {
+      setDownloadingId(null);
+    }
+  };
+
+  /**
+   * Download a badged image for every product that's still sellable —
+   * sold-out, zero-stock and archived pieces are skipped.
+   */
+  const handleDownloadAll = async () => {
+    const targets = filtered.filter(isDownloadable);
+    if (targets.length === 0) {
+      setDownloadNotice("Nothing in stock to download.");
+      return;
+    }
+    if (
+      !confirm(
+        `Download ${targets.length} ${targets.length === 1 ? "image" : "images"}? ` +
+          `Your browser may ask permission to save multiple files.`
+      )
+    )
+      return;
+
+    setDownloadNotice("");
+    setBulkDownload({ done: 0, total: targets.length });
+
+    let failed = 0;
+    for (let i = 0; i < targets.length; i++) {
+      try {
+        await downloadBadgedImage(targets[i]);
+      } catch {
+        failed++;
+      }
+      setBulkDownload({ done: i + 1, total: targets.length });
+      // Browsers throttle (or silently drop) downloads fired back-to-back, so
+      // space them out a little.
+      await new Promise((r) => setTimeout(r, 400));
+    }
+
+    setBulkDownload(null);
+    setDownloadNotice(
+      failed === 0
+        ? `Downloaded ${targets.length} ${targets.length === 1 ? "image" : "images"}.`
+        : `Downloaded ${targets.length - failed} of ${targets.length}; ${failed} failed.`
+    );
+  };
+
   /** Apply the filled-in bulk fields to every selected product. */
   const handleBulkSave = async () => {
     const ids = Array.from(selectedIds);
@@ -397,9 +461,25 @@ export default function AdminProductsPanel({
             className="w-72 border-0 border-b border-gray-200 bg-transparent px-0 py-2 text-sm text-gray-700 placeholder-gray-300 focus:outline-none focus:border-gray-700 transition-colors"
           />
         </div>
-        <p className="text-[11px] tracking-widest uppercase text-gray-400">
-          {filtered.length} {filtered.length === 1 ? "piece" : "pieces"}
-        </p>
+        <div className="flex items-center gap-5">
+          {downloadNotice && (
+            <span className="text-[11px] text-gray-500 tracking-wide">{downloadNotice}</span>
+          )}
+          <button
+            onClick={handleDownloadAll}
+            disabled={bulkDownload !== null}
+            title="Download every in-stock product image with badges"
+            className="text-[10px] tracking-[0.2em] uppercase text-gray-700 hover:text-black disabled:text-gray-300 transition-colors"
+          >
+            {bulkDownload
+              ? `Downloading ${bulkDownload.done}/${bulkDownload.total}…`
+              : "Download all"}
+          </button>
+          <div className="w-px h-3 bg-gray-200" />
+          <p className="text-[11px] tracking-widest uppercase text-gray-400">
+            {filtered.length} {filtered.length === 1 ? "piece" : "pieces"}
+          </p>
+        </div>
       </div>
 
       {/* ── Select all + bulk actions ───────────────────────────────────── */}
@@ -688,6 +768,22 @@ export default function AdminProductsPanel({
                     }`}
                   >
                     {isEditing ? "Cancel" : "Edit"}
+                  </button>
+                  <div className="w-px h-3 bg-gray-200" />
+                  <button
+                    onClick={() => handleDownload(product)}
+                    disabled={downloadingId === product.id}
+                    title="Download image with badges"
+                    aria-label={`Download image for ${product.name}`}
+                    className="text-gray-300 hover:text-gray-800 transition-colors disabled:opacity-40"
+                  >
+                    {downloadingId === product.id ? (
+                      <div className="w-3.5 h-3.5 border border-gray-300 border-t-gray-700 rounded-full animate-spin" />
+                    ) : (
+                      <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10l5 5 5-5M12 15V3" />
+                      </svg>
+                    )}
                   </button>
                   <div className="w-px h-3 bg-gray-200" />
                   <button

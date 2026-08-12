@@ -6,6 +6,7 @@ import ProductDetailsModal from "./ProductDetailsModal";
 import ProductImage from "./ProductImage";
 import { firstImageUrl } from "@/lib/images";
 import { formatPrice } from "@/lib/format";
+import { downloadBadgedImage } from "@/lib/badgeImage";
 import { trackView } from "./RecentlyViewed";
 
 interface Product {
@@ -33,6 +34,21 @@ export default function ProductCard({
 }) {
   const tProduct = useTranslations("product");
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [downloading, setDownloading] = useState(false);
+
+  /** Save the photo with the sale/size/price badges drawn onto it. */
+  const handleDownload = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (downloading) return;
+    setDownloading(true);
+    try {
+      await downloadBadgedImage(product);
+    } catch {
+      // Nothing actionable for a shopper here — the button simply resets.
+    } finally {
+      setDownloading(false);
+    }
+  };
 
   const displayImage = firstImageUrl(product.imageUrl);
   const displayPrice = product.isOnSale && product.salePrice ? product.salePrice : product.price;
@@ -72,6 +88,23 @@ export default function ProductCard({
               Sale
             </span>
           )}
+
+          {/* Download the photo with badges burned in */}
+          <button
+            onClick={handleDownload}
+            disabled={downloading}
+            title="Download image with badges"
+            aria-label="Download image with badges"
+            className="absolute top-3 right-3 w-8 h-8 flex items-center justify-center bg-white/90 backdrop-blur-sm text-gray-700 hover:text-black opacity-0 group-hover:opacity-100 focus:opacity-100 transition-opacity duration-300 disabled:opacity-100 disabled:text-gray-400"
+          >
+            {downloading ? (
+              <div className="w-3.5 h-3.5 border border-gray-300 border-t-gray-700 rounded-full animate-spin" />
+            ) : (
+              <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10l5 5 5-5M12 15V3" />
+              </svg>
+            )}
+          </button>
 
           {/* Low stock warning */}
           {!product.isSoldOut && product.stock != null && product.stock <= 3 && product.stock > 0 && (
